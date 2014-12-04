@@ -14,3 +14,15 @@ def js_date(date):
     assert isinstance(date, datetime)
     
     return time.mktime(date.timetuple()) + date.microsecond * 1e-6
+
+
+def obj_classname(o):
+    assert isinstance(o, object)
+
+    return classname(o.__class__)
+
+
+def classname(cls):
+    assert issubclass(cls, object)
+
+    return cls.__module__ + "." + cls.__name__

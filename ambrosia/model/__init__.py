@@ -1,130 +1,197 @@
-from sqlalchemy import *
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, with_polymorphic
 from datetime import datetime
 import os.path
+from BTrees import OOBTree
+from persistent import Persistent
+from persistent.list import PersistentList
+from persistent.mapping import PersistentMapping
 
 import ambrosia.context
-from ambrosia.util import js_date
+from ambrosia.util import js_date, obj_classname, classname
 
 __author__ = 'wolfgang'
 
-Base = declarative_base()
 
+class Analysis(Persistent):
+    def __init__(self):
+        self.filename = None
+        self.package = None
+        self.start_time = None
+        self.end_time = None
+        # TODO hashes
+        self._entities = PersistentMapping()
+        self._events = PersistentList()
+        self._event_index = PersistentMapping()
 
-class Analysis(Base):
-    __tablename__ = "Analysis"
-    id = Column(Integer, primary_key=True)
-    root_event = relationship("Event", uselist=False, backref="analysis")
-    filename = Column(String(255))
-    package = Column(String(255))
-    start_time = Column(TIMESTAMP)
-    end_time = Column(TIMESTAMP)
-    # TODO hashes
-    entities = relationship("Entity", backref="analysis", lazy="dynamic")
-
-    def __init__(self, context):
-        assert isinstance(context, ambrosia.context.AmbrosiaContext)
-        self.context = context
-        self.root_event = RootEvent(context)
-        # since ambrosia is the client on the database that uses a specific analyis,
-        # we can simply cache the entities for this analysis
-        self._entities_cache = {}
-
-    def add_entity(self, cls, *args):
-        self.get_entity(cls, *args)
-
-    def get_entity(self, cls, *args):
+    def iter_entities(self, cls):
         assert issubclass(cls, Entity)
 
-        if cls not in self._entities_cache:
-            self._entities_cache[cls] = []
+        for e in self._entities[classname(cls)][0]:
+            yield e
 
-        for entity in self._entities_cache[cls]:
-            assert isinstance(entity, Entity)
-            assert isinstance(entity, cls)
-            if entity.matches_entity(*args):
-                return entity
+    def add_entity(self, context, cls, *args):
+        self.get_entity(context, cls, *args)
 
-        new_entity = cls(self.context, *args)
-        self.entities.append(new_entity)
-        self._entities_cache[cls].append(new_entity)
-
-        return new_entity
-
-
-class Event(Base):
-    __tablename__ = "Event"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50))
-    plugin = Column(String(50))
-    start_ts = Column(TIMESTAMP)
-    end_ts = Column(TIMESTAMP)
-    children = relationship("Event", backref="parent", remote_side=[id], uselist=True)
-    parent_id = Column(Integer, ForeignKey("Event.id"))
-    analysis_id = Column(Integer, ForeignKey("Analysis.id"))
-    event_type = Column(String(50))
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'Event',
-        'polymorphic_on': event_type
-    }
-
-    def __init__(self, context, name, plugin, start_ts=None, end_ts=None):
+    def get_entity(self, context, cls, *args):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
-        self.context = context
+        assert issubclass(cls, Entity)
+
+        if classname(cls) not in self._entities:
+            # self.entities contains a tuple 1. with all emlements and 2. with an BTree over the primary identifier
+            self._entities[classname(cls)] = (PersistentList(), OOBTree.BTree())
+
+        entity = self._entities[classname(cls)]
+
+        res = cls.find(context, entity[0], entity[1], *args)
+
+        if res is None:
+            res = cls(context, *args)
+            assert isinstance(res, Entity)
+            entity[0].append(res)
+
+            if res.primary_identifier not in entity[1]:
+                entity[1][res.primary_identifier] = PersistentList()
+
+            entity[1][res.primary_identifier].append(res)
+
+        return res
+
+    def iter_events(self, context, cls, key=None, min_value=None, max_value=None, value=None):
+        assert isinstance(context, ambrosia.context.AmbrosiaContext)
+        assert issubclass(cls, Event)
+        assert isinstance(key, str) or key is None
+
+        if key is None:
+            # no key -> just get all elements
+            for el in self._events:
+                if isinstance(el, cls):
+                    yield el
+        else:
+            assert key in cls.indices, "key is not defined as index"
+            if value is not None:
+                min_value, max_value = value, value
+
+            class_name = classname(cls)
+
+            if class_name in self._event_index and key in self._event_index[class_name]:
+                for val, lst in self._event_index[class_name][key].iteritems(min_value, max_value):
+                    for el in lst:
+                        yield el
+
+    def _event_index_list(self, evt, key):
+        assert isinstance(key, str)
+        assert isinstance(evt, Event)
+        class_name = obj_classname(evt)
+
+        if class_name not in self._event_index:
+            self._event_index[class_name] = PersistentMapping()
+
+        class_index = self._event_index[class_name]
+
+        if key not in class_index:
+            class_index[key] = OOBTree.BTree()
+
+        key_index = class_index[key]
+
+        key_val = getattr(evt, key)
+
+        if key_val not in key_index:
+            key_index[key_val] = PersistentList()
+
+        return key_index[key_val]
+
+    def add_event(self, evt):
+        assert isinstance(evt, Event)
+
+        self._events.append(evt)
+
+        for idx in getattr(evt.__class__, 'indices'):
+            self._event_index_list(evt, idx).append(evt)
+
+    def del_event(self, evt):
+        assert isinstance(evt, Event)
+
+        self._events.remove(evt)
+        for idx in getattr(evt.__class__, 'indices'):
+            self._event_index_list(evt, idx).remove(evt)
+
+    def combine_events(self, evts, evt):
+        assert isinstance(evt, Event)
+
+        for e in evts:
+            self.del_event(e)
+            evt.children.append(e)
+
+        self.add_event(evt)
+
+    def get_vals(self):
+        return {'start_time': js_date(self.start_time),
+                'end_time': js_date(self.end_time),
+                'filename': self.filename,
+                'package': self.package,
+                'events': [e.get_vals() for e in self._events]}
+
+    def adjust_times(self, context):
+        assert isinstance(context, ambrosia.context.AmbrosiaContext)
+
+        for el in self._events:
+            el.adjust_times(context)
+
+
+class Event(Persistent):
+    """
+    this set contains all attributes that can be searched for; these attributes MUST NOT be CHANGED after the event has
+       been added
+    """
+    indices = set()
+
+    def __init__(self, name, plugin, start_ts=None, end_ts=None):
+        assert isinstance(name, str)
+        assert isinstance(plugin, str)
+        assert isinstance(start_ts, datetime) or start_ts is None
+        assert isinstance(end_ts, datetime) or end_ts is None
         self.name = name
         self.plugin = plugin
         self.start_ts = start_ts
         self.end_ts = end_ts
+        self.children = PersistentList()
 
     def get_properties(self):
         raise NotImplementedError()
 
-    def adjust_times(self):
+    def adjust_times(self, context):
+        assert isinstance(context, ambrosia.context.AmbrosiaContext)
+
         for c in self.children:
-            c.adjust_times()
+            c.adjust_times(context)
 
     @staticmethod
-    def find(root_event):
+    def find(analysis):
         pass
 
+    def get_vals(self):
+        return {'type': classname(type(self)),
+                'children': [c.get_vals() for c in self.children],
+                'startTS': js_date(self.start_ts),
+                'endTS': js_date(self.end_ts),
+                'name': self.name,
+                'plugin': self.plugin,
+                'properties': self.get_properties()}
 
-class Entity(Base):
-    __tablename__ = "Entity"
-    id = Column(Integer, primary_key=True)
-    analysis_id = Column(Integer, ForeignKey("Analysis.id"))
-    entity_type = Column(String(50))
+class Entity(Persistent):
+    def __init__(self, primary_identifier):
+        self.primary_identifier = primary_identifier
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'Entity',
-        'polymorphic_on': entity_type
-    }
-
-    def matches_entity(self, **args):
+    @staticmethod
+    def find(context, entities, identifier_btree, *args):
         raise NotImplementedError()
 
 
 class Process(Entity):
-    __tablename__ = "Process"
-    id = Column(Integer, ForeignKey('Entity.id'), primary_key=True)
-    __mapper_args__ = {
-        'polymorphic_identity': 'Process',
-    }
-    comm = Column(String(255))
-    path = Column(String(255))
-    type = Column(String(50))
-    ananas_id = Column(Integer)
-    uid = Column(Integer)
-    start_ts = Column(TIMESTAMP)
-    end_ts = Column(TIMESTAMP)
-    pid = Column(Integer)
-
     def __init__(self, context, pid, start_ts, end_ts):
+        super(Process, self).__init__(pid)
+        assert isinstance(context, ambrosia.context.AmbrosiaContext)
         assert isinstance(start_ts, datetime) or start_ts is None
         assert isinstance(end_ts, datetime) or end_ts is None
-        assert isinstance(context, ambrosia.context.AmbrosiaContext)
-        self.context = context
 
         self.pid = pid
         self.comm = None
@@ -132,103 +199,83 @@ class Process(Entity):
         self.type = None
         self.uid = None
 
-        start_ts, end_ts = self._normalize_times(start_ts, end_ts)
+        start_ts, end_ts = self._normalize_times(context, start_ts, end_ts)
 
         self.start_ts = start_ts
         self.end_ts = end_ts
 
-    def _normalize_times(self, startts, endts):
-        if startts is None:
-            startts = self.context.analysis.start_time
+    @staticmethod
+    def _normalize_times(context, start_ts, end_ts):
+        assert isinstance(context, ambrosia.context.AmbrosiaContext)
 
-        if endts is None:
-            endts = self.context.analysis.end_time
+        if start_ts is None:
+            start_ts = context.analysis.start_time
 
-        return startts, endts
+        if end_ts is None:
+            end_ts = context.analysis.end_time
 
-    def matches_entity(self, pid, startTS, endTS):
-        assert isinstance(startTS, datetime) or startTS is None
-        assert isinstance(endTS, datetime) or endTS is None
+        return start_ts, end_ts
 
-        if pid != self.pid:
-            return False
+    @staticmethod
+    def find(context, entities, identifier_btree, pid, start_ts, end_ts):
+        assert isinstance(context, ambrosia.AmbrosiaContext)
+        assert isinstance(identifier_btree, OOBTree.BTree)
+        assert isinstance(start_ts, datetime) or start_ts is None
+        assert isinstance(end_ts, datetime) or end_ts is None
 
-        startTS, endTS = self._normalize_times(startTS, endTS)
+        start_ts, end_ts = Process._normalize_times(context, start_ts, end_ts)
 
-        # the two processes overlap and have the same pid -> match
-        if startTS < self.endTS and endTS > self.startTS:
-            # update actual start/end
-            self.startTS = min(self.startTS, startTS)
-            self.endTS = max(self.endTS, endTS)
-            return True
+        els = identifier_btree.get(pid)
 
-        return False
+        if els is None:
+            return None
+
+        for el in els:
+            # the two processes overlap and have the same pid -> match
+            if start_ts < el.end_ts and end_ts > el.start_ts:
+                # update actual start/end
+                el.start_ts = min(el.start_ts, start_ts)
+                el.end_ts = max(el.end_ts, end_ts)
+                return el
 
 
 class File(Entity):
-    __tablename__ = "File"
-    id = Column(Integer, ForeignKey('Entity.id'), primary_key=True)
-    __mapper_args__ = {
-        'polymorphic_identity': 'File',
-    }
-    abspath = Column(String(255))
-
-    def __init__(self, analysis, abspath):
-        self.abspath = os.path.normpath(abspath)
+    def __init__(self, context, abspath):
+        assert isinstance(context, ambrosia.context.AmbrosiaContext)
+        abspath = os.path.normpath(abspath)
+        super(File, self).__init__(abspath)
+        self.abspath = abspath
 
     def matches_entity(self, abspath):
         return os.path.normpath(abspath) == self.abspath
 
+    @staticmethod
+    def find(context, entities, identifier_btree, abspath):
+        assert isinstance(context, ambrosia.AmbrosiaContext)
+        assert isinstance(identifier_btree, OOBTree.BTree)
+        return identifier_btree.get(abspath)[0]
+
 
 class ServerEndpoint(Entity):
-    __tablename__ = "ServerEndpoint"
-    id = Column(Integer, ForeignKey('Entity.id'), primary_key=True)
-    __mapper_args__ = {
-        'polymorphic_identity': 'ServerEndpoint',
-    }
-    protocol = Column(String(50))
-    address = Column(String(100))
-    port = Column(Integer)
-
-    def __init__(self, analysis, protocol, address, port=None):
+    def __init__(self, context, protocol, address, port=None):
+        assert isinstance(context, ambrosia.context.AmbrosiaContext)
+        super(ServerEndpoint, self).__init__(address)
         self.protocol = protocol
         self.address = address
         self.port = port
 
-    def matches_entity(self, protocol, address, port=None):
-        return protocol == self.protocol and \
-            address == self.address and \
-            port == self.port
+    def find(context, entities, identifier_btree, protocol, address, port):
+        assert isinstance(context, ambrosia.AmbrosiaContext)
+        assert isinstance(identifier_btree, OOBTree.BTree)
 
+        for el in identifier_btree.get(address):
+            assert isinstance(el, ServerEndpoint)
 
-class RootEvent(Event):
-    def __init__(self, context):
-        Event.__init__(self, context, '<root>', '<none>')
+            if el.protocol != protocol:
+                continue
 
-    def _get_vals(self, el):
-        assert isinstance(el, Event)
-        children = []
+            if el.port != port:
+                continue
 
-        for c in el.get_children():
-            children.append(self._get_vals(c))
+            return el
 
-        props = el.get_properties()
-
-        return {'type': type(el).__name__,
-                'children': children,
-                'startTS': js_date(el.startTS),
-                'endTS': js_date(el.endTS),
-                'name': el.name,
-                'plugin': el.plugin,
-                'properties': props}
-
-    def get_vals(self):
-        return self._get_vals(self)
-
-    def get_properties(self):
-        return {}
-
-    def select(self, clazz):
-        poly_query = with_polymorphic(Event, clazz)
-
-        return self.context.db.session.query(poly_query)

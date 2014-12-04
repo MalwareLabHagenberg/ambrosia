@@ -1,26 +1,21 @@
 import dateutil
 import json
-from sqlalchemy import *
-from sqlalchemy.orm import relationship
 
 import ambrosia
 from ambrosia import model
 from ambrosia.context import AmbrosiaContext
-from ambrosia.model import Base
 
 
 class ANANASEvent(model.Event):
-    __tablename__ = "ANANASEvent"
-    id = Column(Integer, ForeignKey('Event.id'), primary_key=True)
-    __mapper_args__ = {
-        'polymorphic_identity': 'File',
-    }
-    params = Column(String(255))
+    indices = {'name'}
 
     def __init__(self, context, name, timestamp, params):
-        model.Event.__init__(self, context, name, 'core', start_ts=timestamp)
+        super(ANANASEvent, self).__init__(
+            name,
+            'core',
+            start_ts=timestamp)
         self.name = name
-        self.params = json.dumps(params)
+        self.params = params
     
     def get_properties(self):
         return {'name': self.name,
@@ -31,7 +26,7 @@ class EventParser(ambrosia.ResultParser):
         assert isinstance(context, AmbrosiaContext)
         if name == 'events':
             for evt in el:
-                context.analysis.root_event.children.append(ANANASEvent(
+                context.analysis.add_event(ANANASEvent(
                     context,
                     evt.attrib['name'],
                     dateutil.parser.parse(evt.attrib['timestamp']),

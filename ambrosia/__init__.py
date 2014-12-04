@@ -45,21 +45,16 @@ class Ambrosia(object):
 
     def adjust_times(self):
         self.context.clock_syncer.prepare()
-        self.context.analysis.root_event.adjust_times()
+        self.context.analysis.adjust_times(self.context)
         
     def correlate(self):
         
         #TODO
         from ambrosia_plugins.lkm import ProcessEvent
-        ProcessEvent.find(self.context)
+        #ProcessEvent.find(self.context)
 
     def get_json(self):
-        analysis = self.context.analysis
-        return json.dumps({'start_time': js_date(analysis.start_time),
-                           'end_time': js_date(analysis.end_time),
-                           'filename': analysis.filename,
-                           'package': analysis.package,
-                           'root_event': analysis.root_event.get_vals()})
+        return json.dumps(self.context.analysis.get_vals())
 
 
 class ResultParser(object):

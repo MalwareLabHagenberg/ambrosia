@@ -1,6 +1,4 @@
 from datetime import datetime, timedelta
-from sqlalchemy.orm import with_polymorphic
-from sqlalchemy.sql.expression import and_
 
 import ambrosia.context
 from ambrosia.model import Event
@@ -15,17 +13,15 @@ class ClockSyncer(object):
     def prepare(self):
         # TODO
         import ambrosia_plugins.events as plugin_events
-        poly_query = with_polymorphic(Event, [plugin_events.ANANASEvent])
 
-        tevts = self.context.db.session.query(poly_query) \
-            .filter(and_(
-                poly_query.analysis == self.context.analysis,
-                poly_query.name == 'set_time')) \
-            .all()
+        for evt in self.context.analysis.iter_events(
+                self.context,
+                plugin_events.ANANASEvent,
+                'name',
+                value="set_time"):
 
-        for evt in tevts:
             emuts = datetime.fromtimestamp(float(evt.params))
-            hostts = evt.startTS
+            hostts = evt.start_ts
 
             self.timesets.append((emuts,
                                   emuts - hostts))
