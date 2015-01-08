@@ -1,6 +1,8 @@
 import time
 from datetime import datetime
 import logging
+import random
+import string
 
 
 def get_logger(o):
@@ -26,3 +28,7 @@ def classname(cls):
     assert issubclass(cls, object)
 
     return cls.__module__ + "." + cls.__name__
+
+
+def unique_id():
+    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))

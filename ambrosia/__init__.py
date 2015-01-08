@@ -2,17 +2,19 @@ import json
 from xml.etree.ElementTree import Element
 
 import dateutil.parser
+from ambrosia import model
 
 import ambrosia.clocks
 from ambrosia.context import AmbrosiaContext
 import ambrosia.db
 import ambrosia.config
-from ambrosia.util import js_date
+from ambrosia.util import js_date, get_logger
 
 
 class Ambrosia(object):
     def __init__(self, root, configfile):
         self.root = root
+        self.log = get_logger(self)
 
         # setup context
         self.context = AmbrosiaContext(configfile)
@@ -20,6 +22,8 @@ class Ambrosia(object):
         self._parse_report()
         
     def _parse_report(self):
+        self.log.info("parsing report")
+
         for el in self.root:
             assert isinstance(el, Element)
 
@@ -44,22 +48,30 @@ class Ambrosia(object):
         self.context.db.commit()
 
     def adjust_times(self):
-        self.context.clock_syncer.prepare()
+        self.log.info("adjusting times")
         self.context.analysis.adjust_times(self.context)
         
     def correlate(self):
-        
+        self.log.info("correlating events")
         #TODO
-        from ambrosia_plugins.lkm import ProcessEvent
-        #ProcessEvent.find(self.context)
+        from ambrosia_plugins.lkm import SyscallCorrelator
+
+        sc = SyscallCorrelator(self.context)
+        sc.correlate()
 
     def get_json(self):
         return json.dumps(self.context.analysis.get_vals())
 
 
 class ResultParser(object):
+    def prepare(self, context):
+        pass
+
     def parse(self, name, el, context):
         raise NotImplementedError()
+
+    def finish(self, context):
+        pass
     
     @staticmethod
     def start_parsers(el, context):
@@ -69,13 +81,25 @@ class ResultParser(object):
         # TODO
         from ambrosia_plugins.lkm import LkmPluginParser 
         from ambrosia_plugins.events import EventParser
-        
-        for cls in [LkmPluginParser, EventParser]:
+        from ambrosia_plugins.apimonitor import ApimonitorPluginParser
+
+        lp = LkmPluginParser()
+        ep = EventParser()
+        ap = ApimonitorPluginParser()
+
+        lp.prepare(context)
+        ep.prepare(context)
+        ap.prepare(context)
+
+        for parser in [lp, ep, ap]:
             for r in el:
-                parser = cls()
                 assert isinstance(parser, ResultParser)
                 parser.parse(r.tag, r, context)
                 parsers.append(parser)
-        
+
+        lp.finish(context)
+        ep.finish(context)
+        ap.finish(context)
+
         return parsers
 

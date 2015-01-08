@@ -21,6 +21,9 @@ class ANANASEvent(model.Event):
         return {'name': self.name,
                 'params': self.params}
 
+    def __str__(self):
+        return 'ANANAS Event: {} {}'.format(self.name, json.dumps(self.params))
+
 class EventParser(ambrosia.ResultParser):
     def parse(self, name, el, context):
         assert isinstance(context, AmbrosiaContext)

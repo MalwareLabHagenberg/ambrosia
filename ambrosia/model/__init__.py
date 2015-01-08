@@ -6,7 +6,7 @@ from persistent.list import PersistentList
 from persistent.mapping import PersistentMapping
 
 import ambrosia.context
-from ambrosia.util import js_date, obj_classname, classname
+from ambrosia.util import js_date, obj_classname, classname, unique_id
 
 __author__ = 'wolfgang'
 
@@ -55,15 +55,15 @@ class Analysis(Persistent):
 
         return res
 
-    def iter_events(self, context, cls, key=None, min_value=None, max_value=None, value=None):
+    def iter_events(self, context, cls=None, key=None, min_value=None, max_value=None, value=None):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
-        assert issubclass(cls, Event)
+        assert cls is None or issubclass(cls, Event)
         assert isinstance(key, str) or key is None
 
         if key is None:
             # no key -> just get all elements
             for el in self._events:
-                if isinstance(el, cls):
+                if cls is None or isinstance(el, cls):
                     yield el
         else:
             assert key in cls.indices, "key is not defined as index"
@@ -94,10 +94,15 @@ class Analysis(Persistent):
 
         key_val = getattr(evt, key)
 
-        if key_val not in key_index:
-            key_index[key_val] = PersistentList()
+        if key_val is None:
+            return None
 
-        return key_index[key_val]
+        ret = key_index.get(key_val)
+        if ret is None:
+            ret = PersistentList()
+            key_index[key_val] = ret
+
+        return ret
 
     def add_event(self, evt):
         assert isinstance(evt, Event)
@@ -105,14 +110,24 @@ class Analysis(Persistent):
         self._events.append(evt)
 
         for idx in getattr(evt.__class__, 'indices'):
-            self._event_index_list(evt, idx).append(evt)
+            idxlist = self._event_index_list(evt, idx)
+            if idxlist is not None:
+                idxlist.append(evt)
 
     def del_event(self, evt):
         assert isinstance(evt, Event)
 
-        self._events.remove(evt)
+        try:
+            self._events.remove(evt)
+        except ValueError:
+            # event does not exist, that's fine too
+            return
+
         for idx in getattr(evt.__class__, 'indices'):
-            self._event_index_list(evt, idx).remove(evt)
+            idxlist = self._event_index_list(evt, idx)
+            if idxlist is not None:
+                idxlist.remove(evt)
+
 
     def combine_events(self, evts, evt):
         assert isinstance(evt, Event)
@@ -177,14 +192,22 @@ class Event(Persistent):
                 'plugin': self.plugin,
                 'properties': self.get_properties()}
 
+    def __str__(self):
+        return self.__class__.__name__ + ': ' + self.name
+
+
 class Entity(Persistent):
     def __init__(self, primary_identifier):
         self.primary_identifier = primary_identifier
+        self.primary_key = unique_id()
 
     @staticmethod
     def find(context, entities, identifier_btree, *args):
         raise NotImplementedError()
 
+    def __cmp__(self, other):
+        assert isinstance(other, Entity)
+        return cmp(self.primary_key, other.primary_key)
 
 class Process(Entity):
     def __init__(self, context, pid, start_ts, end_ts):
@@ -198,6 +221,7 @@ class Process(Entity):
         self.path = None
         self.type = None
         self.uid = None
+        self.parent = None
 
         start_ts, end_ts = self._normalize_times(context, start_ts, end_ts)
 
@@ -238,6 +262,8 @@ class Process(Entity):
                 el.end_ts = max(el.end_ts, end_ts)
                 return el
 
+    def __str__(self):
+        return 'Process: "{}" ({}) Path: {}'.format(self.comm, self.pid, self.path)
 
 class File(Entity):
     def __init__(self, context, abspath):
@@ -253,8 +279,13 @@ class File(Entity):
     def find(context, entities, identifier_btree, abspath):
         assert isinstance(context, ambrosia.AmbrosiaContext)
         assert isinstance(identifier_btree, OOBTree.BTree)
-        return identifier_btree.get(abspath)[0]
+        e = identifier_btree.get(abspath)
 
+        if e is not None:
+            return e[0]
+
+    def __str__(self):
+        return 'File '+self.abspath
 
 class ServerEndpoint(Entity):
     def __init__(self, context, protocol, address, port=None):

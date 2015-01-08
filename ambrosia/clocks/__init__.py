@@ -8,27 +8,12 @@ class ClockSyncer(object):
     def __init__(self, context):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
         self.context = context
-        self.timesets = []
-        
-    def prepare(self):
-        # TODO
-        import ambrosia_plugins.events as plugin_events
+        self.translate_table = []
 
-        for evt in self.context.analysis.iter_events(
-                self.context,
-                plugin_events.ANANASEvent,
-                'name',
-                value="set_time"):
-
-            emuts = datetime.fromtimestamp(float(evt.params))
-            hostts = evt.start_ts
-
-            self.timesets.append((emuts,
-                                  emuts - hostts))
-        
     def emu_time(self, t):
+        assert isinstance(t, datetime)
         d = timedelta()
-        for emuts, diff in self.timesets:
+        for emuts, diff in self.translate_table:
             if emuts > t:
                 break
             
