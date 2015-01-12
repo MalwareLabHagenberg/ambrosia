@@ -32,3 +32,14 @@ def classname(cls):
 
 def unique_id():
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+
+def join_command(lst):
+    res = []
+
+    for c in lst:
+        if ' ' in c or '\'' in c or '"' in c:
+            res.append('"' + c.replace('\\', '\\\\').replace('"', '\\\'') + '"')
+        else:
+            res.append(c)
+
+    return ' '.join(res)

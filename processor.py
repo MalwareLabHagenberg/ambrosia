@@ -34,14 +34,12 @@ def main():
     runner = ambrosia.Ambrosia(xmlroot, args.config)
     runner.adjust_times()
     runner.correlate()
-    #print analysis.get_json()
-
-
+    print runner.get_json()
+    '''
     for e in runner.context.analysis.iter_events(runner.context):
-        #if isinstance(e, SyscallEvent):
-        #    print e.end_ts - e.monotonoc_ts
-        print_tree(e)
-
+        print e
+        #print_tree(e)
+    '''
 
 if __name__ == "__main__":
     main()

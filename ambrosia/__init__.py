@@ -52,15 +52,26 @@ class Ambrosia(object):
         self.context.analysis.adjust_times(self.context)
         
     def correlate(self):
-        self.log.info("correlating events")
         #TODO
         from ambrosia_plugins.lkm import SyscallCorrelator
+        from ambrosia_plugins.apimonitor import ApiCallCorrelator
 
+        self.log.info("correlating syscalls")
         sc = SyscallCorrelator(self.context)
         sc.correlate()
 
+        self.log.info("correlating API call")
+        acc = ApiCallCorrelator(self.context)
+        acc.correlate()
+
+    def sort_events(self):
+        self.log.info("sorting events")
+        self.context.analysis.sort()
+
     def get_json(self):
+        self.log.info("exporting JSON")
         return json.dumps(self.context.analysis.get_vals())
+
 
 
 class ResultParser(object):

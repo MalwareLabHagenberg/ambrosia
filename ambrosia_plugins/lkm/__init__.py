@@ -4,32 +4,27 @@ import datetime
 import dateutil.parser
 
 import ambrosia
+from ambrosia.util import get_logger, join_command
 from ambrosia import model
 from ambrosia.context import AmbrosiaContext
+from ambrosia.model.entities import Process, File
 from ambrosia_plugins.events import ANANASEvent
-from ambrosia_plugins.lkm.events import SyscallEvent, ProcessEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
-    SocketEvent, SocketAccept, AllocateSegmentEvent, StartThreadEvent, SuperUserRequest, CreateDir, SendSignal, \
-    DeleteFileEvent, ExecEvent
+from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
+    SocketEvent, SocketAccept, MemoryMapEvent, StartThreadEvent, SuperUserRequest, CreateDir, SendSignal, \
+    DeleteFileEvent, ExecEvent, ANANASAdbShellExec
 
 
 class LkmPluginParser(ambrosia.ResultParser):
     def __init__(self):
         super(LkmPluginParser, self).__init__()
         self.processes = {}
-
-    def _timedelta_diff(self, td1, td2):
-        assert isinstance(td1, datetime.timedelta)
-        assert isinstance(td2, datetime.timedelta)
-
-        if td1 < td2:
-            return td2 - td1
-        else:
-            return td1 - td2
+        self.log = get_logger(self)
 
     def parse(self, name, el, context):
         assert isinstance(context, AmbrosiaContext)
         analysis = context.analysis
         if name == 'processes':
+            self.log.info('Parsing process-tag')
             for p in el:
                 props = p.attrib.copy().items()
                 props += p.find('info').attrib.items()
@@ -44,7 +39,7 @@ class LkmPluginParser(ambrosia.ResultParser):
                     end = dateutil.parser.parse(props['end'])
 
                 proc = analysis.get_entity(context,
-                                           model.Process,
+                                           Process,
                                            int(props['pid']),
                                            start,
                                            end)
@@ -64,6 +59,7 @@ class LkmPluginParser(ambrosia.ResultParser):
                 self.processes[proc.ananas_id] = proc
 
         elif name == 'syscalltrace':
+            self.log.info('Parsing syscalltrace-tag')
             boot_time = None
             lasterror = None
 
@@ -107,10 +103,10 @@ class LkmPluginParser(ambrosia.ResultParser):
                 error = time - datetime.timedelta(0, mt) - boot_time
                 adjtime = time - error
 
-                if lasterror is None or self._timedelta_diff(lasterror, error) > datetime.timedelta(0, 1):
+                if lasterror is None or _timedelta_diff(lasterror, error) > datetime.timedelta(0, 1):
                     # add 1 for safety to definitely get all events
                     offset = datetime.timedelta(0, 1)
-                    context.clock_syncer.translate_table.append(([time - offset], error + offset))
+                    context.clock_syncer.translate_table.append((time - offset, error))
 
                 lasterror = error
 
@@ -122,11 +118,20 @@ class LkmPluginParser(ambrosia.ResultParser):
                                              spawned_child)
                 analysis.add_event(syscall_event)
 
-
     def finish(self, context):
         for ananas_id, proc in self.processes.iteritems():
             if proc.parent_id != -1:
                 proc.parent = self.processes[proc.parent_id]
+
+
+def _timedelta_diff(td1, td2):
+    assert isinstance(td1, datetime.timedelta)
+    assert isinstance(td2, datetime.timedelta)
+
+    if td1 < td2:
+        return td2 - td1
+    else:
+        return td1 - td2
 
 
 class SyscallCorrelator(object):
@@ -136,12 +141,15 @@ class SyscallCorrelator(object):
         self.context = context
         self.to_add = set()
         self.to_remove = set()
+        self.log = get_logger(self)
 
-    def _get_fd_event(self, evt, fd, proc_attrs, clazz=None):
+    def _get_fd_event(self, evt, fd, proc_attrs, clazz=None, default_start_ts=None):
         assert isinstance(evt, model.Event)
 
         if fd not in proc_attrs["fd_events"]:
-            fdevt = FileDescriptorEvent("unknown", None, True, evt.end_ts, evt.end_ts)
+            fdevt = FileDescriptorEvent(None, True)
+            if default_start_ts is not None:
+                fdevt.start_ts = default_start_ts
             proc_attrs["fd_events"][fd] = fdevt
             self.to_add.add(fdevt)
 
@@ -168,7 +176,7 @@ class SyscallCorrelator(object):
         assert isinstance(evt, model.Event)
 
         if oldfd not in proc_attrs["fd_events"]:
-            fdevt = FileDescriptorEvent("unknown", None, True, evt.end_ts, evt.end_ts)
+            fdevt = FileDescriptorEvent(None, True)
             proc_attrs["fd_events"][oldfd] = fdevt
             self.to_add.add(fdevt)
 
@@ -180,6 +188,8 @@ class SyscallCorrelator(object):
         return fevt
 
     def _update_tree(self):
+        self.log.info('Updating Event tree')
+
         for evt in self.to_remove:
             self.context.analysis.del_event(evt)
 
@@ -190,8 +200,8 @@ class SyscallCorrelator(object):
         self.to_add = set()
         self.to_remove = set()
 
-
     def correlate(self):
+        self.log.info('Generating events from syscalls')
         for evt in self.context.analysis.iter_events(self.context, cls=SyscallEvent):
             self._check_syscall(evt)
 
@@ -200,18 +210,57 @@ class SyscallCorrelator(object):
         self._find_execs()
         self._update_tree()
 
-        self._find_test()
+        self._correlate_adb_cmds()
+        self._update_tree()
 
-    def _find_test(self):
-        #for cmd in self.context.analysis.iter_events(self.context, CommandExecuteEvent):
-        for adb_cmd in self.context.analysis.iter_events(self.context, ANANASEvent, 'name', value='adb_cmd'):
-            if 'shell' in adb_cmd.params:
-                idx = adb_cmd.params.index('shell')
-                cmd = adb_cmd.params[idx+1:]
+    def _correlate_adb_cmds(self):
+        self.log.info('Correlating ADB commands with command executions')
 
+        found_matches = {}
 
+        for cmd_evt in self.context.analysis.iter_events(self.context, CommandExecuteEvent):
+            if ['/system/bin/sh', '-c'] != cmd_evt.command[:2]:
+                # adb commands are started using /system/bin/sh
+                continue
+
+            if cmd_evt.process.type != 'ADBD_CHILD':
+                continue
+
+            cmd_str = cmd_evt.command[2]
+
+            for adb_cmd in self.context.analysis.iter_events(self.context, ANANASEvent, 'start_ts',
+                                                             min_value=cmd_evt.start_ts - datetime.timedelta(0, 1)):
+                if adb_cmd.name != 'adb_cmd':
+                    continue
+
+                if adb_cmd in found_matches:
+                        continue
+
+                if 'shell' in adb_cmd.params:
+                    idx = adb_cmd.params.index('shell')
+                    cmd = adb_cmd.params[idx+1:]
+
+                    if len(cmd) > 1:
+                        cmd = join_command(cmd)
+                    else:
+                        cmd = cmd[0]
+
+                    if cmd == cmd_str:
+                        found_matches[adb_cmd] = cmd_evt
+                        break
+
+        for adb_cmd, cmd_evt in found_matches.iteritems():
+            self.to_remove.add(adb_cmd)
+            self.to_remove.add(cmd_evt)
+
+            ase = ANANASAdbShellExec()
+            ase.add_child(adb_cmd)
+            ase.add_child(cmd_evt)
+
+            self.to_add.add(ase)
 
     def _find_execs(self):
+        self.log.info('Searching for command executions')
         for fork in self.context.analysis.iter_events(self.context, StartThreadEvent):
             exec_ = None
             mintimediff = None
@@ -241,28 +290,30 @@ class SyscallCorrelator(object):
 
                         if exe.end_ts > lastexe.end_ts:
                             lastexe = exe
-                
-                cmd_evt = CommandExecuteEvent(lastexe.path, ' '.join(lastexe.argv), fork.spawned_child)
+
+                # we use the argv of the first execve. e.g. sh -c 'xxx' instead of xxx
+                cmd_evt = CommandExecuteEvent(lastexe.path, exec_.argv, fork.spawned_child)
+                cmd_evt.add_child(fork)
 
                 for e in execs_to_add:
-                    cmd_evt.children.append(e)
+                    cmd_evt.add_child(e)
                     self.to_remove.add(e)
 
                 if cmd_evt.path == '/system/xbin/su':
                     su_evt = SuperUserRequest(cmd_evt.start_ts, cmd_evt.end_ts, cmd_evt.process)
-                    su_evt.children.append(cmd_evt)
+                    su_evt.add_child(cmd_evt)
                     self.to_add.add(su_evt)
                 else:
                     self.to_add.add(cmd_evt)
             else:
                 continue
 
-            for mmap in self.context.analysis.iter_events(self.context, AllocateSegmentEvent, 'process_entity',
+            for mmap in self.context.analysis.iter_events(self.context, MemoryMapEvent, 'process_entity',
                                                           value=fork.spawned_child):
                 if mmap.end_ts >= exec_.end_ts and \
                         (mmap.end_ts - exec_.end_ts) < datetime.timedelta(0, 0, 0, 1000):
                     # mmaps within first 1000ms are considered to be initialisation calls
-                    cmd_evt.children.append(mmap)
+                    cmd_evt.add_child(mmap)
                     self.to_remove.add(mmap)
 
             for fe in self.context.analysis.iter_events(self.context, FileEvent, 'opening_process',
@@ -272,7 +323,7 @@ class SyscallCorrelator(object):
                 if not fe.successful:
                     if re.match('^/vendor/lib/.+.so', fe.abspath) or re.match('^/system/lib/.+.so', fe.abspath):
                         # unsucessful library loads
-                        cmd_evt.children.append(fe)
+                        cmd_evt.add_child(fe)
                         self.to_remove.add(fe)
                 else:
                     if fe.abspath == '/proc/mounts' or \
@@ -280,10 +331,8 @@ class SyscallCorrelator(object):
                             fe.abspath == '/' or \
                             re.match('/acct/uid/\d+/tasks', fe.abspath):
                         # startup stuff
-                        cmd_evt.children.append(fe)
+                        cmd_evt.add_child(fe)
                         self.to_remove.add(fe)
-
-
 
     def _check_syscall(self, evt):
         assert isinstance(evt, SyscallEvent)
@@ -291,7 +340,7 @@ class SyscallCorrelator(object):
         proc = evt.process
         parent_evt = None
 
-        assert isinstance(proc, model.Process)
+        assert isinstance(proc, Process)
 
         if proc not in self.proc_attrs:
             if proc.parent in self.proc_attrs:
@@ -308,14 +357,11 @@ class SyscallCorrelator(object):
             parent_evt = FileEvent(
                 self.context.analysis.get_entity(
                     self.context,
-                    model.File,
+                    File,
                     evt.params[0]),
                 int(evt.params[1]),
                 proc,
-                evt.returnval >= 0,
-                evt.end_ts,
-                evt.end_ts
-            )
+                evt.returnval >= 0)
 
             if parent_evt.successful:
                 proc_attrs["fd_events"][evt.returnval] = parent_evt
@@ -324,10 +370,7 @@ class SyscallCorrelator(object):
         elif evt.name == "socket":
             parent_evt = SocketEvent(
                 proc,
-                evt.returnval >= 0,
-                evt.end_ts,
-                evt.end_ts
-            )
+                evt.returnval >= 0)
 
             if parent_evt.successful:
                 proc_attrs["fd_events"][evt.returnval] = parent_evt
@@ -338,15 +381,12 @@ class SyscallCorrelator(object):
 
             parent_evt = SocketAccept(
                 proc,
-                evt.returnval >= 0,
-                evt.end_ts,
-                evt.end_ts
-            )
+                evt.returnval >= 0)
 
             if parent_evt.successful:
                 proc_attrs["fd_events"][evt.returnval] = parent_evt
 
-            mainsocket.children.append(parent_evt)
+            mainsocket.add_child(parent_evt)
             self.to_add.add(mainsocket)
         elif evt.name == "connect":
             parent_evt = self._get_fd_event(evt, int(evt.params[0]), proc_attrs)
@@ -370,15 +410,14 @@ class SyscallCorrelator(object):
             address = int(evt.returnval)
 
             # TODO check if successfull
-            parent_evt = AllocateSegmentEvent(flags, fd, address, proc, True, evt.end_ts, evt.end_ts)
-            self.to_add.add(parent_evt)
+            parent_evt = MemoryMapEvent(flags, fd, address, proc, True, evt.end_ts, evt.end_ts)
 
             if 'MAP_ANONYMOUS' not in parent_evt.flags:
-                fdevt = self._get_fd_event(evt, fd, proc_attrs, (FileEvent, FileDescriptorEvent))
-                parent_evt.children.append(fdevt)
-                if isinstance(fdevt, FileEvent):
-                    parent_evt.file_entity = fdevt.file_entity
-                self.to_remove.add(fdevt)
+                # TODO
+                fdevt = self._get_fd_event(evt, fd, proc_attrs, (FileEvent, FileDescriptorEvent), evt.start_ts)
+                fdevt.add_child(parent_evt)
+            else:
+                self.to_add.add(parent_evt)
 
         elif evt.name == "clone" or evt.name == "fork" or evt.name == "vfork":
             if evt.returnval < 0:
@@ -399,7 +438,7 @@ class SyscallCorrelator(object):
                                          evt.returnval >= 0,
                                          self.context.analysis.get_entity(
                                              self.context,
-                                             model.File,
+                                             File,
                                              evt.params[0]))
             self.to_add.add(parent_evt)
         elif evt.name == "mkdir":
@@ -408,7 +447,7 @@ class SyscallCorrelator(object):
                                    proc,
                                    self.context.analysis.get_entity(
                                        self.context,
-                                       model.File,
+                                       File,
                                        evt.params[0]))
             self.to_add.add(parent_evt)
         elif evt.name == "kill":
@@ -418,7 +457,7 @@ class SyscallCorrelator(object):
                                     proc,
                                     self.context.analysis.get_entity(
                                         self.context,
-                                        model.Process,
+                                        Process,
                                         int(evt.params[0]),
                                         evt.start_ts,
                                         evt.end_ts))
@@ -426,5 +465,5 @@ class SyscallCorrelator(object):
 
         if parent_evt is not None:
             assert isinstance(parent_evt, model.Event)
-            parent_evt.children.append(evt)
+            parent_evt.add_child(evt)
             self.to_remove.add(evt)
