@@ -10,8 +10,8 @@ from ambrosia.context import AmbrosiaContext
 from ambrosia.model.entities import Process, File
 from ambrosia_plugins.events import ANANASEvent
 from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
-    SocketEvent, SocketAccept, MemoryMapEvent, StartThreadEvent, SuperUserRequest, CreateDir, SendSignal, \
-    DeleteFileEvent, ExecEvent, ANANASAdbShellExec
+    SocketEvent, SocketAccept, MemoryMapEvent, StartTaslEvent, SuperUserRequest, CreateDir, SendSignal, \
+    DeleteFileEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent
 
 
 class LkmPluginParser(ambrosia.ResultParser):
@@ -38,6 +38,10 @@ class LkmPluginParser(ambrosia.ResultParser):
                 if 'end' in props:
                     end = dateutil.parser.parse(props['end'])
 
+                props['fds'] = {}
+                for fdel in p.findall('fds/fd'):
+                    props['fds'][int(fdel.attrib['number'])] = fdel.attrib['path']
+
                 proc = analysis.get_entity(context,
                                            Process,
                                            int(props['pid']),
@@ -49,6 +53,14 @@ class LkmPluginParser(ambrosia.ResultParser):
                 proc.comm = props['comm']
                 proc.path = props['path']
                 proc.type = props['type']
+                proc.fds = props['fds']
+                proc.tgid = int(props['tgid'])
+
+                try:
+                    proc.tg_leader_id = int(props['threadgroup-leader'])
+                except ValueError:
+                    # tg-leader is None
+                    pass
 
                 try:
                     proc.uid = int(props['uid'])
@@ -120,9 +132,24 @@ class LkmPluginParser(ambrosia.ResultParser):
 
     def finish(self, context):
         for ananas_id, proc in self.processes.iteritems():
+            assert isinstance(proc, Process)
+
             if proc.parent_id != -1:
                 proc.parent = self.processes[proc.parent_id]
+                proc.tg_leader = self.processes[proc.tg_leader_id]
 
+                if not proc.is_process():
+                    # threads do not heave any files
+                    assert len(proc.fds) == 0
+                    proc.fds = proc.tg_leader.fds
+                else:
+                    if len(proc.fds) == 0 and proc.type != 'KERNEL' and not proc.start_captured:
+                        # non-kernel processes with no FDs but that existed
+                        # during fd-listing are strange
+                        self.log.warn("Process {} does not have any FDs".format(proc))
+
+        for ananas_id, proc in self.processes.iteritems():
+            assert proc.tg_leader is None or proc.tg_leader.is_process()
 
 def _timedelta_diff(td1, td2):
     assert isinstance(td1, datetime.timedelta)
@@ -137,23 +164,61 @@ def _timedelta_diff(td1, td2):
 class SyscallCorrelator(object):
     def __init__(self, context):
         assert isinstance(context, AmbrosiaContext)
-        self.proc_attrs = {}
+        self.fd_directory = {}
         self.context = context
         self.to_add = set()
         self.to_remove = set()
         self.log = get_logger(self)
+        self._generate_start_fd_directory()
 
-    def _get_fd_event(self, evt, fd, proc_attrs, clazz=None, default_start_ts=None):
+    def _generate_start_fd_directory(self):
+        for proc in self.context.analysis.iter_entities(self.context, Process):
+            assert isinstance(proc, Process)
+
+            if proc.start_captured:
+                # process did not exist on lkm load -> no fd listing available
+                continue
+
+            fds = {}
+            for fd, path in proc.fds.iteritems():
+                if path.startswith('socket:'):
+                    new_event = SocketEvent(proc, True)
+                elif path.startswith('anon_inode:') or path.startswith('pipe:'):
+                    new_event = AnonymousFileEvent(path, proc)
+                elif path.startswith('/'):
+                    if path.endswith(' (deleted)'):
+                        # kernel appends ' (deleted)' for deleted files
+                        path = path[0:-10]
+
+                    new_event = FileEvent(
+                        self.context.analysis.get_entity(
+                            self.context,
+                            File,
+                            path),
+                        None,
+                        proc,
+                        True)
+                else:
+                    self.log.warn('Unknown path: "{}"'.format(path))
+                    continue
+
+                fds[fd] = new_event
+
+            self.fd_directory[proc] = fds
+
+
+    def _get_fd_event(self, evt, fd, proc_fds, process, clazz=None, default_start_ts=None):
         assert isinstance(evt, model.Event)
+        assert isinstance(process, Process)
 
-        if fd not in proc_attrs["fd_events"]:
-            fdevt = FileDescriptorEvent(None, True)
+        if fd not in proc_fds:
+            fdevt = UnknownFdEvent(process, fd)
             if default_start_ts is not None:
                 fdevt.start_ts = default_start_ts
-            proc_attrs["fd_events"][fd] = fdevt
+            proc_fds[fd] = fdevt
             self.to_add.add(fdevt)
 
-        res = proc_attrs["fd_events"][fd]
+        res = proc_fds[fd]
 
         if clazz is not None:
             if not isinstance(res, clazz):
@@ -161,29 +226,29 @@ class SyscallCorrelator(object):
 
         return res
 
-    def _get_del_fd_event(self, evt, fd, proc_attrs, clazz=None):
+    def _get_del_fd_event(self, evt, fd, proc_fds, proc, clazz=None):
         assert isinstance(evt, model.Event)
-        evt = self._get_fd_event(evt, fd, proc_attrs, clazz)
+        evt = self._get_fd_event(evt, fd, proc_fds, proc, clazz)
 
         if evt is None:
             return
 
-        del proc_attrs["fd_events"][fd]
+        del proc_fds[fd]
 
         return evt
 
-    def _get_dup(self, evt, oldfd, newfd, proc_attrs):
+    def _get_dup(self, evt, oldfd, newfd, proc_fds, proc):
         assert isinstance(evt, model.Event)
 
-        if oldfd not in proc_attrs["fd_events"]:
-            fdevt = FileDescriptorEvent(None, True)
-            proc_attrs["fd_events"][oldfd] = fdevt
+        if oldfd not in proc_fds:
+            fdevt = UnknownFdEvent(proc, oldfd)
+            proc_fds[oldfd] = fdevt
             self.to_add.add(fdevt)
 
-        fevt = proc_attrs["fd_events"][oldfd]
+        fevt = proc_fds[oldfd]
 
         if evt.returnval >= 0:
-            proc_attrs["fd_events"][newfd] = fevt
+            proc_fds[newfd] = fevt
 
         return fevt
 
@@ -261,7 +326,7 @@ class SyscallCorrelator(object):
 
     def _find_execs(self):
         self.log.info('Searching for command executions')
-        for fork in self.context.analysis.iter_events(self.context, StartThreadEvent):
+        for fork in self.context.analysis.iter_events(self.context, StartTaslEvent):
             exec_ = None
             mintimediff = None
             execs_to_add = set()
@@ -279,7 +344,6 @@ class SyscallCorrelator(object):
 
             if exec_ is not None and mintimediff < datetime.timedelta(0, 0, 0, 1000):
                 # a fork-and-exec should not take longer then 1000ms
-
                 # find additional execs: search whole $PATH for actual executeable
                 lastexe = exec_
                 for exe in exes:
@@ -316,20 +380,25 @@ class SyscallCorrelator(object):
                     cmd_evt.add_child(mmap)
                     self.to_remove.add(mmap)
 
-            for fe in self.context.analysis.iter_events(self.context, FileEvent, 'opening_process',
+            for fe in self.context.analysis.iter_events(self.context, FileEvent, 'process',
                                                         value=fork.spawned_child):
                 assert isinstance(fe, FileEvent)
 
-                if not fe.successful:
-                    if re.match('^/vendor/lib/.+.so', fe.abspath) or re.match('^/system/lib/.+.so', fe.abspath):
-                        # unsucessful library loads
-                        cmd_evt.add_child(fe)
-                        self.to_remove.add(fe)
-                else:
+                if (fe.start_ts - fork.start_ts) > datetime.timedelta(0, 2):
+                    # we consider everything within 2 seconds as startup
+                    continue
+
+                if re.match('^/vendor/lib/.+\.so', fe.abspath) or re.match('^/system/lib/.+\.so', fe.abspath):
+                    # successful/unsuccessfullibrary loads
+                    cmd_evt.add_child(fe)
+                    self.to_remove.add(fe)
+
+                if fe.successful:
                     if fe.abspath == '/proc/mounts' or \
                             fe.abspath == '/proc/filesystems' or \
                             fe.abspath == '/' or \
-                            re.match('/acct/uid/\d+/tasks', fe.abspath):
+                            re.match('/acct/uid/\d+/tasks', fe.abspath) or \
+                            fe.abspath == '/proc/'+str(fork.spawned_child.pid)+'/oom_adj':
                         # startup stuff
                         cmd_evt.add_child(fe)
                         self.to_remove.add(fe)
@@ -342,16 +411,20 @@ class SyscallCorrelator(object):
 
         assert isinstance(proc, Process)
 
-        if proc not in self.proc_attrs:
-            if proc.parent in self.proc_attrs:
-                # parent is known -> fds are inherited
-                self.proc_attrs[proc] = self.proc_attrs[proc.parent].copy()
-            else:
-                self.proc_attrs[proc] = {
-                    "fd_events": {}
-                }
+        if proc not in self.fd_directory:
+            assert proc.start_captured
 
-        proc_attrs = self.proc_attrs[proc]
+            if proc.tg_leader in self.fd_directory:
+                # threadgroup is known -> fds are inherited
+                self.fd_directory[proc] = self.fd_directory[proc.tg_leader]
+            elif proc.is_process() and proc.parent in self.fd_directory:
+                # its a new process and parent is known -> copy fd table
+                self.fd_directory[proc] = self.fd_directory[proc.parent].copy()
+            else:
+                self.log.warn("task without known threadgroup or parent: {}".format(proc))
+                self.fd_directory[proc] = {}
+
+        proc_fds = self.fd_directory[proc]
 
         if evt.name == "open" or evt.name == "creat":
             parent_evt = FileEvent(
@@ -364,7 +437,7 @@ class SyscallCorrelator(object):
                 evt.returnval >= 0)
 
             if parent_evt.successful:
-                proc_attrs["fd_events"][evt.returnval] = parent_evt
+                proc_fds[evt.returnval] = parent_evt
 
             self.to_add.add(parent_evt)
         elif evt.name == "socket":
@@ -373,23 +446,34 @@ class SyscallCorrelator(object):
                 evt.returnval >= 0)
 
             if parent_evt.successful:
-                proc_attrs["fd_events"][evt.returnval] = parent_evt
+                proc_fds[evt.returnval] = parent_evt
+
+            self.to_add.add(parent_evt)
+        elif evt.name == "pipe" or evt.name == "pipe2":
+            fd1 = int(evt.params[0])
+            fd2 = int(evt.params[1])
+
+            parent_evt = AnonymousFileEvent('pipe', proc, evt.returnval >= 0 and fd1 >= 0 and fd2 >= 0)
+
+            if parent_evt.successful:
+                proc_fds[fd1] = parent_evt
+                proc_fds[fd2] = parent_evt
 
             self.to_add.add(parent_evt)
         elif evt.name == "accept":
-            mainsocket = self._get_fd_event(evt, int(evt.params[0]), proc_attrs)
+            mainsocket = self._get_fd_event(evt, int(evt.params[0]), proc_fds, proc)
 
             parent_evt = SocketAccept(
                 proc,
                 evt.returnval >= 0)
 
             if parent_evt.successful:
-                proc_attrs["fd_events"][evt.returnval] = parent_evt
+                proc_fds[evt.returnval] = parent_evt
 
             mainsocket.add_child(parent_evt)
             self.to_add.add(mainsocket)
         elif evt.name == "connect":
-            parent_evt = self._get_fd_event(evt, int(evt.params[0]), proc_attrs)
+            parent_evt = self._get_fd_event(evt, int(evt.params[0]), proc_fds, proc)
         elif evt.name == "read" or \
                 evt.name == "write" or \
                 evt.name == "sendto" or \
@@ -397,24 +481,25 @@ class SyscallCorrelator(object):
                 evt.name == "recvfrom" or \
                 evt.name == "recvmsg":
 
-            parent_evt = self._get_fd_event(evt, int(evt.params[0]), proc_attrs)
+            parent_evt = self._get_fd_event(evt, int(evt.params[0]), proc_fds, proc)
+
         elif evt.name == "close":
-            parent_evt = self._get_del_fd_event(evt, int(evt.params[0]), proc_attrs)
+            parent_evt = self._get_del_fd_event(evt, int(evt.params[0]), proc_fds, proc)
         elif evt.name == "dup":
-            parent_evt = self._get_dup(evt, int(evt.params[0]), evt.returnval, proc_attrs)
+            parent_evt = self._get_dup(evt, int(evt.params[0]), evt.returnval, proc_fds, proc)
         elif evt.name == "dup2":
-            parent_evt = self._get_dup(evt, int(evt.params[0]), int(evt.params[1]), proc_attrs)
+            parent_evt = self._get_dup(evt, int(evt.params[0]), int(evt.params[1]), proc_fds, proc)
         elif evt.name == "mmap2":
             fd = int(evt.params[4])
             flags = int(evt.params[3])
             address = int(evt.returnval)
 
-            # TODO check if successfull
+            #  check if successfull
             parent_evt = MemoryMapEvent(flags, fd, address, proc, True, evt.end_ts, evt.end_ts)
 
             if 'MAP_ANONYMOUS' not in parent_evt.flags:
                 # TODO
-                fdevt = self._get_fd_event(evt, fd, proc_attrs, (FileEvent, FileDescriptorEvent), evt.start_ts)
+                fdevt = self._get_fd_event(evt, fd, proc_fds, proc, FileDescriptorEvent, evt.start_ts)
                 fdevt.add_child(parent_evt)
             else:
                 self.to_add.add(parent_evt)
@@ -427,7 +512,9 @@ class SyscallCorrelator(object):
             if pid < 0:
                 pid = None
 
-            parent_evt = StartThreadEvent(evt.end_ts, evt.end_ts, proc, pid, evt.spawned_child)
+            assert evt.spawned_child.start_captured
+
+            parent_evt = StartTaslEvent(evt.end_ts, evt.end_ts, proc, pid, evt.spawned_child)
             self.to_add.add(parent_evt)
         elif evt.name == "execve":
             parent_evt = ExecEvent(evt.start_ts, evt.end_ts, evt.params[0], evt.argv, evt.env, proc)
@@ -462,6 +549,7 @@ class SyscallCorrelator(object):
                                         evt.start_ts,
                                         evt.end_ts))
             self.to_add.add(parent_evt)
+
 
         if parent_evt is not None:
             assert isinstance(parent_evt, model.Event)

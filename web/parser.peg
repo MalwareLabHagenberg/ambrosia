@@ -1,0 +1,63 @@
+/*{
+function Property(prop){
+    this.prop = prop;
+}
+
+function Comparison(p1, op, p2){
+    this.p1 = p1;
+    this.op = op;
+    this.p2 = p2;
+}
+
+function Statement(p1, op, p2){
+    this.p1 = p1;
+    this.op = op;
+    this.p2 = p2;
+}
+
+}
+*/
+
+start
+  = expression
+
+expression
+  = statement
+  / "(" exp:expression ")" { return exp }
+
+statement
+  = c1:comparison ws op:logical_operator ws c2:statement { return new Statement(c1, op, c2) }
+  / c:comparison { return c }
+
+
+comparison
+  = p1:value ws op:operand ws p2:value { return new Comparison(p1, op, p2) }
+
+value
+  = property
+  / string
+  / number
+
+operand
+  = op:'==' { return 'EQ'}
+  / op:'!=' { return 'NEQ' }
+  / op:'>=' { return 'GE' }
+  / op:'>' { return 'G' }
+  / op:'<=' { return 'LE' }
+  / op:'<' { return 'L' }
+
+logical_operator
+  = op:'&&' { return 'AND'}
+  / op:'||' { return 'OR' }
+
+property
+  = clazz:[a-zA-Z]+ { return new Property(clazz.join("")) }
+
+string
+  = '"' str:[^\"]* '"' { return str.join("") }
+
+number
+  = num:[0-9\.]+ { return parseFloat(num.join("")) }
+
+ws
+  = [ \t]*

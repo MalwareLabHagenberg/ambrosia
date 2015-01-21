@@ -15,11 +15,16 @@ class Process(Entity):
         assert isinstance(end_ts, datetime) or end_ts is None
 
         self.pid = pid
+        self.tgid = None
+        self.tg_leader_id = None
+        self.tg_leader = None
         self.comm = None
         self.path = None
         self.type = None
         self.uid = None
         self.parent = None
+        self.fds = []
+        self.start_captured = start_ts is not None # TODO ugly
 
         start_ts, end_ts = self._normalize_times(context, start_ts, end_ts)
 
@@ -63,16 +68,28 @@ class Process(Entity):
     def __str__(self):
         return '[Process: "{}" ({}) Path: {}]'.format(self.comm, self.pid, self.path)
 
+    def is_process(self):
+        return self == self.tg_leader
+
 
 class File(Entity):
+    _unknown_file = None
+
     def __init__(self, context, abspath):
-        assert isinstance(context, ambrosia.context.AmbrosiaContext)
+        assert isinstance(context, ambrosia.context.AmbrosiaContext) or context is None
         abspath = os.path.normpath(abspath)
         super(File, self).__init__(abspath)
         self.abspath = abspath
 
     def matches_entity(self, abspath):
         return os.path.normpath(abspath) == self.abspath
+
+    @staticmethod
+    def unknown():
+        if File._unknown_file is None:
+            File._unknown_file = File(None, '<UNKNOWN>')
+
+        return File._unknown_file
 
     @staticmethod
     def find(context, entities, identifier_btree, abspath):
@@ -84,6 +101,9 @@ class File(Entity):
             return e[0]
 
     def __str__(self):
+        if self is self._unknown_file:
+            return '[Not identified file]'
+
         return '[File "{}"]'.format(self.abspath)
 
 

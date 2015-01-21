@@ -1,10 +1,10 @@
 "use strict";
 
 function MainView(){
-    
+    this._width = 1000;
 }
 MainView.prototype.view_offset = 0;
-MainView.prototype.zoom_level = 3000.0;
+MainView.prototype.zoom_level = 500000.0;
 
 MainView.prototype.setup = function(){
     this.setupEventHandler();
@@ -13,38 +13,60 @@ MainView.prototype.setup = function(){
     $('#mainview').svg({onLoad: function(svg){
         window.setTimeout(function(){
             ths.svg = svg;
-            ths.g_zoomed = svg.group();
-            ths.g_unzoomed = svg.group();
-            ths.g_measure = svg.group(ths.g_zoomed);
-            ths.g_events = svg.group(ths.g_zoomed);
-            ths.g_measure_text = svg.group(ths.g_unzoomed);
             
-            ths.zoomAndPan();
             ths.redraw();
-            
-            for(var i in window.am.events){
-                assert(window.am.events[i] instanceof Event);
-                window.am.events[i].calcDimensions(Event.DEFAULT_BLOCK_LAYOUT_MAMAGER);
-            }
-            
-            for(var i in window.am.events){
-                window.am.events[i].draw();
-            }
         }, 1); // JQUERY SVG catches all exceptions, we do not want this!
-    }});
+    }, settings: {height: $('#mainview').height() - 20}});
+    
+    Event.onSelectHandler.push(function(){
+        $(this.svgElement).addClass('mainview_selected');
+    });
+}
+
+MainView.prototype.redraw = function(){
+    var lastTS = 0;
+    
+    Event.reset();
+    
+    this.svg.clear();
+    this.g_zoomed = this.svg.group();
+    this.g_unzoomed = this.svg.group();
+    this.g_measure = this.svg.group(this.g_zoomed);
+    this.g_events = this.svg.group(this.g_zoomed);
+    this.g_measure_text = this.svg.group(this.g_unzoomed);
+    
+    for(var i in window.am.events){
+        assert(window.am.events[i] instanceof Event);
+        assert(window.am.events[i].startTS >= lastTS);
+        lastTS = window.am.events[i].startTS;
+        window.am.events[i].calcDimensions(Event.DEFAULT_BLOCK_LAYOUT_MAMAGER);
+    }
+    
+    this.setWidth(Event.DEFAULT_BLOCK_LAYOUT_MAMAGER.getWidth());
+    
+    for(var i in window.am.events){
+        window.am.events[i].draw();
+    }
+    
+
+    this._drawn_zoom_level = 0;
+    this.zoomAndPan();
+    this.redrawMeasure();
 }
 
 MainView.prototype.setupEventHandler = function(){
-    var zoomRedrawTimeout = 0;
+    var zoomredrawMeasureTimeout = 0;
     var ths = this;
     
     $('#mainview').mousewheel(function(event){
         ths.zoom_level *= (-event.deltaY * 0.05) + 1;
         ths.zoomAndPan();
-        window.clearTimeout(zoomRedrawTimeout);
-        zoomRedrawTimeout = window.setTimeout(function(){
-            ths.redraw()
+        window.clearTimeout(zoomredrawMeasureTimeout);
+        zoomredrawMeasureTimeout = window.setTimeout(function(){
+            ths.redrawMeasure()
         }, 50);
+        
+        return false;
     });
     
     var lastPos = 0;
@@ -52,13 +74,14 @@ MainView.prototype.setupEventHandler = function(){
         ths.view_offset += -(event.pageY - lastPos) * (ths.zoom_level / ths.height());
         lastPos = event.pageY;
         ths.zoomAndPan();
+        return false;
     };
     
-    var upHandler = function() {
+    var upHandler = function(event) {
         $(document).unbind("mousemove", dragHandler);
         $(document).unbind("mouseup", upHandler);
         ths.zoomAndPan();
-        ths.redraw();
+        ths.redrawMeasure();
     };
     
     $('#mainview').mousedown(function(event){
@@ -68,8 +91,14 @@ MainView.prototype.setupEventHandler = function(){
     });
 }
 
-MainView.prototype.width = function(){
-    return this.svg.width();
+MainView.prototype.getWidth = function(){
+    return this._width;
+}
+
+MainView.prototype.setWidth = function(val){
+    this._width = val;
+    this.svg.configure({width: Event.DEFAULT_BLOCK_LAYOUT_MAMAGER.getWidth()});
+    this.redrawMeasure();
 }
 
 MainView.prototype.height = function(){
@@ -78,7 +107,7 @@ MainView.prototype.height = function(){
 
 MainView.prototype.zoomAndPan = function(){
     this.zoom_level = Math.max(1, this.zoom_level);
-    this.zoom_level = Math.min(50000, this.zoom_level);
+    this.zoom_level = Math.min(500000, this.zoom_level);
     
     this.view_offset = Math.max(-1000, this.view_offset);
 
@@ -99,7 +128,7 @@ MainView.prototype.zoomAndPan = function(){
         this.g_zoomed, 
         {transform: 'scale(1, '+scale+') translate(0, '+translate+')'})
         
-    /* hide text while zooming/paning, redraw afterwards */
+    /* hide text while zooming/paning, redrawMeasure afterwards */
     this.svg.configure(
         this.g_measure_text, 
         {display: 'none'})
@@ -107,7 +136,7 @@ MainView.prototype.zoomAndPan = function(){
     zooming.finish();
 }
 
-MainView.prototype.redraw = function(){
+MainView.prototype.redrawMeasure = function(){
     /* remove all objects from measure groups */
     while(this.g_measure.firstChild){ this.svg.remove(this.g_measure.firstChild); }
     while(this.g_measure_text.firstChild){ this.svg.remove(this.g_measure_text.firstChild); }
@@ -117,9 +146,11 @@ MainView.prototype.redraw = function(){
     var tw = (10000 / this.zoom_level) + 10;
     
     /* the scale for the lines to draw */
-    var mindraw = 1000;
+    var mindraw = 20000;
     
     /* depending on the zoom level draw exacter measure lines */
+    if(this.zoom_level < 400000) mindraw = 10000;
+    if(this.zoom_level < 40000) mindraw = 1000;
     if(this.zoom_level < 4000) mindraw = 100;
     if(this.zoom_level < 400) mindraw = 10;
     if(this.zoom_level < 40) mindraw = 1;
@@ -151,7 +182,7 @@ MainView.prototype.drawMeasureLine = function(offset, fontSize, strokeWidth, tex
     this.svg.line(
         this.g_measure, 
         50, offset,   // x1, y1
-        this.width(), offset, // x2, y2
+        this.getWidth(), offset, // x2, y2
         {stroke: 'gray', fill: 'none', strokeWidth: strokeWidth});
     
     this.svg.text(

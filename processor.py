@@ -5,15 +5,16 @@ import sys
 import xml.etree.ElementTree as ET
 import logging
 from datetime import datetime, timedelta
-from ambrosia_plugins.lkm import FileEvent, StartThreadEvent, CommandExecuteEvent, SuperUserRequest
-from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileEvent, StartThreadEvent, SuperUserRequest
+from ambrosia_plugins.events import ANANASEvent
+from ambrosia_plugins.lkm import FileEvent, StartTaslEvent, CommandExecuteEvent, SuperUserRequest
+from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileEvent, StartTaslEvent, SuperUserRequest
 
 sys.path.append(".")
 
 import ambrosia
 
 def print_tree(t, i=''):
-    print i+str(t)
+    print str(t.start_ts)+i+str(t)
     for c in t.children:
         print_tree(c, i+' ')
 
@@ -34,12 +35,12 @@ def main():
     runner = ambrosia.Ambrosia(xmlroot, args.config)
     runner.adjust_times()
     runner.correlate()
-    print runner.get_json()
+    print runner.serialize()
     '''
     for e in runner.context.analysis.iter_events(runner.context):
-        print e
-        #print_tree(e)
+        #if not isinstance(e, FileEvent) and not isinstance(e, ANANASEvent):
+        #    print e
+        print_tree(e)
     '''
-
 if __name__ == "__main__":
     main()

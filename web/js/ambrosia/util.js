@@ -21,7 +21,16 @@ function assert(b){
 }
 
 function busy(msg){
-    return {
-        'finish': function(){ }
+    var busybox = $('<div class="busybox"/>').text(msg);
+    $('#busyindicator').append(busybox)
+    
+    function createRet(bb){
+        return {
+            'finish': function(){
+                bb.remove();
+            }
+        }
     }
+    
+    return createRet(busybox);
 }

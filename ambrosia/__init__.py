@@ -8,7 +8,7 @@ import ambrosia.clocks
 from ambrosia.context import AmbrosiaContext
 import ambrosia.db
 import ambrosia.config
-from ambrosia.util import js_date, get_logger
+from ambrosia.util import js_date, get_logger, serialize_obj
 
 
 class Ambrosia(object):
@@ -68,9 +68,9 @@ class Ambrosia(object):
         self.log.info("sorting events")
         self.context.analysis.sort()
 
-    def get_json(self):
-        self.log.info("exporting JSON")
-        return json.dumps(self.context.analysis.get_vals())
+    def serialize(self):
+        self.log.info("serializing")
+        return serialize_obj(self.context.analysis.get_vals())
 
 
 

@@ -26,6 +26,16 @@ class Analysis(Persistent):
     def add_entity(self, context, cls, *args):
         self.get_entity(context, cls, *args)
 
+    def iter_entities(self, context, cls):
+        assert isinstance(context, ambrosia.context.AmbrosiaContext)
+        assert issubclass(cls, Entity)
+
+        if classname(cls) not in self._entities:
+            return
+
+        for entity in self._entities[classname(cls)][0]:
+            yield entity
+
     def get_entity(self, context, cls, *args):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
         assert issubclass(cls, Entity)
@@ -124,11 +134,18 @@ class Analysis(Persistent):
                 idxlist.remove(evt)
 
     def get_vals(self):
+        for el in self._events:
+            assert isinstance(el, Event)
+            el.sort()
+
+        events = list(self._events)
+        events.sort(cmp=lambda x,y: x.cmp_by_time(y))
+
         return {'start_time': js_date(self.start_time),
                 'end_time': js_date(self.end_time),
                 'filename': self.filename,
                 'package': self.package,
-                'events': [e.get_vals() for e in self._events]}
+                'events': [e.get_vals() for e in events]}
 
     def adjust_times(self, context):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
@@ -136,10 +153,6 @@ class Analysis(Persistent):
         for el in self._events:
             el.adjust_times(context)
 
-    def sort(self):
-        for el in self._events:
-            assert isinstance(el, Event)
-            el.sort()
 
 
 class Event(Persistent):
@@ -220,7 +233,7 @@ class Event(Persistent):
     def _update_end_ts(self, end_ts):
         assert isinstance(end_ts, datetime)
 
-        if self.end_ts is None or end_ts < self.end_ts:
+        if self.end_ts is None or end_ts > self.end_ts:
             self.end_ts = end_ts
 
 
@@ -247,22 +260,32 @@ class Event(Persistent):
             c.adjust_times(context)
 
     def get_vals(self):
+        vals = self.get_properties()
+        refs, props = {}, {}
+
+        for k, v in vals.iteritems():
+            if isinstance(v, Entity):
+                refs[k] = v.primary_key
+            else:
+                props[k] = v
+
         return {'type': classname(type(self)),
                 'children': [c.get_vals() for c in self.children],
                 'startTS': js_date(self.start_ts),
                 'endTS': js_date(self.end_ts),
                 'description': str(self),
-                'properties': self.get_properties()}
+                'properties': props,
+                'references': refs}
 
     def __str__(self):
         raise NotImplementedError(type(self))
 
-    def __cmp__(self, other):
+    def cmp_by_time(self, other):
         assert isinstance(other, Event)
         return cmp(self.start_ts, other.start_ts)
 
     def sort(self):
-        self._children.sort()
+        self._children.sort(cmp=lambda x,y: x.cmp_by_time(y))
 
         for c in self._children:
             assert isinstance(c, Event)
@@ -278,6 +301,7 @@ class Entity(Persistent):
         raise NotImplementedError()
 
     def __cmp__(self, other):
-        assert isinstance(other, Entity)
+        if not isinstance(other, Entity):
+            return -1
         return cmp(self.primary_key, other.primary_key)
 

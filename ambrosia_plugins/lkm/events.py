@@ -9,13 +9,13 @@ __author__ = 'wolfgang'
 class SyscallEvent(model.Event):
     indices = {'name'}
 
-    def __init__(self, context, props, time, monotonoc_ts, process_entity, spawned_child=None):
+    def __init__(self, context, props, time, monotonic_ts, process_entity, spawned_child=None):
         assert isinstance(context, AmbrosiaContext)
         assert isinstance(process_entity, Process)
         super(SyscallEvent, self).__init__(end_ts=time)
 
         self.name = props['name']
-        self.monotonoc_ts = monotonoc_ts
+        self.monotonic_ts = monotonic_ts
         self.pid = int(props['pid'])
         self.params = props['params']
         self.returnval = props['returnval']
@@ -24,6 +24,8 @@ class SyscallEvent(model.Event):
 
         add_info = props['add_info']
 
+        self.argv, self.env = None, None
+
         if 'execve_argv' in add_info:
             self.argv = add_info['execve_argv']
 
@@ -31,11 +33,28 @@ class SyscallEvent(model.Event):
             self.env = add_info['execve_envp']
 
     def get_properties(self):
-        return {
+        props = {
             'pid': self.pid,
             'params': self.params,
-            'returnval': self.returnval
+            'returnval': self.returnval,
+            'name': self.name,
+            'process': self.process,
+            'spawned_child': self.spawned_child,
+            'monotonic_ts': self.monotonic_ts
         }
+
+        if self.argv is not None:
+            props['argv'] = join_command(self.argv)
+
+        if self.env is not None:
+            props['env'] = '\n'.join(self.env)
+
+        i = 1
+        for p in self.params:
+            props['param_'+str(i)] = p
+            i += 1
+
+        return props
 
     def __str__(self):
         return '[Syscall: {} {} by {} result:{}]'.format(
@@ -56,65 +75,111 @@ class CommandExecuteEvent(model.Event):
         self.path = path
 
     def get_properties(self):
-        return {}
+        return {
+            'process': self.process,
+            'command': self.command,
+            'path': self.path
+        }
 
     def __str__(self):
         return '[Execute: {}, {}]'.format(self.path, join_command(self.command))
 
 
 class FileDescriptorEvent(model.Event):
-    indices = {'opening_process'}
+    indices = {'process'}
 
-    def __init__(self, opening_process, successful):
-        assert isinstance(opening_process, Process) or opening_process is None
+    def __init__(self, process, successful):
+        assert isinstance(process, Process) or process is None
         super(FileDescriptorEvent, self).__init__()
-        self.opening_process = opening_process
+        self.process = process
         self.successful = successful
 
     def get_properties(self):
-        return {} # TODO
+        return {
+            'process': self.process,
+            'sucessful': self.successful
+        }
 
     def __str__(self):
-        return '[FD-Event (unknown FD)]'
+        return '[File Descriptor Event]'
+
+
+class UnknownFdEvent(FileDescriptorEvent):
+    def __init__(self, process, fd_number):
+        super(UnknownFdEvent, self).__init__(process, True)
+        self.fd_number = fd_number
+
+    def get_properties(self):
+        props = super(UnknownFdEvent, self).get_properties()
+
+        props.update({
+            'fd_number': self.fd_number
+        })
+
+        return props
+
+    def __str__(self):
+        return '[Unknown FD-Event (#{})]'.format(self.fd_number)
 
 
 class FileEvent(FileDescriptorEvent):
     indices = FileDescriptorEvent.indices | {'abspath'}
 
-    def __init__(self, file_entity, mode, opening_process, successful):
+    def __init__(self, file_entity, mode, process, successful):
         assert isinstance(file_entity, File)
-        super(FileEvent, self).__init__(opening_process, successful)
+        super(FileEvent, self).__init__(process, successful)
         self.abspath = file_entity.abspath
         self.file_entity = file_entity
         self.mode = mode
 
     def get_properties(self):
-        return {'mode': self.mode,
-                'abspath': self.abspath,
-                }
+        props = super(FileEvent, self).get_properties()
+
+        props.update({
+            'mode': self.mode,
+            'abspath': self.abspath,
+            'file': self.file_entity
+        })
+
+        return props
 
     def __str__(self):
         return '[FileEvent: "{}"]'.format(self.abspath)
 
 
+class AnonymousFileEvent(FileEvent):
+    indices = FileDescriptorEvent.indices
+
+    def __init__(self, description, process, successful=True):
+        super(AnonymousFileEvent, self).__init__(File.unknown(), None, process, successful)
+        self.description = description
+
+    def __str__(self):
+        return '[Anonymous File "{}"]'.format(self.description)
+
+
 class SocketEvent(FileDescriptorEvent):
     indices = FileDescriptorEvent.indices | set()
 
-    def __init__(self, opening_process, successful):
-        super(SocketEvent, self).__init__(opening_process, successful)
+    def __init__(self, process, successful):
+        super(SocketEvent, self).__init__(process, successful)
 
     def get_properties(self):
-        return {} # TODO
+        props = super(SocketEvent, self).get_properties()
+
+        return props
 
 
 class SocketAccept(FileDescriptorEvent):
     indices = FileDescriptorEvent.indices | set()
 
-    def __init__(self, opening_process, successful):
-        super(SocketAccept, self).__init__(opening_process, successful)
+    def __init__(self, process, successful):
+        super(SocketAccept, self).__init__(process, successful)
 
     def get_properties(self):
-        return {} # TODO
+        props = super(SocketAccept, self).get_properties()
+
+        return props
 
     def __str__(self):
         return '[Accept from socket]'
@@ -123,24 +188,21 @@ class SocketAccept(FileDescriptorEvent):
 class MemoryMapEvent(model.Event):
     indices = {'process_entity'}
 
-    mmap_flags = {'MAP_SHARED': 0x001,
-                  'MAP_PRIVATE': 0x002,
-                  'MAP_TYPE': 0x00f,
-                  'MAP_FIXED': 0x010,
-                  'MAP_RENAME': 0x020,
-                  'MAP_AUTOGROW': 0x040,
-                  'MAP_LOCAL': 0x080,
-                  'MAP_AUTORSRV': 0x100,
-                  'MAP_NORESERVE': 0x0400,
-                  'MAP_ANONYMOUS': 0x0800,
-                  'MAP_GROWSDOWN': 0x1000,
-                  'MAP_DENYWRITE': 0x2000,
-                  'MAP_EXECUTABLE': 0x4000,
-                  'MAP_LOCKED': 0x8000,
-                  'MAP_POPULATE': 0x10000,
-                  'MAP_NONBLOCK': 0x20000,
-                  'MAP_STACK': 0x40000,
-                  'MAP_HUGETLB': 0x80000}
+    mmap_flags = {'MAP_SHARED': 0x1,
+                  'MAP_PRIVATE': 0x2,
+                  'MAP_FIXED': 0x10,
+                  'MAP_ANONYMOUS': 0x20,
+                  'MAP_GROWSDOWN': 0x100,
+                  'MAP_DENYWRITE': 0x800,
+                  'MAP_EXECUTABLE': 0x1000,
+                  'MAP_LOCKED': 0x2000,
+                  'MAP_NORESERVE': 0x4000,
+                  'MAP_POPULATE': 0x8000,
+                  'MAP_NONBLOCK': 0x10000,
+                  'MAP_STACK': 0x20000,
+                  'MAP_HUGETLB': 0x40000,
+                  'MAP_UNINITIALIZED': 0x4000000,
+                  }
 
     def __init__(self, flags, fd, address, process_entity, successful, start_ts, end_ts):
         assert isinstance(process_entity, Process)
@@ -157,7 +219,18 @@ class MemoryMapEvent(model.Event):
         self.fd = fd
 
     def get_properties(self):
-        return {} # TODO
+        return {
+            'process': self.process_entity,
+            'file': self.file_entity,
+            'address': self.address,
+            'flags_value': self.flags_val,
+            'sucessful': self.successful,
+            'shared': 'MAP_SHARED' in self.flags,
+            'private': 'MAP_PRIVATE' in self.flags,
+            'anonymous': 'MAP_ANONYMOUS' in self.flags,
+            'flags': ','.join([x for x in self.flags]),
+            'fd': self.fd
+        }
 
     def __str__(self):
         res = ''
@@ -175,21 +248,28 @@ class MemoryMapEvent(model.Event):
         return '['+res+']'
 
 
-class StartThreadEvent(model.Event):
+class StartTaslEvent(model.Event):
     indices = set()
 
     def __init__(self, start_ts, end_ts, process_entity, child_pid, spawned_child):
         assert isinstance(process_entity, Process)
-        super(StartThreadEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
+        assert isinstance(spawned_child, Process)
+        super(StartTaslEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
         self.child_pid = child_pid
         self.process_entity = process_entity
         self.spawned_child = spawned_child
+        self.is_process = spawned_child.is_process()
 
     def get_properties(self):
-        return {} # TODO
+        return {
+            'child_pid': self.child_pid,
+            'process': self.process_entity,
+            'spawned_child': self.spawned_child,
+            'is_process': self.is_process
+        }
 
     def __str__(self):
-        return '[Start Thread: {}]'.format(self.child_pid)
+        return '[Start {}: {}]'.format('process' if self.is_process else 'thread', self.child_pid)
 
 
 class SuperUserRequest(model.Event):
@@ -201,7 +281,9 @@ class SuperUserRequest(model.Event):
         self.process_entity = process_entity
 
     def get_properties(self):
-        return {} # TODO
+        return {
+            'process': self.process_entity
+        }
 
     def __str__(self):
         return '[SU-Request by PID {}, UID {}]'.format(self.process_entity.pid, self.process_entity.uid)
@@ -218,7 +300,10 @@ class CreateDir(model.Event):
         self.file_entity = file_entity
 
     def get_properties(self):
-        return {} # TODO
+        return {
+            'file': self.file_entity,
+            'process': self.process_entity
+        }
 
     def __str__(self):
         return '[Mkdir: {}]'.format(str(self.file_entity))
@@ -236,7 +321,11 @@ class SendSignal(model.Event):
         self.number = number
 
     def get_properties(self):
-        return {} # TODO
+        return {
+            'process': self.process_entity,
+            'target_process': self.target_process,
+            'number': self.number
+        }
 
     def __str__(self):
         return '[Signal {} to {} (by {})]'.format(self.number, self.target_process, self.process_entity)
@@ -252,7 +341,10 @@ class DeleteFileEvent(model.Event):
         self.successful = successful
 
     def get_properties(self):
-        return {} # TODO
+        return {
+            'file': self.file_entity,
+            'successful': self.successful
+        }
 
     def __str__(self):
         return "[Delete File: {}]".format(str(self.file_entity))
@@ -270,7 +362,11 @@ class ExecEvent(model.Event):
         self.path = path
 
     def get_properties(self):
-        return {} # TODO
+        return {
+            'argv': join_command(self.argv),
+            'env': '\n'.join(self.env),
+            'path': self.path
+        }
 
     def __str__(self):
         return '[Exec: {}, {}]'.format(self.path, join_command(self.argv))
@@ -283,7 +379,7 @@ class ANANASAdbShellExec(model.Event):
         super(ANANASAdbShellExec, self).__init__()
 
     def get_properties(self):
-        return {} # TODO
+        return {}
 
     def __str__(self):
         return '[ANANAS Shell Command]'

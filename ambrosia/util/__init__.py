@@ -3,7 +3,7 @@ from datetime import datetime
 import logging
 import random
 import string
-
+import json
 
 def get_logger(o):
     assert isinstance(o, object)
@@ -43,3 +43,39 @@ def join_command(lst):
             res.append(c)
 
     return ' '.join(res)
+
+
+class SerializationError(Exception):
+    pass
+
+
+def _serialize_entry(obj, objs):
+    if obj is None:
+        return 0
+    elif isinstance(obj, (int, float, basestring)):
+        if obj in objs:
+            return objs.index(obj)
+        else:
+            objs.append(obj)
+            return len(objs) - 1
+    elif isinstance(obj, dict):
+        ret = {}
+        for k, v in obj.iteritems():
+            ret[_serialize_entry(k, objs)] = _serialize_entry(v, objs)
+        return ret
+    elif isinstance(obj, list):
+        ret = []
+        for x in obj:
+            ret.append(_serialize_entry(x, objs))
+
+        return ret
+    else:
+        raise SerializationError("invalid type: {}".format(type(obj)))
+
+
+def serialize_obj(obj):
+    objs = [None]
+
+    res = _serialize_entry(obj, objs)
+
+    return json.dumps([res, objs])

@@ -4,6 +4,7 @@ function BlockLayoutManager(){
     this.blocks = [];
     this.yPosition = 0;
     this._width = 0;
+    this._end_y = 0;
 }
 
 BlockLayoutManager.prototype.cleanBlocks = function(){
@@ -47,6 +48,7 @@ BlockLayoutManager.prototype.fitBlock = function(dim){
     }
     
     this._width = Math.max(this._width, dim.getEndX());
+    this._end_y = Math.max(this._end_y, dim.getEndY());
     
     this.blocks.push(dim);
     
@@ -58,3 +60,7 @@ BlockLayoutManager.prototype.getWidth = function(){
     return this._width;
 }
 
+BlockLayoutManager.prototype.getEndY = function(){
+    assert(isFinite(this._end_y));
+    return this._end_y;
+}
