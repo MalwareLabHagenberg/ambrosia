@@ -6,9 +6,19 @@ import ambrosia
 from ambrosia import model
 from ambrosia.context import AmbrosiaContext
 from ambrosia.model import Event
+from ambrosia.plugins import PluginInfoTop
 from ambrosia_plugins.events import ANANASEvent
 from ambrosia.util import get_logger
 
+
+class PluginInfo(PluginInfoTop):
+    @staticmethod
+    def correlators():
+        return [(ApimonitorCorrelator, 10)]
+
+    @staticmethod
+    def parsers():
+        return [ApimonitorPluginParser]
 
 class AndroidApicall(model.Event):
     indices = {}
@@ -55,7 +65,7 @@ class ApimonitorPluginParser(ambrosia.ResultParser):
         assert isinstance(context, AmbrosiaContext)
 
 
-class ApimonitirCorrelator(object):
+class ApimonitorCorrelator(ambrosia.Correlator):
     def __init__(self, context):
         assert isinstance(context, AmbrosiaContext)
         self.proc_attrs = {}

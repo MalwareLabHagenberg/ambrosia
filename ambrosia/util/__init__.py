@@ -5,6 +5,7 @@ import random
 import string
 import json
 
+
 def get_logger(o):
     assert isinstance(o, object)
     return logging.getLogger(o.__module__ + "." + o.__class__.__name__)
@@ -49,24 +50,26 @@ class SerializationError(Exception):
     pass
 
 
-def _serialize_entry(obj, objs):
+def _serialize_entry(obj, objs, _serialized_set):
     if obj is None:
         return 0
     elif isinstance(obj, (int, float, basestring)):
-        if obj in objs:
+        # we use sets, they are faster for "in" operations
+        if obj in _serialized_set:
             return objs.index(obj)
         else:
             objs.append(obj)
+            _serialized_set.add(obj)
             return len(objs) - 1
     elif isinstance(obj, dict):
         ret = {}
         for k, v in obj.iteritems():
-            ret[_serialize_entry(k, objs)] = _serialize_entry(v, objs)
+            ret[_serialize_entry(k, objs, _serialized_set)] = _serialize_entry(v, objs, _serialized_set)
         return ret
     elif isinstance(obj, list):
         ret = []
         for x in obj:
-            ret.append(_serialize_entry(x, objs))
+            ret.append(_serialize_entry(x, objs, _serialized_set))
 
         return ret
     else:
@@ -76,6 +79,6 @@ def _serialize_entry(obj, objs):
 def serialize_obj(obj):
     objs = [None]
 
-    res = _serialize_entry(obj, objs)
+    res = _serialize_entry(obj, objs, set())
 
     return json.dumps([res, objs])

@@ -31,26 +31,35 @@ BlockLayoutManager.prototype.isOccupied = function(dim){
     return false;
 }
 
-BlockLayoutManager.prototype.fitBlock = function(dim){
+BlockLayoutManager.prototype.fitBlock = function(dim, margin_x, margin_y){
     assert(dim instanceof Dimensions);
 
     this.yPosition = dim.getY();
     this.cleanBlocks();
 
-    dim.setX(0);
+    // add margin for block
+    var fitBlock = new Dimensions(
+        0, // begin to fit at position 0
+        dim.getY(), 
+        dim.getWidth() + margin_x, // add margin
+        dim.getHeight() + margin_y);
+    
     while(true){
-        var res = this.isOccupied(dim)
+        var res = this.isOccupied(fitBlock)
         if(res === false){
             break;
         }
         
-        dim.setX(res);
+        fitBlock.setX(res);
     }
+    
+    this.blocks.push(fitBlock);
+    
+    // apply result to dim
+    dim.setX(fitBlock.getX())
     
     this._width = Math.max(this._width, dim.getEndX());
     this._end_y = Math.max(this._end_y, dim.getEndY());
-    
-    this.blocks.push(dim);
     
     return dim;
 }

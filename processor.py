@@ -6,8 +6,8 @@ import xml.etree.ElementTree as ET
 import logging
 from datetime import datetime, timedelta
 from ambrosia_plugins.events import ANANASEvent
-from ambrosia_plugins.lkm import FileEvent, StartTaslEvent, CommandExecuteEvent, SuperUserRequest
-from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileEvent, StartTaslEvent, SuperUserRequest
+from ambrosia_plugins.lkm import FileEvent, StartTaskEvent, CommandExecuteEvent, SuperUserRequest
+from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileEvent, StartTaskEvent, SuperUserRequest
 
 sys.path.append(".")
 

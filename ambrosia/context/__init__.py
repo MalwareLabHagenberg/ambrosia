@@ -1,3 +1,4 @@
+from ambrosia.plugins import PluginManager
 
 
 class AmbrosiaContext(object):
@@ -8,3 +9,5 @@ class AmbrosiaContext(object):
         self.db = db.AmbrosiaDb(self)
         self.analysis = self.db.add_analysis()
         self.clock_syncer = clocks.ClockSyncer(self)
+        self.plugin_manager = PluginManager()
+        self.plugin_manager.find()

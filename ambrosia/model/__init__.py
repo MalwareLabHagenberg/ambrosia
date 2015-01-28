@@ -18,10 +18,11 @@ class Analysis(Persistent):
         self.package = None
         self.start_time = None
         self.end_time = None
-        # TODO hashes
         self._entities = PersistentMapping()
         self._events = OOBTree.TreeSet()
         self._event_index = PersistentMapping()
+        self.plugins = {}
+        self.hashes = {}
 
     def add_entity(self, context, cls, *args):
         self.get_entity(context, cls, *args)
@@ -139,13 +140,22 @@ class Analysis(Persistent):
             el.sort()
 
         events = list(self._events)
-        events.sort(cmp=lambda x,y: x.cmp_by_time(y))
+        events.sort(cmp=lambda x, y: x.cmp_by_time(y))
+
+        entities = {}
+
+        for entity_class, class_entities in self._entities.iteritems():
+            for entity in class_entities[0]:
+                assert isinstance(entity, Entity)
+                entities[entity.primary_key] = entity.get_vals()
 
         return {'start_time': js_date(self.start_time),
                 'end_time': js_date(self.end_time),
                 'filename': self.filename,
                 'package': self.package,
-                'events': [e.get_vals() for e in events]}
+                'events': [e.get_vals() for e in events],
+                'entities': entities
+        }
 
     def adjust_times(self, context):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
@@ -291,6 +301,7 @@ class Event(Persistent):
             assert isinstance(c, Event)
             c.sort()
 
+
 class Entity(Persistent):
     def __init__(self, primary_identifier):
         self.primary_identifier = primary_identifier
@@ -305,3 +316,24 @@ class Entity(Persistent):
             return -1
         return cmp(self.primary_key, other.primary_key)
 
+    def get_vals(self):
+        properties, references = {}, {}
+
+        props = self.get_properties()
+
+        for k, v in props.iteritems():
+            if isinstance(v, Entity):
+                references[k] = v.primary_key
+            else:
+                properties[k] = v
+
+        return {
+            'id': self.primary_key,
+            'type': classname(type(self)),
+            'properties': properties,
+            'references': references,
+            'description': str(self)
+        }
+
+    def get_properties(self):
+        raise NotImplementedError(type(self))

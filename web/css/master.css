@@ -16,6 +16,24 @@ body {
     width: 300px;
 }
 
+.filterinput.filterchanged {
+    background-color: #ffffcc;
+}
+
 .filterinput.errorinput {
     background-color: #ffcccc;
+}
+
+rect.mainview_block {
+    stroke: #000000;
+    stroke-width: 0.001px;
+    fill-opacity: 0.7;
+    stroke-opacity: 0.1;
+}
+
+rect.mainview_selected {
+    stroke-opacity: 1;
+    fill-opacity: 1;
+    stroke: #000000;
+    stroke-width: 8px;
 }

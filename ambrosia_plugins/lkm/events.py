@@ -129,7 +129,7 @@ class FileEvent(FileDescriptorEvent):
         assert isinstance(file_entity, File)
         super(FileEvent, self).__init__(process, successful)
         self.abspath = file_entity.abspath
-        self.file_entity = file_entity
+        self.file = file_entity
         self.mode = mode
 
     def get_properties(self):
@@ -138,7 +138,7 @@ class FileEvent(FileDescriptorEvent):
         props.update({
             'mode': self.mode,
             'abspath': self.abspath,
-            'file': self.file_entity
+            'file': self.file
         })
 
         return props
@@ -150,8 +150,9 @@ class FileEvent(FileDescriptorEvent):
 class AnonymousFileEvent(FileEvent):
     indices = FileDescriptorEvent.indices
 
-    def __init__(self, description, process, successful=True):
-        super(AnonymousFileEvent, self).__init__(File.unknown(), None, process, successful)
+    def __init__(self, description, process, context, successful=True):
+        assert isinstance(context, AmbrosiaContext)
+        super(AnonymousFileEvent, self).__init__(File.unknown(context), None, process, successful)
         self.description = description
 
     def __str__(self):
@@ -248,13 +249,13 @@ class MemoryMapEvent(model.Event):
         return '['+res+']'
 
 
-class StartTaslEvent(model.Event):
+class StartTaskEvent(model.Event):
     indices = set()
 
     def __init__(self, start_ts, end_ts, process_entity, child_pid, spawned_child):
         assert isinstance(process_entity, Process)
         assert isinstance(spawned_child, Process)
-        super(StartTaslEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
+        super(StartTaskEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
         self.child_pid = child_pid
         self.process_entity = process_entity
         self.spawned_child = spawned_child
@@ -334,11 +335,13 @@ class SendSignal(model.Event):
 class DeleteFileEvent(model.Event):
     indices = set()
 
-    def __init__(self, start_ts, end_ts, successful, file_entity):
+    def __init__(self, start_ts, end_ts, successful, file_entity, process):
         assert isinstance(file_entity, File)
+        assert isinstance(process, Process)
         super(DeleteFileEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
         self.file_entity = file_entity
         self.successful = successful
+        self.process = process
 
     def get_properties(self):
         return {
@@ -373,7 +376,7 @@ class ExecEvent(model.Event):
 
 
 class ANANASAdbShellExec(model.Event):
-    indices = {}
+    indices = set()
 
     def __init__(self):
         super(ANANASAdbShellExec, self).__init__()
@@ -383,3 +386,24 @@ class ANANASAdbShellExec(model.Event):
 
     def __str__(self):
         return '[ANANAS Shell Command]'
+
+
+class LibraryLoad(model.Event):
+    indices = {'process'}
+
+    def __init__(self, file, process, successful):
+        assert isinstance(file, File)
+        assert isinstance(process, Process)
+        super(LibraryLoad, self).__init__()
+        self.file = file
+        self.process = process
+        self.successful = successful
+
+    def get_properties(self):
+        return {
+            'file': self.file,
+            'process': self.process
+        }
+
+    def __str__(self):
+        return '[Library load: {}]'.format(self.file.abspath)

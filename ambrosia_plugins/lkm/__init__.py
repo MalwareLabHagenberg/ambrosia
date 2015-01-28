@@ -4,15 +4,25 @@ import datetime
 import dateutil.parser
 
 import ambrosia
+from ambrosia.plugins import PluginInfoTop
 from ambrosia.util import get_logger, join_command
 from ambrosia import model
 from ambrosia.context import AmbrosiaContext
 from ambrosia.model.entities import Process, File
 from ambrosia_plugins.events import ANANASEvent
 from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
-    SocketEvent, SocketAccept, MemoryMapEvent, StartTaslEvent, SuperUserRequest, CreateDir, SendSignal, \
-    DeleteFileEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent
+    SocketEvent, SocketAccept, MemoryMapEvent, StartTaskEvent, SuperUserRequest, CreateDir, SendSignal, \
+    DeleteFileEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent, LibraryLoad
 
+
+class PluginInfo(PluginInfoTop):
+    @staticmethod
+    def correlators():
+        return [(SyscallCorrelator, 10)]
+
+    @staticmethod
+    def parsers():
+        return [LkmPluginParser]
 
 class LkmPluginParser(ambrosia.ResultParser):
     def __init__(self):
@@ -161,7 +171,7 @@ def _timedelta_diff(td1, td2):
         return td1 - td2
 
 
-class SyscallCorrelator(object):
+class SyscallCorrelator(ambrosia.Correlator):
     def __init__(self, context):
         assert isinstance(context, AmbrosiaContext)
         self.fd_directory = {}
@@ -184,7 +194,7 @@ class SyscallCorrelator(object):
                 if path.startswith('socket:'):
                     new_event = SocketEvent(proc, True)
                 elif path.startswith('anon_inode:') or path.startswith('pipe:'):
-                    new_event = AnonymousFileEvent(path, proc)
+                    new_event = AnonymousFileEvent(path, proc, self.context)
                 elif path.startswith('/'):
                     if path.endswith(' (deleted)'):
                         # kernel appends ' (deleted)' for deleted files
@@ -272,11 +282,36 @@ class SyscallCorrelator(object):
 
         self._update_tree()
 
+        self._classify_file_events()
+        self._update_tree()
+
         self._find_execs()
         self._update_tree()
 
         self._correlate_adb_cmds()
         self._update_tree()
+
+    def _classify_file_events(self):
+        for fe in self.context.analysis.iter_events(self.context, FileEvent):
+            if re.match('^/vendor/lib/.+\.so', fe.abspath) or re.match('^/system/lib/.+\.so', fe.abspath):
+
+                lle = None
+
+                if not fe.successful:
+                    # failed library load
+                    lle = LibraryLoad(fe.file, fe.process, False)
+
+                if lle is None:
+                    for c in fe.children:
+                        if isinstance(c, MemoryMapEvent):
+                            lle = LibraryLoad(fe.file, fe.process, True)
+                            break
+
+                if lle is not None:
+                    lle.add_child(fe)
+                    self.to_add.add(lle)
+                    self.to_remove.add(fe)
+
 
     def _correlate_adb_cmds(self):
         self.log.info('Correlating ADB commands with command executions')
@@ -326,7 +361,7 @@ class SyscallCorrelator(object):
 
     def _find_execs(self):
         self.log.info('Searching for command executions')
-        for fork in self.context.analysis.iter_events(self.context, StartTaslEvent):
+        for fork in self.context.analysis.iter_events(self.context, StartTaskEvent):
             exec_ = None
             mintimediff = None
             execs_to_add = set()
@@ -388,11 +423,6 @@ class SyscallCorrelator(object):
                     # we consider everything within 2 seconds as startup
                     continue
 
-                if re.match('^/vendor/lib/.+\.so', fe.abspath) or re.match('^/system/lib/.+\.so', fe.abspath):
-                    # successful/unsuccessfullibrary loads
-                    cmd_evt.add_child(fe)
-                    self.to_remove.add(fe)
-
                 if fe.successful:
                     if fe.abspath == '/proc/mounts' or \
                             fe.abspath == '/proc/filesystems' or \
@@ -402,6 +432,16 @@ class SyscallCorrelator(object):
                         # startup stuff
                         cmd_evt.add_child(fe)
                         self.to_remove.add(fe)
+
+            for lle in self.context.analysis.iter_events(self.context, LibraryLoad, 'process',
+                                                         value=fork.spawned_child):
+
+                if (lle.start_ts - fork.start_ts) > datetime.timedelta(0, 2):
+                    # we consider everything within 2 seconds as startup
+                    continue
+
+                cmd_evt.add_child(lle)
+                self.to_remove.add(lle)
 
     def _check_syscall(self, evt):
         assert isinstance(evt, SyscallEvent)
@@ -453,7 +493,7 @@ class SyscallCorrelator(object):
             fd1 = int(evt.params[0])
             fd2 = int(evt.params[1])
 
-            parent_evt = AnonymousFileEvent('pipe', proc, evt.returnval >= 0 and fd1 >= 0 and fd2 >= 0)
+            parent_evt = AnonymousFileEvent('pipe', proc, self.context, evt.returnval >= 0 and fd1 >= 0 and fd2 >= 0)
 
             if parent_evt.successful:
                 proc_fds[fd1] = parent_evt
@@ -498,7 +538,6 @@ class SyscallCorrelator(object):
             parent_evt = MemoryMapEvent(flags, fd, address, proc, True, evt.end_ts, evt.end_ts)
 
             if 'MAP_ANONYMOUS' not in parent_evt.flags:
-                # TODO
                 fdevt = self._get_fd_event(evt, fd, proc_fds, proc, FileDescriptorEvent, evt.start_ts)
                 fdevt.add_child(parent_evt)
             else:
@@ -514,7 +553,7 @@ class SyscallCorrelator(object):
 
             assert evt.spawned_child.start_captured
 
-            parent_evt = StartTaslEvent(evt.end_ts, evt.end_ts, proc, pid, evt.spawned_child)
+            parent_evt = StartTaskEvent(evt.end_ts, evt.end_ts, proc, pid, evt.spawned_child)
             self.to_add.add(parent_evt)
         elif evt.name == "execve":
             parent_evt = ExecEvent(evt.start_ts, evt.end_ts, evt.params[0], evt.argv, evt.env, proc)
@@ -526,7 +565,8 @@ class SyscallCorrelator(object):
                                          self.context.analysis.get_entity(
                                              self.context,
                                              File,
-                                             evt.params[0]))
+                                             evt.params[0]),
+                                         proc)
             self.to_add.add(parent_evt)
         elif evt.name == "mkdir":
             parent_evt = CreateDir(evt.start_ts,

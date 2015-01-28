@@ -1,6 +1,7 @@
 "use strict";
 
 function FilterView(){
+    this._tab_registry = [];
 }
 
 FilterView.prototype.setup = function(){
@@ -14,43 +15,69 @@ FilterView.prototype._addFilterLine = function(filter, tab){
     tab.append(trf);
 }
 
-FilterView.prototype._makeaddLinkClickCallback = function(evtcls, tab){
-    var ths = this;
+FilterView.prototype._removeFilterLine = function(filter){
+    filter.getInput().remove();
+}
+
+
+FilterView.prototype._addFilters = function(evtcls, text, filters){
+    var tab = $('<table/>');
     
-    function cb(){
+    var addlink = $('<a href="javascript:void(0)">add</a>');
+    var th = $('<th/>').text(text).append(addlink);
+    var tr = $('<tr/>').append(th);
+    
+    tab.append(tr);
+    
+    for(var f in filters){
+        this._addFilterLine(filters[f], tab);
+    }
+    
+    addlink.click(function(){
         var filter = new Filter();
         
-        if(!evtcls.filters){
-            evtcls.filters = [];
-        }
-        
-        evtcls.filters.push(filter);
-        ths._addFilterLine(filter, tab);
-    }
-    return cb;
+        Event.addFilter(evtcls, filter);
+    });
+
+    this._tab_registry.push([evtcls, tab]);
+    
+    $('#filterview').append(tab);
 }
+
+FilterView.prototype._getTab = function(evtcls){
+    for(var i in this._tab_registry){
+        var t = this._tab_registry[i];
+        
+        if(t[0] == evtcls){
+            return t[1];
+        }
+    }
+}
+
+Event.addFilterHandler.push(function(evtcls, filter){
+    filterView._addFilterLine(filter, filterView._getTab(evtcls));
+});
+
+Event.removeFilterHandler.push(function(filter){
+    filterView._removeFilterLine(filter);
+});
 
 FilterView.prototype.redraw = function(){
     var ths = this;
 
     for(var e in Event.event_registry){
-        var tab = $('<table/>');
         var evtcls = Event.event_registry[e];
-        
-        var addlink = $('<a href="javascript:void(0)">add</a>');
-        var th = $('<th/>').text(e).append(addlink);
-        var tr = $('<tr/>').append(th);
-        
-        tab.append(tr);
-        
-        if(evtcls.filters){
-            for(var f in evtcls.filters){
-                this._addFilterLine(evtcls.filters[f], tab);
-            }
-        }
-        
-        addlink.click(this._makeaddLinkClickCallback(evtcls, tab));
-        
-        $('#filterview').append(tab);
+        var filters = Event.getFilters(evtcls);
+        this._addFilters(evtcls, e, filters);
     }
+    
+    this._addFilters(null, 'general', Event.getFilters(null));
+    
+    var applyButton = $('<button type="button"/>').text('Apply');
+    applyButton.click(function(){
+        redraw();
+    });
+    
+    $('#filterview').append(applyButton);
 }
+

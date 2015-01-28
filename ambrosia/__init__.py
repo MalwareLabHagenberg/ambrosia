@@ -8,7 +8,7 @@ import ambrosia.clocks
 from ambrosia.context import AmbrosiaContext
 import ambrosia.db
 import ambrosia.config
-from ambrosia.util import js_date, get_logger, serialize_obj
+from ambrosia.util import js_date, get_logger, serialize_obj, classname
 
 
 class Ambrosia(object):
@@ -30,10 +30,8 @@ class Ambrosia(object):
             if el.tag == 'filename':
                 self.context.analysis.filename = el.text
             elif el.tag == 'hashes':
-                '''
                 for h in el:
                     self.context.analysis.hashes[h.attrib['type']] = h.text
-                '''
             elif el.tag == 'package':
                 self.context.analysis.package = el.text
             elif el.tag == 'starttime':
@@ -41,7 +39,9 @@ class Ambrosia(object):
             elif el.tag == 'endtime':
                 self.context.analysis.end_time = dateutil.parser.parse(str(el.text))
             elif el.tag == 'plugins':
-                pass # TODO
+                for p in el:
+                    assert p.tag == 'plugin'
+                    self.context.analysis.plugins[p.attrib['name']] = p.attrib
             elif el.tag == 'results':    
                 ResultParser.start_parsers(el, self.context)
 
@@ -52,17 +52,13 @@ class Ambrosia(object):
         self.context.analysis.adjust_times(self.context)
         
     def correlate(self):
-        #TODO
         from ambrosia_plugins.lkm import SyscallCorrelator
         from ambrosia_plugins.apimonitor import ApiCallCorrelator
 
-        self.log.info("correlating syscalls")
-        sc = SyscallCorrelator(self.context)
-        sc.correlate()
-
-        self.log.info("correlating API call")
-        acc = ApiCallCorrelator(self.context)
-        acc.correlate()
+        for c in self.context.plugin_manager.correlators():
+            self.log.info("starting correlator: {}".format(classname(c)))
+            sc = c(self.context)
+            sc.correlate()
 
     def sort_events(self):
         self.log.info("sorting events")
@@ -72,6 +68,10 @@ class Ambrosia(object):
         self.log.info("serializing")
         return serialize_obj(self.context.analysis.get_vals())
 
+
+class Correlator(object):
+    def correlate(self):
+        raise NotImplementedError()
 
 
 class ResultParser(object):
@@ -86,31 +86,23 @@ class ResultParser(object):
     
     @staticmethod
     def start_parsers(el, context):
-        parsers = []
         assert isinstance(context, AmbrosiaContext)
-        
-        # TODO
-        from ambrosia_plugins.lkm import LkmPluginParser 
-        from ambrosia_plugins.events import EventParser
-        from ambrosia_plugins.apimonitor import ApimonitorPluginParser
 
-        lp = LkmPluginParser()
-        ep = EventParser()
-        ap = ApimonitorPluginParser()
+        parsers = set()
 
-        lp.prepare(context)
-        ep.prepare(context)
-        ap.prepare(context)
+        for p in context.plugin_manager.parsers():
+            pi = p()
+            assert isinstance(pi, ResultParser)
+            pi.prepare(context)
+            parsers.add(pi)
 
-        for parser in [lp, ep, ap]:
+        for parser in parsers:
+            assert isinstance(parser, ResultParser)
             for r in el:
-                assert isinstance(parser, ResultParser)
                 parser.parse(r.tag, r, context)
-                parsers.append(parser)
 
-        lp.finish(context)
-        ep.finish(context)
-        ap.finish(context)
+        for parser in parsers:
+            parser.finish(context)
 
         return parsers
 

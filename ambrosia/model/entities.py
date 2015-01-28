@@ -31,6 +31,19 @@ class Process(Entity):
         self.start_ts = start_ts
         self.end_ts = end_ts
 
+    def get_properties(self):
+        return {
+            'pid': self.pid,
+            'tgid': self.tgid,
+            'tg_leader': self.tg_leader,
+            'comm': self.comm,
+            'path': self.path,
+            'type': self.type,
+            'uid': self.uid,
+            'parent': self.parent,
+            'start_captured': self.start_captured
+        }
+
     @staticmethod
     def _normalize_times(context, start_ts, end_ts):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
@@ -81,13 +94,19 @@ class File(Entity):
         super(File, self).__init__(abspath)
         self.abspath = abspath
 
+    def get_properties(self):
+        return {
+            'abspath': self.abspath
+        }
+
     def matches_entity(self, abspath):
         return os.path.normpath(abspath) == self.abspath
 
     @staticmethod
-    def unknown():
-        if File._unknown_file is None:
-            File._unknown_file = File(None, '<UNKNOWN>')
+    def unknown(context):
+        assert isinstance(context, ambrosia.AmbrosiaContext)
+
+        File._unknown_file = context.analysis.get_entity(context, File, '<UNKNOWN>')
 
         return File._unknown_file
 
@@ -95,6 +114,7 @@ class File(Entity):
     def find(context, entities, identifier_btree, abspath):
         assert isinstance(context, ambrosia.AmbrosiaContext)
         assert isinstance(identifier_btree, OOBTree.BTree)
+
         e = identifier_btree.get(abspath)
 
         if e is not None:
@@ -114,6 +134,13 @@ class ServerEndpoint(Entity):
         self.protocol = protocol
         self.address = address
         self.port = port
+
+    def get_properties(self):
+        return {
+            'protocol': self.protocol,
+            'address': self.address,
+            'port': self.port
+        }
 
     def find(context, entities, identifier_btree, protocol, address, port):
         assert isinstance(context, ambrosia.AmbrosiaContext)

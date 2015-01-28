@@ -1,21 +1,5 @@
 "use strict";
 
-function enrichElement(el, parent){
-    var new_el = new (Event.event_registry[el.type]);
-    
-    for(var i in el){
-        new_el[i] = el[i];
-    }
-    
-    new_el.parent = parent;
-    
-    for(var i in new_el.children){
-        new_el.children[i] = enrichElement(new_el.children[i], new_el);
-    }
-    
-    return new_el;
-}
-
 function deserialize(obj, objs){
     if(obj*1 == obj){
         return objs[obj];
@@ -39,15 +23,18 @@ function deserialize(obj, objs){
 }
 
 function redraw(){
+    // TODO listener
     var drawing = busy('Drawing');
     mainView.redraw();
     drawing.finish();
+    $(".filterinput").removeClass('filterchanged');
 }
 
 var log = new Log();
 var mainView = new MainView();
 var detailsView = new DetailsView();
 var filterView = new FilterView();
+var entityView = new EntityView();
 var ts_offset = 0;
 
 $(document).ready(function(){
@@ -55,14 +42,24 @@ $(document).ready(function(){
     
     $.ajax('test.json', {success: function(r){
         window.am = deserialize(r[0], r[1]);
+        
+        for(var i in window.am.entities){
+            window.am.entities[i] = Entity.enrich(window.am.entities[i]);
+        }
+        
+        for(var i in window.am.entities){
+            window.am.entities[i].resolveReferences();
+        }
+        
         for(var i in window.am.events){
-            window.am.events[i] = enrichElement(window.am.events[i]);
+            window.am.events[i] = Event.enrich(window.am.events[i]);
         }
         window.ts_offset = window.am.start_time;
         loading.finish();
         mainView.setup();
         detailsView.setup();
         filterView.setup();
+        entityView.setup();
     }})
 });
 

@@ -1,13 +1,24 @@
 "use strict";
 
-function Filter(str){
+function Filter(str, forceShowParents){
     if(!str){
-        str = '0==1';
+        str = '1==1';
     }
 
+    if(!forceShowParents){
+        forceShowParents = false;
+    }
+    
+    this._forceShowParents = forceShowParents;
     this._input = $('<input class="filterinput"/>').val(str);
     this._err = $('<div class="filtererror"/>')
-    this._div = $('<div/>').append(this._input).append(this._err);
+    this._del = $('<button type="button"/>').text('del');
+    this._forceParentCb = $('<input type="checkbox"/>').prop('checked', this._forceShowParents);
+    this._div = ($('<div/>')
+        .append(this._input)
+        .append(this._forceParentCb)
+        .append(this._del)
+        .append(this._err));
     this._error = false;
     
     this.setRule(str);
@@ -15,14 +26,17 @@ function Filter(str){
     var ths = this;
     
     this._input.keyup(function(){
+        ths._input.addClass('filterchanged');
         ths.setRule(ths._input.val());
     });
     
-    this._input.change(function(){
-        if(!this.error){
-            redraw()
-        }
+    this._del.click(function(){
+        Event.removeFilter(ths);
     });
+}
+
+Filter.prototype.forcesShowParents = function(){
+    return this._forceShowParents;
 }
 
 Filter.prototype.setRule = function(r){
@@ -47,24 +61,65 @@ Filter.prototype.getInput = function(){
     return this._div;
 }
 
-function Property(prop){
+function Property(prop, prop2){
     this.prop = prop;
+    this.prop2 = prop2;
 }
 Property.prototype.evaluate = function(evt){
     assert(evt instanceof Event);
     
-    if(this.prop == 'true'){
+    if(this.prop == 'references'){
+        assert(this.prop2 != undefined);
+        
+        var vals = [];
+        for(var ref in evt.references){
+            if(evt.references[ref].properties[this.prop2] !== undefined){
+                vals.push(evt.references[ref].properties[this.prop2]);
+            }else{
+                vals.push(evt.references[ref][this.prop2]);
+            }
+        }
+        return vals;
+    }else if(this.prop == 'true'){
         return true;
     }else if(this.prop == 'false'){
         return false;
     }else if(this.prop == 'null'){
         return null;
+    }else if(evt.properties[this.prop]){
+        return evt.properties[this.prop];
     }else if(evt[this.prop]){
         return evt[this.prop];
     }else{
-        return evt.properties[this.prop];
+        /* refernces */
+        if(!evt.references[this.prop]){
+            return undefined;
+        }
+        
+        if(evt.references[this.prop].properties[this.prop2] !== undefined){
+            return evt.references[this.prop].properties[this.prop2];
+        }else{
+            return evt.references[this.prop][this.prop2];
+        }
     }
 }
+
+function UnaryOperator(op, expression){
+    this.op = op;
+    this.expression = expression;
+}
+
+UnaryOperator.prototype.evaluate = function(evt){
+    switch(this.op){
+    case 'NOT':
+        return !this.expression.evaluate(evt);
+        break;
+    default:
+        throw "Unknown unary operation";
+        break;
+    }
+}
+
 
 function Comparison(p1, op, p2){
     this.p1 = p1;
@@ -83,6 +138,8 @@ Comparison.prototype.evaluate = function(evt){
     
     var p1 = this._get_val(this.p1, evt);
     var p2 = this._get_val(this.p2, evt);
+    
+    var reverseIn = false;
     
     switch(this.op){
     case 'EQ':
@@ -106,8 +163,19 @@ Comparison.prototype.evaluate = function(evt){
     case 'REGEX':
         return new RegExp(p2).test(p1);
         break;
+    case 'NIN':
+        reverseIn = true;
+        /* no break */
+    case 'IN':
+        for(var i in p2){
+            if(p2[i] == p1){
+                return reverseIn ? false : true;
+            }
+        }
+        return reverseIn ? true : false;
+        break;
     default:
-        throw "Unknown operation"
+        throw "Unknown operation";
         break;
     }
 }
@@ -132,3 +200,4 @@ Statement.prototype.evaluate = function(evt){
         break;
     }
 }
+

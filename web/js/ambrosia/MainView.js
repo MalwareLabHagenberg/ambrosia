@@ -5,6 +5,8 @@ function MainView(){
 }
 MainView.prototype.view_offset = 0;
 MainView.prototype.zoom_level = 500000.0;
+MainView.X_OFFSET = 55;
+MainView.EXTRA_WIDTH = MainView.X_OFFSET + 50;
 
 MainView.prototype.setup = function(){
     this.setupEventHandler();
@@ -20,6 +22,10 @@ MainView.prototype.setup = function(){
     
     Event.onSelectHandler.push(function(){
         $(this.svgElement).addClass('mainview_selected');
+    });
+    
+    Event.onUnSelectHandler.push(function(){
+        $(this.svgElement).removeClass('mainview_selected');
     });
 }
 
@@ -39,10 +45,11 @@ MainView.prototype.redraw = function(){
         assert(window.am.events[i] instanceof Event);
         assert(window.am.events[i].startTS >= lastTS);
         lastTS = window.am.events[i].startTS;
+        window.am.events[i].calcVisible();
         window.am.events[i].calcDimensions(Event.DEFAULT_BLOCK_LAYOUT_MAMAGER);
     }
     
-    this.setWidth(Event.DEFAULT_BLOCK_LAYOUT_MAMAGER.getWidth());
+    this.setWidth(MainView.EXTRA_WIDTH + Event.DEFAULT_BLOCK_LAYOUT_MAMAGER.getWidth());
     
     for(var i in window.am.events){
         window.am.events[i].draw();
@@ -97,7 +104,7 @@ MainView.prototype.getWidth = function(){
 
 MainView.prototype.setWidth = function(val){
     this._width = val;
-    this.svg.configure({width: Event.DEFAULT_BLOCK_LAYOUT_MAMAGER.getWidth()});
+    this.svg.configure({width: this._width});
     this.redrawMeasure();
 }
 

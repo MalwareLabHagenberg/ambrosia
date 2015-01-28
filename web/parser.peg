@@ -1,6 +1,7 @@
 /*{
-function Property(prop){
+function Property(prop, p2){
     this.prop = prop;
+    this.p2 = p2;
 }
 
 function Comparison(p1, op, p2){
@@ -13,6 +14,11 @@ function Statement(p1, op, p2){
     this.p1 = p1;
     this.op = op;
     this.p2 = p2;
+}
+
+function UnaryOperator(op, ex){
+    this.op = op;
+    this.ex = ex;
 }
 
 }
@@ -28,6 +34,7 @@ expression
 statement
   = c1:comparison ws op:logical_operator ws c2:statement { return new Statement(c1, op, c2) }
   / c:comparison { return c }
+  / lo:unary_operator ex:expression { return new UnaryOperator(lo, ex); }
 
 
 comparison
@@ -39,19 +46,25 @@ value
   / number
 
 operand
-  = op:'==' { return 'EQ'}
-  / op:'!=' { return 'NEQ' }
-  / op:'>=' { return 'GE' }
-  / op:'>' { return 'G' }
-  / op:'<=' { return 'LE' }
-  / op:'<' { return 'L' }
+  = '==' { return 'EQ'}
+  / '!=' { return 'NEQ' }
+  / '>=' { return 'GE' }
+  / '>' { return 'G' }
+  / '<=' { return 'LE' }
+  / '<' { return 'L' }
+  / '~' { return 'REGEX' }
+  / ':' { return 'IN' }
+  / '!:' { return 'NIN' }
+
+unary_operator
+  = '!' { return 'NOT' }
 
 logical_operator
   = op:'&&' { return 'AND'}
   / op:'||' { return 'OR' }
 
 property
-  = clazz:[a-zA-Z]+ { return new Property(clazz.join("")) }
+  = p1:[a-zA-Z]+ "."? p2:[a-zA-Z]* { return new Property(p1.join(""), p2.join("")) }
 
 string
   = '"' str:[^\"]* '"' { return str.join("") }
