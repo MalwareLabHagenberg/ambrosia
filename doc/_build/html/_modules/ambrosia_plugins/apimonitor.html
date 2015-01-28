@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia_plugins.apimonitor &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for ambrosia_plugins.apimonitor</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">dateutil.parser</span>
+
+<span class="kn">import</span> <span class="nn">ambrosia</span>
+<span class="kn">from</span> <span class="nn">ambrosia</span> <span class="kn">import</span> <span class="n">model</span>
+<span class="kn">from</span> <span class="nn">ambrosia.context</span> <span class="kn">import</span> <span class="n">AmbrosiaContext</span>
+<span class="kn">from</span> <span class="nn">ambrosia.model</span> <span class="kn">import</span> <span class="n">Event</span>
+<span class="kn">from</span> <span class="nn">ambrosia.plugins</span> <span class="kn">import</span> <span class="n">PluginInfoTop</span>
+<span class="kn">from</span> <span class="nn">ambrosia_plugins.events</span> <span class="kn">import</span> <span class="n">ANANASEvent</span>
+<span class="kn">from</span> <span class="nn">ambrosia.util</span> <span class="kn">import</span> <span class="n">get_logger</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Wolfgang Ettlinger&#39;</span>
+
+
+<div class="viewcode-block" id="PluginInfo"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.PluginInfo">[docs]</a><span class="k">class</span> <span class="nc">PluginInfo</span><span class="p">(</span><span class="n">PluginInfoTop</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="PluginInfo.correlators"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.PluginInfo.correlators">[docs]</a>    <span class="k">def</span> <span class="nf">correlators</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">ApimonitorCorrelator</span><span class="p">,</span> <span class="mi">10</span><span class="p">)]</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="PluginInfo.parsers"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.PluginInfo.parsers">[docs]</a>    <span class="k">def</span> <span class="nf">parsers</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">ApimonitorPluginParser</span><span class="p">]</span>
+</div></div>
+<div class="viewcode-block" id="AndroidApicall"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.AndroidApicall">[docs]</a><span class="k">class</span> <span class="nc">AndroidApicall</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">returnval</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AndroidApicall</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span> <span class="o">=</span> <span class="n">api</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">returnval</span> <span class="o">=</span> <span class="n">returnval</span>
+
+<div class="viewcode-block" id="AndroidApicall.adjust_times"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.AndroidApicall.adjust_times">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">clock_syncer</span><span class="o">.</span><span class="n">emu_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="AndroidApicall.get_serializeable_properties"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.AndroidApicall.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[Android API-Call: {}, {}, {}, {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">returnval</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ApimonitorPluginParser"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ApimonitorPluginParser">[docs]</a><span class="k">class</span> <span class="nc">ApimonitorPluginParser</span><span class="p">(</span><span class="n">ambrosia</span><span class="o">.</span><span class="n">ResultParser</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ApimonitorPluginParser</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processes</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="ApimonitorPluginParser.parse"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ApimonitorPluginParser.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">el</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;apimonitor&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ac</span> <span class="ow">in</span> <span class="n">el</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">ac</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;apicall&#39;</span>
+                <span class="n">ts</span> <span class="o">=</span> <span class="n">dateutil</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;timestamp&#39;</span><span class="p">]))</span>
+                <span class="n">apicall</span> <span class="o">=</span> <span class="n">AndroidApicall</span><span class="p">(</span><span class="n">ac</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;api&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                                         <span class="n">ac</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;method&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                                         <span class="n">ac</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;parameters&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                                         <span class="n">ac</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;returnvalue&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                                         <span class="n">ts</span><span class="p">)</span>
+
+                <span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">add_event</span><span class="p">(</span><span class="n">apicall</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ApimonitorPluginParser.finish"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ApimonitorPluginParser.finish">[docs]</a>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="ApimonitorCorrelator"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ApimonitorCorrelator">[docs]</a><span class="k">class</span> <span class="nc">ApimonitorCorrelator</span><span class="p">(</span><span class="n">ambrosia</span><span class="o">.</span><span class="n">Correlator</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proc_attrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ApimonitorCorrelator.correlate"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ApimonitorCorrelator.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+</div></div>
+<div class="viewcode-block" id="ContactsAccess"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ContactsAccess">[docs]</a><span class="k">class</span> <span class="nc">ContactsAccess</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ContactsAccess</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ContactsAccess.get_serializeable_properties"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ContactsAccess.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span> <span class="c"># TODO</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[Contact access]&#39;</span>
+
+</div>
+<div class="viewcode-block" id="SMSAccess"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.SMSAccess">[docs]</a><span class="k">class</span> <span class="nc">SMSAccess</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SMSAccess</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SMSAccess.get_serializeable_properties"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.SMSAccess.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span> <span class="c"># TODO</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[SMS access]&#39;</span>
+
+</div>
+<div class="viewcode-block" id="CallLogAccess"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.CallLogAccess">[docs]</a><span class="k">class</span> <span class="nc">CallLogAccess</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CallLogAccess</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CallLogAccess.get_serializeable_properties"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.CallLogAccess.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span> <span class="c"># TODO</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[Call log access]&#39;</span>
+
+</div>
+<div class="viewcode-block" id="PhoneCall"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.PhoneCall">[docs]</a><span class="k">class</span> <span class="nc">PhoneCall</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PhoneCall</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="PhoneCall.get_serializeable_properties"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.PhoneCall.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span> <span class="c"># TODO</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[Phone call]&#39;</span>
+</div>
+<div class="viewcode-block" id="ApiCallCorrelator"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ApiCallCorrelator">[docs]</a><span class="k">class</span> <span class="nc">ApiCallCorrelator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_update_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Updating Event tree&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">del_event</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">evt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">add_event</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ApiCallCorrelator.correlate"><a class="viewcode-back" href="../../ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ApiCallCorrelator.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Generating events from API calls&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">AndroidApicall</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_apicall</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_tree</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">_wrap_evt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apicall</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apicall</span><span class="p">,</span> <span class="n">AndroidApicall</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+
+        <span class="n">o</span> <span class="o">=</span> <span class="n">cls</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+        <span class="n">o</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">apicall</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">apicall</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_apicall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">AndroidApicall</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">evt</span><span class="o">.</span><span class="n">api</span> <span class="o">==</span> <span class="s">&#39;Landroid/content/ContentResolver&#39;</span> <span class="ow">and</span> <span class="n">evt</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;query&#39;</span><span class="p">:</span>
+            <span class="c"># accessing a content provider</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;Landroid/net/Uri;=([^ ]*)&#39;</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">m</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">uri</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">uri</span> <span class="o">==</span> <span class="s">&#39;content://com.android.contacts/contacts&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_wrap_evt</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">ContactsAccess</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">uri</span> <span class="o">==</span> <span class="s">&#39;content://sms/inbox&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_wrap_evt</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">SMSAccess</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">uri</span> <span class="o">==</span> <span class="s">&#39;content://call_log/calls&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_wrap_evt</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">CallLogAccess</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">evt</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">&#39;startActivity&#39;</span> <span class="ow">and</span> <span class="s">&#39;act=android.intent.action.CALL&#39;</span> <span class="ow">in</span> <span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+            <span class="c"># startActivity with CALL-intent -&gt; phone call</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wrap_evt</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">PhoneCall</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia.model package &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ambrosia-model-package">
+<h1>ambrosia.model package<a class="headerlink" href="#ambrosia-model-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ambrosia.model.entities">
+<span id="ambrosia-model-entities-module"></span><h2>ambrosia.model.entities module<a class="headerlink" href="#module-ambrosia.model.entities" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia.model.entities.File">
+<em class="property">class </em><tt class="descclassname">ambrosia.model.entities.</tt><tt class="descname">File</tt><big>(</big><em>context</em>, <em>abspath</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#File"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.File" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a></p>
+<p>Represents file (existing or not) on the emulator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>abspath</strong> (<em>str</em>) &#8211; the absolute path of the file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="ambrosia.model.entities.File.find">
+<em class="property">static </em><tt class="descname">find</tt><big>(</big><em>context</em>, <em>entities</em>, <em>identifier_btree</em>, <em>abspath</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#File.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.File.find" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.entities.File.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#File.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.File.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.entities.File.matches_entity">
+<tt class="descname">matches_entity</tt><big>(</big><em>abspath</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#File.matches_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.File.matches_entity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="ambrosia.model.entities.File.unknown">
+<em class="property">static </em><tt class="descname">unknown</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#File.unknown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.File.unknown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the file representing unknonw files</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia.model.entities.ServerEndpoint">
+<em class="property">class </em><tt class="descclassname">ambrosia.model.entities.</tt><tt class="descname">ServerEndpoint</tt><big>(</big><em>context</em>, <em>protocol</em>, <em>address</em>, <em>port=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#ServerEndpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.ServerEndpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a></p>
+<p>Represents a server endpoint i.e. a server and port.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>protocol</strong> (<em>str</em>) &#8211; the network protocol used (e.g. TCP)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="ambrosia.model.entities.ServerEndpoint.find">
+<tt class="descname">find</tt><big>(</big><em>context</em>, <em>entities</em>, <em>identifier_btree</em>, <em>protocol</em>, <em>address</em>, <em>port</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#ServerEndpoint.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.ServerEndpoint.find" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.entities.ServerEndpoint.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#ServerEndpoint.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.ServerEndpoint.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia.model.entities.Task">
+<em class="property">class </em><tt class="descclassname">ambrosia.model.entities.</tt><tt class="descname">Task</tt><big>(</big><em>context</em>, <em>pid</em>, <em>start_ts</em>, <em>end_ts</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.Task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a></p>
+<p>Represents a process or thread running on the emulator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>pid</strong> (<em>int</em>) &#8211; the PID/TID of the task</li>
+<li><strong>start_ts</strong> (<em>datetime.datetime</em>) &#8211; the timestamp the task started or <cite>None</cite> if unknown</li>
+<li><strong>end_ts</strong> (<em>datetime.datetime</em>) &#8211; the timestamp the task ended or <cite>None</cite> if unknown</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="ambrosia.model.entities.Task.find">
+<em class="property">static </em><tt class="descname">find</tt><big>(</big><em>context</em>, <em>entities</em>, <em>identifier_btree</em>, <em>pid</em>, <em>start_ts</em>, <em>end_ts</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#Task.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.Task.find" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.entities.Task.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#Task.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.Task.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia.model.entities.Task.is_process">
+<tt class="descname">is_process</tt><a class="reference internal" href="_modules/ambrosia/model/entities.html#Task.is_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.Task.is_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>whether this task is a process rather than a thread</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ambrosia.model">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ambrosia.model" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia.model.Analysis">
+<em class="property">class </em><tt class="descclassname">ambrosia.model.</tt><tt class="descname">Analysis</tt><a class="reference internal" href="_modules/ambrosia/model.html#Analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">persistent.Persistent</span></tt></p>
+<p>An Analysis object (and the referenced objects) stores all information the Ambrosia analysis found out.</p>
+<p>Analysis also manages all (top-level) Events and Entities (see <a class="reference internal" href="#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a>,
+<a class="reference internal" href="#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a>) and tries to optimize for searching performance.</p>
+<dl class="method">
+<dt id="ambrosia.model.Analysis.add_entity">
+<tt class="descname">add_entity</tt><big>(</big><em>context</em>, <em>cls</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.add_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.add_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an entity (alias for <a class="reference internal" href="#ambrosia.model.Analysis.get_entity" title="ambrosia.model.Analysis.get_entity"><tt class="xref py py-func docutils literal"><span class="pre">Analysis.get_entity()</span></tt></a>)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Analysis.add_event">
+<tt class="descname">add_event</tt><big>(</big><em>evt</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.add_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.add_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add event and generate indices</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>evt</strong> (<em>Event</em>) &#8211; the event to add</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The indexed attributes of an event may not be altered after the event has been added (otherwise the indices
+are out of date). This means that only static values may be indexed.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Analysis.adjust_times">
+<tt class="descname">adjust_times</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.adjust_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.adjust_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Goes through all events and calls adjust_times on all Events</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Analysis.del_event">
+<tt class="descname">del_event</tt><big>(</big><em>evt</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.del_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.del_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete event and update indices</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>evt</strong> (<em>Event</em>) &#8211; the event to remove</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Analysis.get_entity">
+<tt class="descname">get_entity</tt><big>(</big><em>context</em>, <em>cls</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.get_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.get_entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for a specific entity, if it does not exist, create a new one</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>cls</strong> (<em>class</em>) &#8211; the class of the entity we are looking for</li>
+<li><strong>*args</strong> &#8211; the arguments that would construct an entity</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>This method uses <a class="reference internal" href="#ambrosia.model.Entity.find" title="ambrosia.model.Entity.find"><tt class="xref py py-func docutils literal"><span class="pre">Entity.find()</span></tt></a> (of the specific entity class) to search for entities. This method
+receives a List of all known entitites of that class as well as a <tt class="xref py py-class docutils literal"><span class="pre">BTrees.OOBTree.BTree</span></tt> also containing
+all entities (indexed by their <em>primary_identifier</em> to allow more efficient searching). Moreover this method
+relieves the *args argument.</p>
+<p>The *args argument contains all information that identifies a certain entity. This could be e.g. the IP address
+and the port of a server. Those values are passed to the find method. If the server is already known, the entity
+representing it is returned. If no such server entity exist a new one is created using those two parameters.</p>
+<p>This behaviour makes sure that multiple event referencing the same entity all have references to the exact same
+entity in memory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Analysis.iter_entities">
+<tt class="descname">iter_entities</tt><big>(</big><em>context</em>, <em>cls</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.iter_entities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.iter_entities" title="Permalink to this definition">¶</a></dt>
+<dd><p>iterate all known entities of a specific class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>cls</strong> (<em>class</em>) &#8211; the class of the entity we are looking for</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Analysis.iter_events">
+<tt class="descname">iter_events</tt><big>(</big><em>context</em>, <em>cls=None</em>, <em>key=None</em>, <em>min_value=None</em>, <em>max_value=None</em>, <em>value=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.iter_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.iter_events" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates over all events matching specific conditions in an efficient manner.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>cls</strong> (<em>class</em>) &#8211; the class of the events we are looking for</li>
+<li><strong>key</strong> &#8211; the key we are searching for</li>
+<li><strong>min_value</strong> &#8211; the minimum value</li>
+<li><strong>max_value</strong> &#8211; the maximum value</li>
+<li><strong>value</strong> &#8211; the specific value (to search for exactly one value)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>This method uses an internal indizes to efficiently select specific events. Each event class defines attributes
+that should be indexed (<a class="reference internal" href="#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">Event</span></tt></a>.indices). This class makes sure that those attributes can be searched for
+very fast.</p>
+<p>The method accepts the following combinations of argument:
+* nothing: return all events
+* <em>cls</em>: return all events of a specific class (inefficient)
+* <em>cls</em>, <em>key</em>, <em>min_value</em> and/or <em>max_value</em>: search for all events of a specific class where the attribute
+<em>key</em> is within the defined value constraints
+* <em>cls</em>, <em>key</em>, <em>value</em>: search all events of a specific class where the attribute <em>key</em> has the value <em>value</em></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Analysis.to_serializeable">
+<tt class="descname">to_serializeable</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.to_serializeable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.to_serializeable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all results in a serializable form</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia.model.Entity">
+<em class="property">class </em><tt class="descclassname">ambrosia.model.</tt><tt class="descname">Entity</tt><big>(</big><em>primary_identifier</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">persistent.Persistent</span></tt></p>
+<p>An Entity represents a static element without a timestamp e.g. a file or a server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>primary_identifier</strong> (<em>str</em>) &#8211; A identifier that identifies the entity. This does not have to be unique
+(e.g. PID).</td>
+</tr>
+</tbody>
+</table>
+<dl class="staticmethod">
+<dt id="ambrosia.model.Entity.find">
+<em class="property">static </em><tt class="descname">find</tt><big>(</big><em>context</em>, <em>entities</em>, <em>identifier_btree</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Entity.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Entity.find" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should find and return an entity based on the *args. Must be implemented by subclass.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>entities</strong> (<em>list</em>) &#8211; all entities known</li>
+<li><strong>identifier_btree</strong> (<em>BTrees.OOBTree.BTree</em>) &#8211; a binary tree where the keys are the primary identifier and the
+values are a list containg the matching entity.</li>
+<li><strong>*args</strong> &#8211; the arguments identifying the entity. Must be identical to the constructor parameters.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Entity.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Entity.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Entity.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should return all information relevant about the specific entity. Must be implemented by subclass.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Entity.primary_identifier">
+<tt class="descname">primary_identifier</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Entity.primary_identifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Entity.primary_identifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the primary identifier for the entity.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia.model.Entity.primary_key">
+<tt class="descname">primary_key</tt><em class="property"> = None</em><a class="headerlink" href="#ambrosia.model.Entity.primary_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>A generated unique key</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Entity.to_serializeable">
+<tt class="descname">to_serializeable</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Entity.to_serializeable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Entity.to_serializeable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dict containing all relevant information about the entity.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia.model.Event">
+<em class="property">class </em><tt class="descclassname">ambrosia.model.</tt><tt class="descname">Event</tt><big>(</big><em>start_ts=None</em>, <em>end_ts=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">persistent.Persistent</span></tt></p>
+<p>Event represents any event with a start-time and/or end-time</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>start_ts</strong> (<em>datetime.datetime</em>) &#8211; the time the event began</li>
+<li><strong>end_ts</strong> (<em>datetime.datetime</em>) &#8211; the time the event ended</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="ambrosia.model.Event.add_child">
+<tt class="descname">add_child</tt><big>(</big><em>c</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Event.add_child"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.add_child" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add child to this event. Also checks whether new child already has a parent (this is not allowed in a tree
+structure) and updates timestamps.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Event.adjust_times">
+<tt class="descname">adjust_times</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Event.adjust_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.adjust_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust times (e.g. emulator time -&gt; system time)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia.model.Event.children">
+<tt class="descname">children</tt><a class="reference internal" href="_modules/ambrosia/model.html#Event.children"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.children" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates over all children.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Event.cmp_by_time">
+<tt class="descname">cmp_by_time</tt><big>(</big><em>other</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Event.cmp_by_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.cmp_by_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares two events by start timestamp</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> (<em>Event</em>) &#8211; the other event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia.model.Event.end_ts">
+<tt class="descname">end_ts</tt><a class="reference internal" href="_modules/ambrosia/model.html#Event.end_ts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.end_ts" title="Permalink to this definition">¶</a></dt>
+<dd><p>The end timestamp if set else the start timestamp (assuming that start timestamp = end timestamp)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The end timestamp</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Event.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Event.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used for serialisation, has to be implemented by the subclass. Should return a dict with all
+important information about the event.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia.model.Event.indices">
+<tt class="descname">indices</tt><em class="property"> = set([])</em><a class="headerlink" href="#ambrosia.model.Event.indices" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>This set contains all attributes that can be searched for; these attributes MUST NOT be CHANGED after the event has
+been added</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Event.sort">
+<tt class="descname">sort</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Event.sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort events by start timestamp</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia.model.Event.start_ts">
+<tt class="descname">start_ts</tt><a class="reference internal" href="_modules/ambrosia/model.html#Event.start_ts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.start_ts" title="Permalink to this definition">¶</a></dt>
+<dd><p>The start timestamp if set else the end timestamp (assuming that start timestamp = end timestamp)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The start timestamp</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Event.to_serializeable">
+<tt class="descname">to_serializeable</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Event.to_serializeable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.to_serializeable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dict that can be used for serialization</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ambrosia.model package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ambrosia.model.entities">ambrosia.model.entities module</a></li>
+<li><a class="reference internal" href="#module-ambrosia.model">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia.model.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

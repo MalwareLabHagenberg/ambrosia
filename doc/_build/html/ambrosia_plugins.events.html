@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia_plugins.events package &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ambrosia-plugins-events-package">
+<h1>ambrosia_plugins.events package<a class="headerlink" href="#ambrosia-plugins-events-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ambrosia_plugins.events">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ambrosia_plugins.events" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia_plugins.events.ANANASEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.events.</tt><tt class="descname">ANANASEvent</tt><big>(</big><em>name</em>, <em>timestamp</em>, <em>params</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/events.html#ANANASEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.events.ANANASEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<dl class="method">
+<dt id="ambrosia_plugins.events.ANANASEvent.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/events.html#ANANASEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.events.ANANASEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia_plugins.events.ANANASEvent.indices">
+<tt class="descname">indices</tt><em class="property"> = set(['start_ts', 'name'])</em><a class="headerlink" href="#ambrosia_plugins.events.ANANASEvent.indices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia_plugins.events.EventParser">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.events.</tt><tt class="descname">EventParser</tt><a class="reference internal" href="_modules/ambrosia_plugins/events.html#EventParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.events.EventParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ambrosia.html#ambrosia.ResultParser" title="ambrosia.ResultParser"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.ResultParser</span></tt></a></p>
+<dl class="method">
+<dt id="ambrosia_plugins.events.EventParser.parse">
+<tt class="descname">parse</tt><big>(</big><em>name</em>, <em>el</em>, <em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/events.html#EventParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.events.EventParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia_plugins.events.PluginInfo">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.events.</tt><tt class="descname">PluginInfo</tt><a class="reference internal" href="_modules/ambrosia_plugins/events.html#PluginInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.events.PluginInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ambrosia.plugins.html#ambrosia.plugins.PluginInfoTop" title="ambrosia.plugins.PluginInfoTop"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.plugins.PluginInfoTop</span></tt></a></p>
+<dl class="staticmethod">
+<dt id="ambrosia_plugins.events.PluginInfo.correlators">
+<em class="property">static </em><tt class="descname">correlators</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/events.html#PluginInfo.correlators"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.events.PluginInfo.correlators" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="ambrosia_plugins.events.PluginInfo.parsers">
+<em class="property">static </em><tt class="descname">parsers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/events.html#PluginInfo.parsers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.events.PluginInfo.parsers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ambrosia_plugins.events package</a><ul>
+<li><a class="reference internal" href="#module-ambrosia_plugins.events">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia_plugins.events.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

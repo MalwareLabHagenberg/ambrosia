@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia.plugins package &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ambrosia-plugins-package">
+<h1>ambrosia.plugins package<a class="headerlink" href="#ambrosia-plugins-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ambrosia.plugins">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ambrosia.plugins" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia.plugins.PluginInfoTop">
+<em class="property">class </em><tt class="descclassname">ambrosia.plugins.</tt><tt class="descname">PluginInfoTop</tt><a class="reference internal" href="_modules/ambrosia/plugins.html#PluginInfoTop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.plugins.PluginInfoTop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>The base class to all PluginInfo classes. Every plugin must define a class named <cite>PluginInfo</cite> in the base module
+of the plugin.</p>
+<dl class="staticmethod">
+<dt id="ambrosia.plugins.PluginInfoTop.correlators">
+<em class="property">static </em><tt class="descname">correlators</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/plugins.html#PluginInfoTop.correlators"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.plugins.PluginInfoTop.correlators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should return a list with tuples containing a <a class="reference internal" href="ambrosia.html#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Correlator</span></tt></a> and the priority (int)</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ambrosia.plugins.PluginInfoTop.parsers">
+<em class="property">static </em><tt class="descname">parsers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/plugins.html#PluginInfoTop.parsers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.plugins.PluginInfoTop.parsers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should return a list with all defined <a class="reference internal" href="ambrosia.html#ambrosia.ResultParser" title="ambrosia.ResultParser"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.ResultParser</span></tt></a> classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia.plugins.PluginManager">
+<em class="property">class </em><tt class="descclassname">ambrosia.plugins.</tt><tt class="descname">PluginManager</tt><a class="reference internal" href="_modules/ambrosia/plugins.html#PluginManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.plugins.PluginManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Manages all Ambrosia plugins</p>
+<dl class="method">
+<dt id="ambrosia.plugins.PluginManager.correlators">
+<tt class="descname">correlators</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/plugins.html#PluginManager.correlators"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.plugins.PluginManager.correlators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate all correlators (sorted by priority)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.plugins.PluginManager.find">
+<tt class="descname">find</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/plugins.html#PluginManager.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.plugins.PluginManager.find" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds all plugins and gathers information about them.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.plugins.PluginManager.parsers">
+<tt class="descname">parsers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/plugins.html#PluginManager.parsers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.plugins.PluginManager.parsers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returs a set with all parsers</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ambrosia.plugins package</a><ul>
+<li><a class="reference internal" href="#module-ambrosia.plugins">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia.plugins.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

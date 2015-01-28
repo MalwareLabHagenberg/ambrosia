@@ -10,6 +10,8 @@ from ambrosia.plugins import PluginInfoTop
 from ambrosia_plugins.events import ANANASEvent
 from ambrosia.util import get_logger
 
+__author__ = 'Wolfgang Ettlinger'
+
 
 class PluginInfo(PluginInfoTop):
     @staticmethod
@@ -34,7 +36,7 @@ class AndroidApicall(model.Event):
         assert isinstance(context, AmbrosiaContext)
         self.start_ts = context.clock_syncer.emu_time(self.start_ts)
 
-    def get_properties(self):
+    def get_serializeable_properties(self):
         return {}
 
     def __str__(self):
@@ -83,7 +85,7 @@ class ContactsAccess(model.Event):
     def __init__(self):
         super(ContactsAccess, self).__init__()
 
-    def get_properties(self):
+    def get_serializeable_properties(self):
         return {} # TODO
 
     def __str__(self):
@@ -96,7 +98,7 @@ class SMSAccess(model.Event):
     def __init__(self):
         super(SMSAccess, self).__init__()
 
-    def get_properties(self):
+    def get_serializeable_properties(self):
         return {} # TODO
 
     def __str__(self):
@@ -109,7 +111,7 @@ class CallLogAccess(model.Event):
     def __init__(self):
         super(CallLogAccess, self).__init__()
 
-    def get_properties(self):
+    def get_serializeable_properties(self):
         return {} # TODO
 
     def __str__(self):
@@ -122,7 +124,7 @@ class PhoneCall(model.Event):
     def __init__(self):
         super(PhoneCall, self).__init__()
 
-    def get_properties(self):
+    def get_serializeable_properties(self):
         return {} # TODO
 
     def __str__(self):

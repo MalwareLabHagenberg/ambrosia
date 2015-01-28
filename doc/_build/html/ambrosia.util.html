@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia.util package &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ambrosia-util-package">
+<h1>ambrosia.util package<a class="headerlink" href="#ambrosia-util-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ambrosia.util">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ambrosia.util" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="ambrosia.util.SerializationError">
+<em class="property">exception </em><tt class="descclassname">ambrosia.util.</tt><tt class="descname">SerializationError</tt><a class="reference internal" href="_modules/ambrosia/util.html#SerializationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.util.SerializationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+<p>Indicates that something went wrong during serialization</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ambrosia.util.classname">
+<tt class="descclassname">ambrosia.util.</tt><tt class="descname">classname</tt><big>(</big><em>cls</em><big>)</big><a class="reference internal" href="_modules/ambrosia/util.html#classname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.util.classname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the full class name of a class</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ambrosia.util.get_logger">
+<tt class="descclassname">ambrosia.util.</tt><tt class="descname">get_logger</tt><big>(</big><em>o</em><big>)</big><a class="reference internal" href="_modules/ambrosia/util.html#get_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.util.get_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a logger for a object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>o</strong> (<em>object</em>) &#8211; the <cite>self</cite> reference of a object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ambrosia.util.join_command">
+<tt class="descclassname">ambrosia.util.</tt><tt class="descname">join_command</tt><big>(</big><em>lst</em><big>)</big><a class="reference internal" href="_modules/ambrosia/util.html#join_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.util.join_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a list of arguments (argv) to a command line</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ambrosia.util.js_date">
+<tt class="descclassname">ambrosia.util.</tt><tt class="descname">js_date</tt><big>(</big><em>date</em><big>)</big><a class="reference internal" href="_modules/ambrosia/util.html#js_date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.util.js_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a datetime.datetime to a float timestamp for javascript</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ambrosia.util.obj_classname">
+<tt class="descclassname">ambrosia.util.</tt><tt class="descname">obj_classname</tt><big>(</big><em>o</em><big>)</big><a class="reference internal" href="_modules/ambrosia/util.html#obj_classname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.util.obj_classname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the full class name of an object</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ambrosia.util.serialize_obj">
+<tt class="descclassname">ambrosia.util.</tt><tt class="descname">serialize_obj</tt><big>(</big><em>obj</em><big>)</big><a class="reference internal" href="_modules/ambrosia/util.html#serialize_obj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.util.serialize_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize an object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>obj</strong> (<em>object</em>) &#8211; the object to serialize</td>
+</tr>
+</tbody>
+</table>
+<p>Returns a JSON-string containing the &#8220;hollow&#8221; object and a list with objects. All actual data is striped from the
+object and appended to the objects list.</p>
+<p>For example this function converts the dict:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&#39;test&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;test&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>into the following &#8220;hollow&#8221; object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>and the following objects list:
+.. code-block:: python</p>
+<blockquote>
+<div>[None, &#8216;test&#8217;, 1]</div></blockquote>
+<p>All the data in the &#8220;hollow&#8221; object references data in the objects list. E.g. <cite>1</cite> references &#8216;test&#8217;.</p>
+<p>This type of is used for compression. Since Ambrosia generates a lot of data containing the same string multiple
+times this serialization should reduce the size of the serialized data (since a string only has to be stored once
+in the objects list. E.g. in the example above the string &#8216;test&#8217; is contained two times in the original data but
+only once in the objects list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ambrosia.util.unique_id">
+<tt class="descclassname">ambrosia.util.</tt><tt class="descname">unique_id</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/util.html#unique_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.util.unique_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a uniqe id</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ambrosia.util package</a><ul>
+<li><a class="reference internal" href="#module-ambrosia.util">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia.util.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -2,8 +2,12 @@ import os
 import ambrosia
 from ambrosia.util import get_logger
 
+__author__ = 'Wolfgang Ettlinger'
+
 
 class PluginManager(object):
+    """Manages all Ambrosia plugins
+    """
     def __init__(self):
         self.log = get_logger(self)
         self.plugins = []
@@ -11,6 +15,8 @@ class PluginManager(object):
         self._parsers = set()
 
     def find(self):
+        """Finds all plugins and gathers information about them.
+        """
         pluginspath = os.path.join(
             os.path.dirname(
                 os.path.abspath(__file__)),
@@ -47,6 +53,8 @@ class PluginManager(object):
                 self.log.exception('error importing plugin {}'.format(p))
 
     def correlators(self):
+        """Iterate all correlators (sorted by priority)
+        """
         keys = self._correlators.keys()
         keys.sort()
 
@@ -55,14 +63,24 @@ class PluginManager(object):
                 yield c
 
     def parsers(self):
+        """Returs a set with all parsers
+        """
         return self._parsers
 
 
 class PluginInfoTop(object):
+    """The base class to all PluginInfo classes. Every plugin must define a class named `PluginInfo` in the base module
+    of the plugin.
+    """
+
     @staticmethod
     def correlators():
+        """Should return a list with tuples containing a :class:`ambrosia.Correlator` and the priority (int)
+        """
         return []
 
     @staticmethod
     def parsers():
+        """Should return a list with all defined :class:`ambrosia.ResultParser` classes.
+        """
         return []

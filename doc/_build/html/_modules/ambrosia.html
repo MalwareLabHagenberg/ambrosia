@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for ambrosia</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">import</span> <span class="n">Element</span>
+
+<span class="kn">import</span> <span class="nn">dateutil.parser</span>
+<span class="kn">import</span> <span class="nn">ambrosia.clocks</span>
+<span class="kn">import</span> <span class="nn">ambrosia.db</span>
+<span class="kn">import</span> <span class="nn">ambrosia.config</span>
+<span class="kn">from</span> <span class="nn">ambrosia</span> <span class="kn">import</span> <span class="n">model</span>
+<span class="kn">from</span> <span class="nn">ambrosia.context</span> <span class="kn">import</span> <span class="n">AmbrosiaContext</span>
+<span class="kn">from</span> <span class="nn">ambrosia.util</span> <span class="kn">import</span> <span class="n">js_date</span><span class="p">,</span> <span class="n">get_logger</span><span class="p">,</span> <span class="n">serialize_obj</span><span class="p">,</span> <span class="n">classname</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Wolfgang Ettlinger&#39;</span>
+
+
+<div class="viewcode-block" id="Ambrosia"><a class="viewcode-back" href="../ambrosia.html#ambrosia.Ambrosia">[docs]</a><span class="k">class</span> <span class="nc">Ambrosia</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class is the main class that performs starts all actions</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        root (xml.etree.Element): The document root of the XML report</span>
+<span class="sd">        configfile (str): the config file path</span>
+
+<span class="sd">    Upon object creation the report is being parsed. General information (such as the APK filename) as well as</span>
+<span class="sd">    Plugin-specific values are obtained. Plugin-specific values are parsed using :class:`ResultParser` instances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">configfile</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">Element</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># setup context</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">AmbrosiaContext</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parse_report</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">_parse_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;parsing report&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">Element</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;filename&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">el</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">elif</span> <span class="n">el</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;hashes&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">el</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">hashes</span><span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">elif</span> <span class="n">el</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;package&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="n">el</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">elif</span> <span class="n">el</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;starttime&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">dateutil</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">text</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">el</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;endtime&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="n">dateutil</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">text</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">el</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;plugins&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">el</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;plugin&#39;</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plugins</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">attrib</span>
+            <span class="k">elif</span> <span class="n">el</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;results&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;starting result-parsers&quot;</span><span class="p">)</span>
+                <span class="n">ResultParser</span><span class="o">.</span><span class="n">start_parsers</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Ambrosia.adjust_times"><a class="viewcode-back" href="../ambrosia.html#ambrosia.Ambrosia.adjust_times">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method adjusts the timestamps of all events.</span>
+
+<span class="sd">        Since the emulator clock and the clock of the analysis machine may be different (e.g. when the simulation plugin</span>
+<span class="sd">        turns time ahead) the timestamps of several Events (with timestamps comming from the emulator) have to be</span>
+<span class="sd">        adjusted (to the clock of the analysis machine). See :class:`ambrosia.clocks.ClockSyncer`.</span>
+
+<span class="sd">        This method should be called right after the :class:`ambrosia.Ambrosia` class has been created.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;adjusting times&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">adjust_times</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Ambrosia.correlate"><a class="viewcode-back" href="../ambrosia.html#ambrosia.Ambrosia.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Correlates the events</span>
+
+<span class="sd">        This method finds all Correlaters (see :class:`ambrosia.plugins.PluginManager`) and starts them.</span>
+
+<span class="sd">        A :class:`Correlator` searches for specific events (at top level) and wraps them into other events. E.g. a</span>
+<span class="sd">        open(), read() and close() SyscallEvents are wrapped into a FileEvent. The :class:`Correlator` can also do</span>
+<span class="sd">        several passes (e.g. wrap 3 events of type A into a event B, then wrap several B events and wrap them into a C</span>
+<span class="sd">        event).</span>
+
+<span class="sd">        Should be called after :func:`Ambrosia.adjust_times`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">plugin_manager</span><span class="o">.</span><span class="n">correlators</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;starting correlator: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">classname</span><span class="p">(</span><span class="n">c</span><span class="p">)))</span>
+            <span class="n">sc</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
+            <span class="n">sc</span><span class="o">.</span><span class="n">correlate</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Ambrosia.serialize"><a class="viewcode-back" href="../ambrosia.html#ambrosia.Ambrosia.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Serialize Events into a compact text format (see :func:`ambrosia.util.serialize_obj`).</span>
+
+<span class="sd">        Should be called after :func:`Ambrosia.correlate`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            the serialized string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;serializing&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">serialize_obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">to_serializeable</span><span class="p">())</span>
+
+</div></div>
+<div class="viewcode-block" id="Correlator"><a class="viewcode-back" href="../ambrosia.html#ambrosia.Correlator">[docs]</a><span class="k">class</span> <span class="nc">Correlator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for Correlators.</span>
+
+<span class="sd">    A Correlator is called after all primitive events (like Syscalls, API calls etc.) have been acquired. The Correlator</span>
+<span class="sd">    is responsible to find matching primitive events (or events generated by other Correlators) and wrap them into</span>
+<span class="sd">    higher-level Events.</span>
+
+<span class="sd">    The :class:`ambrosia.plugins.PluginInfoTop` specifies a priority for each Correlator. This allows to force a</span>
+<span class="sd">    specific order in which the Correlators are called (e.g. if a Correlator relies on Events generated by another</span>
+<span class="sd">    Correlator).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Correlator.correlate"><a class="viewcode-back" href="../ambrosia.html#ambrosia.Correlator.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;**Must** be implemented by the specific class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="ResultParser"><a class="viewcode-back" href="../ambrosia.html#ambrosia.ResultParser">[docs]</a><span class="k">class</span> <span class="nc">ResultParser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Allows a plugin to implement parsers for the results in the XML report (Abstract base class).</span>
+
+<span class="sd">    When the *result* section of a report is parsed **all** ResultParsers of all plugins are called for each result</span>
+<span class="sd">    section. Each ResultParser may generate primitive events from the supplied XML Element.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ResultParser.prepare"><a class="viewcode-back" href="../ambrosia.html#ambrosia.ResultParser.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called before any parsing is done by any ResultParser. **May** be overwritten by specific class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (ambrosia.context.AmbrosiaContext): The current context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="ResultParser.parse"><a class="viewcode-back" href="../ambrosia.html#ambrosia.ResultParser.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">el</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The actual parsing routine **must** be implemented by the specific class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the tag (child of the *results* element).</span>
+<span class="sd">            el (xml.etree.Element): The result element to parse.</span>
+<span class="sd">            context (ambrosia.context.AmbrosiaContext): The current context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ResultParser.finish"><a class="viewcode-back" href="../ambrosia.html#ambrosia.ResultParser.finish">[docs]</a>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called after all parsing has been done</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (ambrosia.context.AmbrosiaContext): The current context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+    </div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ResultParser.start_parsers"><a class="viewcode-back" href="../ambrosia.html#ambrosia.ResultParser.start_parsers">[docs]</a>    <span class="k">def</span> <span class="nf">start_parsers</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Starts all ResultParsers registered in the :class:`ambrosia.plugins.PluginManager`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (ambrosia.context.AmbrosiaContext): The current context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
+
+        <span class="n">parsers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="c"># prepare parsers</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">plugin_manager</span><span class="o">.</span><span class="n">parsers</span><span class="p">():</span>
+            <span class="n">pi</span> <span class="o">=</span> <span class="n">p</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pi</span><span class="p">,</span> <span class="n">ResultParser</span><span class="p">)</span>
+            <span class="n">pi</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            <span class="n">parsers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pi</span><span class="p">)</span>
+
+        <span class="c"># actual parsing process</span>
+        <span class="k">for</span> <span class="n">parser</span> <span class="ow">in</span> <span class="n">parsers</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">ResultParser</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">el</span><span class="p">:</span>
+                <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+        <span class="c"># finish</span>
+        <span class="k">for</span> <span class="n">parser</span> <span class="ow">in</span> <span class="n">parsers</span><span class="p">:</span>
+            <span class="n">parser</span><span class="o">.</span><span class="n">finish</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

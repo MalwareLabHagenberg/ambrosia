@@ -4,12 +4,20 @@ from BTrees import OOBTree
 import ambrosia.context
 from ambrosia.model import Entity
 
-__author__ = 'wolfgang'
+__author__ = 'Wolfgang Ettlinger'
 
 
-class Process(Entity):
+class Task(Entity):
+    """Represents a process or thread running on the emulator.
+
+    Args:
+        context (ambrosia.context.AmbrosiaContext): the current context
+        pid (int): the PID/TID of the task
+        start_ts (datetime.datetime): the timestamp the task started or `None` if unknown
+        end_ts (datetime.datetime): the timestamp the task ended or `None` if unknown
+    """
     def __init__(self, context, pid, start_ts, end_ts):
-        super(Process, self).__init__(pid)
+        super(Task, self).__init__(pid)
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
         assert isinstance(start_ts, datetime) or start_ts is None
         assert isinstance(end_ts, datetime) or end_ts is None
@@ -31,7 +39,7 @@ class Process(Entity):
         self.start_ts = start_ts
         self.end_ts = end_ts
 
-    def get_properties(self):
+    def get_serializeable_properties(self):
         return {
             'pid': self.pid,
             'tgid': self.tgid,
@@ -63,7 +71,7 @@ class Process(Entity):
         assert isinstance(start_ts, datetime) or start_ts is None
         assert isinstance(end_ts, datetime) or end_ts is None
 
-        start_ts, end_ts = Process._normalize_times(context, start_ts, end_ts)
+        start_ts, end_ts = Task._normalize_times(context, start_ts, end_ts)
 
         els = identifier_btree.get(pid)
 
@@ -81,11 +89,21 @@ class Process(Entity):
     def __str__(self):
         return '[Process: "{}" ({}) Path: {}]'.format(self.comm, self.pid, self.path)
 
+    @property
     def is_process(self):
+        """whether this task is a process rather than a thread
+        """
         return self == self.tg_leader
 
 
 class File(Entity):
+    """Represents file (existing or not) on the emulator.
+
+    Args:
+        context (ambrosia.context.AmbrosiaContext): the current context
+        abspath (str): the absolute path of the file
+    """
+
     _unknown_file = None
 
     def __init__(self, context, abspath):
@@ -94,7 +112,7 @@ class File(Entity):
         super(File, self).__init__(abspath)
         self.abspath = abspath
 
-    def get_properties(self):
+    def get_serializeable_properties(self):
         return {
             'abspath': self.abspath
         }
@@ -104,6 +122,11 @@ class File(Entity):
 
     @staticmethod
     def unknown(context):
+        """Get the file representing unknonw files
+
+        Args:
+            context (ambrosia.context.AmbrosiaContext): the current context
+        """
         assert isinstance(context, ambrosia.AmbrosiaContext)
 
         File._unknown_file = context.analysis.get_entity(context, File, '<UNKNOWN>')
@@ -128,6 +151,13 @@ class File(Entity):
 
 
 class ServerEndpoint(Entity):
+    """Represents a server endpoint i.e. a server and port.
+
+    Args:
+        context (ambrosia.context.AmbrosiaContext): the current context
+        protocol (str): the network protocol used (e.g. TCP)
+    """
+
     def __init__(self, context, protocol, address, port=None):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
         super(ServerEndpoint, self).__init__(address)
@@ -135,7 +165,7 @@ class ServerEndpoint(Entity):
         self.address = address
         self.port = port
 
-    def get_properties(self):
+    def get_serializeable_properties(self):
         return {
             'protocol': self.protocol,
             'address': self.address,

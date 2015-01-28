@@ -8,11 +8,13 @@ from ambrosia.plugins import PluginInfoTop
 from ambrosia.util import get_logger, join_command
 from ambrosia import model
 from ambrosia.context import AmbrosiaContext
-from ambrosia.model.entities import Process, File
+from ambrosia.model.entities import Task, File
 from ambrosia_plugins.events import ANANASEvent
 from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
     SocketEvent, SocketAccept, MemoryMapEvent, StartTaskEvent, SuperUserRequest, CreateDir, SendSignal, \
     DeleteFileEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent, LibraryLoad
+
+__author__ = 'Wolfgang Ettlinger'
 
 
 class PluginInfo(PluginInfoTop):
@@ -53,7 +55,7 @@ class LkmPluginParser(ambrosia.ResultParser):
                     props['fds'][int(fdel.attrib['number'])] = fdel.attrib['path']
 
                 proc = analysis.get_entity(context,
-                                           Process,
+                                           Task,
                                            int(props['pid']),
                                            start,
                                            end)
@@ -142,13 +144,13 @@ class LkmPluginParser(ambrosia.ResultParser):
 
     def finish(self, context):
         for ananas_id, proc in self.processes.iteritems():
-            assert isinstance(proc, Process)
+            assert isinstance(proc, Task)
 
             if proc.parent_id != -1:
                 proc.parent = self.processes[proc.parent_id]
                 proc.tg_leader = self.processes[proc.tg_leader_id]
 
-                if not proc.is_process():
+                if not proc.is_process:
                     # threads do not heave any files
                     assert len(proc.fds) == 0
                     proc.fds = proc.tg_leader.fds
@@ -159,7 +161,7 @@ class LkmPluginParser(ambrosia.ResultParser):
                         self.log.warn("Process {} does not have any FDs".format(proc))
 
         for ananas_id, proc in self.processes.iteritems():
-            assert proc.tg_leader is None or proc.tg_leader.is_process()
+            assert proc.tg_leader is None or proc.tg_leader.is_process
 
 def _timedelta_diff(td1, td2):
     assert isinstance(td1, datetime.timedelta)
@@ -182,8 +184,8 @@ class SyscallCorrelator(ambrosia.Correlator):
         self._generate_start_fd_directory()
 
     def _generate_start_fd_directory(self):
-        for proc in self.context.analysis.iter_entities(self.context, Process):
-            assert isinstance(proc, Process)
+        for proc in self.context.analysis.iter_entities(self.context, Task):
+            assert isinstance(proc, Task)
 
             if proc.start_captured:
                 # process did not exist on lkm load -> no fd listing available
@@ -219,7 +221,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
     def _get_fd_event(self, evt, fd, proc_fds, process, clazz=None, default_start_ts=None):
         assert isinstance(evt, model.Event)
-        assert isinstance(process, Process)
+        assert isinstance(process, Task)
 
         if fd not in proc_fds:
             fdevt = UnknownFdEvent(process, fd)
@@ -449,7 +451,7 @@ class SyscallCorrelator(ambrosia.Correlator):
         proc = evt.process
         parent_evt = None
 
-        assert isinstance(proc, Process)
+        assert isinstance(proc, Task)
 
         if proc not in self.fd_directory:
             assert proc.start_captured
@@ -457,7 +459,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             if proc.tg_leader in self.fd_directory:
                 # threadgroup is known -> fds are inherited
                 self.fd_directory[proc] = self.fd_directory[proc.tg_leader]
-            elif proc.is_process() and proc.parent in self.fd_directory:
+            elif proc.is_process and proc.parent in self.fd_directory:
                 # its a new process and parent is known -> copy fd table
                 self.fd_directory[proc] = self.fd_directory[proc.parent].copy()
             else:
@@ -584,7 +586,7 @@ class SyscallCorrelator(ambrosia.Correlator):
                                     proc,
                                     self.context.analysis.get_entity(
                                         self.context,
-                                        Process,
+                                        Task,
                                         int(evt.params[0]),
                                         evt.start_ts,
                                         evt.end_ts))

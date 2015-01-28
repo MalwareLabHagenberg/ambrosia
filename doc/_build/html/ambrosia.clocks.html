@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia.clocks package &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ambrosia-clocks-package">
+<h1>ambrosia.clocks package<a class="headerlink" href="#ambrosia-clocks-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ambrosia.clocks">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ambrosia.clocks" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia.clocks.ClockSyncer">
+<em class="property">class </em><tt class="descclassname">ambrosia.clocks.</tt><tt class="descname">ClockSyncer</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia/clocks.html#ClockSyncer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.clocks.ClockSyncer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Used to synchronize all events.</p>
+<p>This class manages the <strong>translate_table</strong>. This Array has the following structure:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span>
+    <span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>where
+* <em>time</em> is a timestamp (datetime.datetime) when the emulator time has changed (in <strong>emulator time</strong>) and
+* <em>error</em> is the datetime.timedelta of how much the emulator time is in the future</p>
+<p>The entries have to be sorted by <em>time</em>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This class assumes that when the emulator is started, the times are synchronized.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>This class assumes that the emulator clock is always turned ahead (and never back). Currently this is the case
+since ANANAS tries to trigger behaviour that occur when the sample has been installed for a while.</p>
+<p class="last">This also poses a theoretical issue e.g. if the emulator time is 17:00 at boot and at 17:02 the clock is turned
+back to 17:00. An event occurring at 17:01 can either have happened at 17:01 or 17:03.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This class assumes that all timestamps have the same time zone (local time).</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; The current context.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="ambrosia.clocks.ClockSyncer.emu_time">
+<tt class="descname">emu_time</tt><big>(</big><em>t</em><big>)</big><a class="reference internal" href="_modules/ambrosia/clocks.html#ClockSyncer.emu_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.clocks.ClockSyncer.emu_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate host time from a given emulator timestamp.</p>
+<p>The method goes through all entries and finds the first entry where the given emulator timestamp is greater than
+the <em>time</em>. This means that the timestamp occurs after this emulator clock change. If no such entry is found,
+the emulator clock is assumed to be in sync with the host clock.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ambrosia.clocks package</a><ul>
+<li><a class="reference internal" href="#module-ambrosia.clocks">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia.clocks.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

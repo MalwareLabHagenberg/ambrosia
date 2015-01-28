@@ -6,6 +6,8 @@ from ambrosia import model
 from ambrosia.context import AmbrosiaContext
 from ambrosia.plugins import PluginInfoTop
 
+__author__ = 'Wolfgang Ettlinger'
+
 
 class PluginInfo(PluginInfoTop):
     @staticmethod
@@ -25,7 +27,7 @@ class ANANASEvent(model.Event):
         self.name = name
         self.params = params
     
-    def get_properties(self):
+    def get_serializeable_properties(self):
         return {'name': self.name,
                 'params': self.params}
 

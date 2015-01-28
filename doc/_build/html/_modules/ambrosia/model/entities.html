@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia.model.entities &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="../../../index.html" />
+    <link rel="up" title="ambrosia.model" href="../model.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../ambrosia.html" >ambrosia</a> &raquo;</li>
+          <li><a href="../model.html" accesskey="U">ambrosia.model</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for ambrosia.model.entities</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">BTrees</span> <span class="kn">import</span> <span class="n">OOBTree</span>
+<span class="kn">import</span> <span class="nn">ambrosia.context</span>
+<span class="kn">from</span> <span class="nn">ambrosia.model</span> <span class="kn">import</span> <span class="n">Entity</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Wolfgang Ettlinger&#39;</span>
+
+
+<div class="viewcode-block" id="Task"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.Task">[docs]</a><span class="k">class</span> <span class="nc">Task</span><span class="p">(</span><span class="n">Entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a process or thread running on the emulator.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">        pid (int): the PID/TID of the task</span>
+<span class="sd">        start_ts (datetime.datetime): the timestamp the task started or `None` if unknown</span>
+<span class="sd">        end_ts (datetime.datetime): the timestamp the task ended or `None` if unknown</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Task</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span> <span class="ow">or</span> <span class="n">start_ts</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span> <span class="ow">or</span> <span class="n">end_ts</span> <span class="ow">is</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tgid</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tg_leader_id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tg_leader</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_captured</span> <span class="o">=</span> <span class="n">start_ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="c"># TODO ugly</span>
+
+        <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_times</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">=</span> <span class="n">start_ts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">=</span> <span class="n">end_ts</span>
+
+<div class="viewcode-block" id="Task.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.Task.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;pid&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span>
+            <span class="s">&#39;tgid&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tgid</span><span class="p">,</span>
+            <span class="s">&#39;tg_leader&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tg_leader</span><span class="p">,</span>
+            <span class="s">&#39;comm&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">,</span>
+            <span class="s">&#39;path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s">&#39;uid&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="s">&#39;parent&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+            <span class="s">&#39;start_captured&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_captured</span>
+        <span class="p">}</span>
+</div>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_normalize_times</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">start_ts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">start_ts</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">start_time</span>
+
+        <span class="k">if</span> <span class="n">end_ts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">end_ts</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">end_time</span>
+
+        <span class="k">return</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Task.find"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.Task.find">[docs]</a>    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">identifier_btree</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier_btree</span><span class="p">,</span> <span class="n">OOBTree</span><span class="o">.</span><span class="n">BTree</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span> <span class="ow">or</span> <span class="n">start_ts</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span> <span class="ow">or</span> <span class="n">end_ts</span> <span class="ow">is</span> <span class="bp">None</span>
+
+        <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span> <span class="o">=</span> <span class="n">Task</span><span class="o">.</span><span class="n">_normalize_times</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">)</span>
+
+        <span class="n">els</span> <span class="o">=</span> <span class="n">identifier_btree</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">els</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">els</span><span class="p">:</span>
+            <span class="c"># the two processes overlap and have the same pid -&gt; match</span>
+            <span class="k">if</span> <span class="n">start_ts</span> <span class="o">&lt;</span> <span class="n">el</span><span class="o">.</span><span class="n">end_ts</span> <span class="ow">and</span> <span class="n">end_ts</span> <span class="o">&gt;</span> <span class="n">el</span><span class="o">.</span><span class="n">start_ts</span><span class="p">:</span>
+                <span class="c"># update actual start/end</span>
+                <span class="n">el</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">)</span>
+                <span class="n">el</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">el</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[Process: &quot;{}&quot; ({}) Path: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Task.is_process"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.Task.is_process">[docs]</a>    <span class="k">def</span> <span class="nf">is_process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;whether this task is a process rather than a thread</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">tg_leader</span>
+
+</div></div>
+<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.File">[docs]</a><span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="n">Entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents file (existing or not) on the emulator.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">        abspath (str): the absolute path of the file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_unknown_file</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">abspath</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span> <span class="ow">or</span> <span class="n">context</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="n">abspath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abspath</span> <span class="o">=</span> <span class="n">abspath</span>
+
+<div class="viewcode-block" id="File.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.File.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;abspath&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">abspath</span>
+        <span class="p">}</span>
+</div>
+<div class="viewcode-block" id="File.matches_entity"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.File.matches_entity">[docs]</a>    <span class="k">def</span> <span class="nf">matches_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">abspath</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">abspath</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="File.unknown"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.File.unknown">[docs]</a>    <span class="k">def</span> <span class="nf">unknown</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the file representing unknonw files</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+
+        <span class="n">File</span><span class="o">.</span><span class="n">_unknown_file</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">get_entity</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">File</span><span class="p">,</span> <span class="s">&#39;&lt;UNKNOWN&gt;&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">File</span><span class="o">.</span><span class="n">_unknown_file</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="File.find"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.File.find">[docs]</a>    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">identifier_btree</span><span class="p">,</span> <span class="n">abspath</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier_btree</span><span class="p">,</span> <span class="n">OOBTree</span><span class="o">.</span><span class="n">BTree</span><span class="p">)</span>
+
+        <span class="n">e</span> <span class="o">=</span> <span class="n">identifier_btree</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">e</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unknown_file</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;[Not identified file]&#39;</span>
+
+        <span class="k">return</span> <span class="s">&#39;[File &quot;{}&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ServerEndpoint"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.ServerEndpoint">[docs]</a><span class="k">class</span> <span class="nc">ServerEndpoint</span><span class="p">(</span><span class="n">Entity</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a server endpoint i.e. a server and port.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">        protocol (str): the network protocol used (e.g. TCP)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ServerEndpoint</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+
+<div class="viewcode-block" id="ServerEndpoint.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.ServerEndpoint.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;protocol&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
+            <span class="s">&#39;address&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
+            <span class="s">&#39;port&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span>
+        <span class="p">}</span>
+</div>
+<div class="viewcode-block" id="ServerEndpoint.find"><a class="viewcode-back" href="../../../ambrosia.model.html#ambrosia.model.entities.ServerEndpoint.find">[docs]</a>    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">identifier_btree</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier_btree</span><span class="p">,</span> <span class="n">OOBTree</span><span class="o">.</span><span class="n">BTree</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">identifier_btree</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">address</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">ServerEndpoint</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">protocol</span> <span class="o">!=</span> <span class="n">protocol</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">port</span> <span class="o">!=</span> <span class="n">port</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">return</span> <span class="n">el</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../ambrosia.html" >ambrosia</a> &raquo;</li>
+          <li><a href="../model.html" >ambrosia.model</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

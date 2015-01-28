@@ -1,7 +1,7 @@
 from ConfigParser import SafeConfigParser
 import os
 
-__author__ = 'wolfgang'
+__author__ = 'Wolfgang Ettlinger'
 
 
 class Config(SafeConfigParser):

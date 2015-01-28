@@ -1,0 +1,603 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia.model &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="../../index.html" />
+    <link rel="up" title="ambrosia" href="../ambrosia.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../ambrosia.html" accesskey="U">ambrosia</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for ambrosia.model</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">from</span> <span class="nn">BTrees</span> <span class="kn">import</span> <span class="n">OOBTree</span>
+<span class="kn">from</span> <span class="nn">persistent</span> <span class="kn">import</span> <span class="n">Persistent</span>
+<span class="kn">from</span> <span class="nn">persistent.list</span> <span class="kn">import</span> <span class="n">PersistentList</span>
+<span class="kn">from</span> <span class="nn">persistent.mapping</span> <span class="kn">import</span> <span class="n">PersistentMapping</span>
+
+<span class="kn">import</span> <span class="nn">ambrosia.context</span>
+<span class="kn">from</span> <span class="nn">ambrosia.util</span> <span class="kn">import</span> <span class="n">js_date</span><span class="p">,</span> <span class="n">obj_classname</span><span class="p">,</span> <span class="n">classname</span><span class="p">,</span> <span class="n">unique_id</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Wolfgang Ettlinger&#39;</span>
+
+
+<div class="viewcode-block" id="Analysis"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis">[docs]</a><span class="k">class</span> <span class="nc">Analysis</span><span class="p">(</span><span class="n">Persistent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An Analysis object (and the referenced objects) stores all information the Ambrosia analysis found out.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">    * filename (str): the name of the APK</span>
+<span class="sd">    * package (str): the package of the APK</span>
+<span class="sd">    * start_time (datetime.datetime): when the ANANAS analysis started</span>
+<span class="sd">    * end_time (datetime.datetime): when the ANANAS analysis ended</span>
+<span class="sd">    * plugins (dict): the plugins (key) and wheter they were active during ANANAS analysis (value, bool)</span>
+<span class="sd">    * hashes (dict): the hashes of the APK in the form {type: hash}</span>
+
+<span class="sd">    Analysis also manages all (top-level) Events and Entities (see :class:`ambrosia.model.Event`,</span>
+<span class="sd">    :class:`ambrosia.model.Entity`) and tries to optimize for searching performance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span> <span class="o">=</span> <span class="n">PersistentMapping</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;contains all entities in the form of (simplified):</span>
+<span class="sd">        {</span>
+<span class="sd">            class_name: (</span>
+<span class="sd">                [entitiy, ...],</span>
+<span class="sd">                Binary tree of all entities (key: primary_identifier)</span>
+<span class="sd">            )</span>
+<span class="sd">        }</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_events</span> <span class="o">=</span> <span class="n">OOBTree</span><span class="o">.</span><span class="n">TreeSet</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;contains all entities</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event_index</span> <span class="o">=</span> <span class="n">PersistentMapping</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;contains indices for events in the form of</span>
+<span class="sd">        {</span>
+<span class="sd">            class_name: {</span>
+<span class="sd">                key: Binary Tree {</span>
+<span class="sd">                        attribute_value: [event, ...]</span>
+<span class="sd">                    }</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plugins</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hashes</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="Analysis.add_entity"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.add_entity">[docs]</a>    <span class="k">def</span> <span class="nf">add_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add an entity (alias for :func:`Analysis.get_entity`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_entity</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Analysis.iter_entities"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.iter_entities">[docs]</a>    <span class="k">def</span> <span class="nf">iter_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;iterate all known entities of a specific class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">            cls (class): the class of the entity we are looking for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">Entity</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">classname</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span><span class="p">[</span><span class="n">classname</span><span class="p">(</span><span class="n">cls</span><span class="p">)][</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">yield</span> <span class="n">entity</span>
+</div>
+<div class="viewcode-block" id="Analysis.get_entity"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.get_entity">[docs]</a>    <span class="k">def</span> <span class="nf">get_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Search for a specific entity, if it does not exist, create a new one</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">            cls (class): the class of the entity we are looking for</span>
+<span class="sd">            *args: the arguments that would construct an entity</span>
+
+<span class="sd">        This method uses :func:`Entity.find` (of the specific entity class) to search for entities. This method</span>
+<span class="sd">        receives a List of all known entitites of that class as well as a :class:`BTrees.OOBTree.BTree` also containing</span>
+<span class="sd">        all entities (indexed by their *primary_identifier* to allow more efficient searching). Moreover this method</span>
+<span class="sd">        relieves the \*args argument.</span>
+
+<span class="sd">        The \*args argument contains all information that identifies a certain entity. This could be e.g. the IP address</span>
+<span class="sd">        and the port of a server. Those values are passed to the find method. If the server is already known, the entity</span>
+<span class="sd">        representing it is returned. If no such server entity exist a new one is created using those two parameters.</span>
+
+<span class="sd">        This behaviour makes sure that multiple event referencing the same entity all have references to the exact same</span>
+<span class="sd">        entity in memory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">Entity</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">classname</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span><span class="p">:</span>
+            <span class="c"># self.entities contains a tuple 1. with all emlements and 2. with an BTree over the primary identifier</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span><span class="p">[</span><span class="n">classname</span><span class="p">(</span><span class="n">cls</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">PersistentList</span><span class="p">(),</span> <span class="n">OOBTree</span><span class="o">.</span><span class="n">BTree</span><span class="p">())</span>
+
+        <span class="n">entity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span><span class="p">[</span><span class="n">classname</span><span class="p">(</span><span class="n">cls</span><span class="p">)]</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">entity</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entity</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">Entity</span><span class="p">)</span>
+            <span class="n">entity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">primary_identifier</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">entity</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">entity</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">res</span><span class="o">.</span><span class="n">primary_identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">PersistentList</span><span class="p">()</span>
+
+            <span class="n">entity</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">res</span><span class="o">.</span><span class="n">primary_identifier</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">res</span>
+</div>
+<div class="viewcode-block" id="Analysis.iter_events"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.iter_events">[docs]</a>    <span class="k">def</span> <span class="nf">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterates over all events matching specific conditions in an efficient manner.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">            cls (class): the class of the events we are looking for</span>
+<span class="sd">            key: the key we are searching for</span>
+<span class="sd">            min_value: the minimum value</span>
+<span class="sd">            max_value: the maximum value</span>
+<span class="sd">            value: the specific value (to search for exactly one value)</span>
+
+<span class="sd">        This method uses an internal indizes to efficiently select specific events. Each event class defines attributes</span>
+<span class="sd">        that should be indexed (:class:`Event`.indices). This class makes sure that those attributes can be searched for</span>
+<span class="sd">        very fast.</span>
+
+<span class="sd">        The method accepts the following combinations of argument:</span>
+<span class="sd">        * nothing: return all events</span>
+<span class="sd">        * *cls*: return all events of a specific class (inefficient)</span>
+<span class="sd">        * *cls*, *key*, *min_value* and/or *max_value*: search for all events of a specific class where the attribute</span>
+<span class="sd">        *key* is within the defined value constraints</span>
+<span class="sd">        * *cls*, *key*, *value*: search all events of a specific class where the attribute *key* has the value *value*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cls</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">is</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># no key -&gt; just get all elements</span>
+            <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">:</span>
+                <span class="c"># if cls is given: filter by class</span>
+                <span class="k">if</span> <span class="n">cls</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">el</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">indices</span><span class="p">,</span> <span class="s">&quot;key is not defined as index&quot;</span>
+
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># set min_value and max_value to value (if value is given)</span>
+                <span class="n">min_value</span><span class="p">,</span> <span class="n">max_value</span> <span class="o">=</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span>
+
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">classname</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+
+            <span class="c"># check if there is an index (there is none if no events of this class is known)</span>
+            <span class="k">if</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index</span><span class="p">[</span><span class="n">class_name</span><span class="p">]:</span>
+
+                <span class="c"># locate the index and use it</span>
+                <span class="k">for</span> <span class="n">val</span><span class="p">,</span> <span class="n">lst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index</span><span class="p">[</span><span class="n">class_name</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">(</span><span class="n">min_value</span><span class="p">,</span> <span class="n">max_value</span><span class="p">):</span>
+
+                    <span class="c"># the value the index refers to is a list since multiple events may have the same value</span>
+                    <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="n">el</span>
+</div>
+    <span class="k">def</span> <span class="nf">_event_index_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Locates the index for a specific event and key (and creates it if it does not exist)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="n">obj_classname</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">class_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_event_index</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">PersistentMapping</span><span class="p">()</span>
+
+        <span class="n">class_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">class_index</span><span class="p">:</span>
+            <span class="n">class_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">OOBTree</span><span class="o">.</span><span class="n">BTree</span><span class="p">()</span>
+
+        <span class="n">key_index</span> <span class="o">=</span> <span class="n">class_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="n">key_val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">key_val</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">key_index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key_val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">PersistentList</span><span class="p">()</span>
+            <span class="n">key_index</span><span class="p">[</span><span class="n">key_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
+
+        <span class="k">return</span> <span class="n">ret</span>
+
+<div class="viewcode-block" id="Analysis.add_event"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.add_event">[docs]</a>    <span class="k">def</span> <span class="nf">add_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add event and generate indices</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            evt (Event): the event to add</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">            The indexed attributes of an event may not be altered after the event has been added (otherwise the indices</span>
+<span class="sd">            are out of date). This means that only static values may be indexed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="s">&#39;indices&#39;</span><span class="p">):</span>
+            <span class="n">idxlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index_list</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idxlist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">idxlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Analysis.del_event"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.del_event">[docs]</a>    <span class="k">def</span> <span class="nf">del_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete event and update indices</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            evt (Event): the event to remove</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="c"># event does not exist, that&#39;s fine too</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="s">&#39;indices&#39;</span><span class="p">):</span>
+            <span class="n">idxlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index_list</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idxlist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">idxlist</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Analysis.to_serializeable"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.to_serializeable">[docs]</a>    <span class="k">def</span> <span class="nf">to_serializeable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns all results in a serializable form</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+            <span class="n">el</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="n">events</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">)</span>
+        <span class="n">events</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="nb">cmp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">cmp_by_time</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="n">entities</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">entity_class</span><span class="p">,</span> <span class="n">class_entities</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">class_entities</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">Entity</span><span class="p">)</span>
+                <span class="n">entities</span><span class="p">[</span><span class="n">entity</span><span class="o">.</span><span class="n">primary_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">get_vals</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;start_time&#39;</span><span class="p">:</span> <span class="n">js_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">),</span>
+            <span class="s">&#39;end_time&#39;</span><span class="p">:</span> <span class="n">js_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_time</span><span class="p">),</span>
+            <span class="s">&#39;filename&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+            <span class="s">&#39;package&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="p">,</span>
+            <span class="s">&#39;events&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">to_serializeable</span><span class="p">()</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">events</span><span class="p">],</span>
+            <span class="s">&#39;entities&#39;</span><span class="p">:</span> <span class="n">entities</span>
+        <span class="p">}</span>
+</div>
+<div class="viewcode-block" id="Analysis.adjust_times"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.adjust_times">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Goes through all events and calls adjust_times on all Events</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">:</span>
+            <span class="n">el</span><span class="o">.</span><span class="n">adjust_times</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="Event"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event">[docs]</a><span class="k">class</span> <span class="nc">Event</span><span class="p">(</span><span class="n">Persistent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Event represents any event with a start-time and/or end-time</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        start_ts (datetime.datetime): the time the event began</span>
+<span class="sd">        end_ts  (datetime.datetime): the time the event ended</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This set contains all attributes that can be searched for; these attributes MUST NOT be CHANGED after the event has</span>
+<span class="sd">       been added</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span> <span class="ow">or</span> <span class="n">start_ts</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span> <span class="ow">or</span> <span class="n">end_ts</span> <span class="ow">is</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_ts</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_ts</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="n">PersistentList</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">start_ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">=</span> <span class="n">start_ts</span>
+
+        <span class="k">if</span> <span class="n">end_ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">=</span> <span class="n">end_ts</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The start timestamp if set else the end timestamp (assuming that start timestamp = end timestamp)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The start timestamp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_ts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_ts</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_ts</span>
+
+    <span class="nd">@start_ts.setter</span>
+<div class="viewcode-block" id="Event.start_ts"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.start_ts">[docs]</a>    <span class="k">def</span> <span class="nf">start_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the start timestamp and updates the timestamps of the parent (the parents start timestamp cannot be</span>
+<span class="sd">        smaller then the child&#39;s)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_ts</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_update_start_ts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_ts</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The end timestamp if set else the start timestamp (assuming that start timestamp = end timestamp)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The end timestamp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_ts</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_ts</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_ts</span>
+
+    <span class="nd">@end_ts.setter</span>
+<div class="viewcode-block" id="Event.end_ts"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.end_ts">[docs]</a>    <span class="k">def</span> <span class="nf">end_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the end timestamp and updates the timestamps of the parent (the parents end timestamp cannot be</span>
+<span class="sd">        greater then the child&#39;s)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_ts</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_update_end_ts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_end_ts</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Event.add_child"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.add_child">[docs]</a>    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add child to this event. Also checks whether new child already has a parent (this is not allowed in a tree</span>
+<span class="sd">        structure) and updates timestamps.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;child already has a parent&#39;</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">start_ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_start_ts</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">end_ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_end_ts</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">end_ts</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">_update_start_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">start_ts</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">=</span> <span class="n">start_ts</span>
+
+    <span class="k">def</span> <span class="nf">_update_end_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_ts</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">end_ts</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_ts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">=</span> <span class="n">end_ts</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Event.children"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.children">[docs]</a>    <span class="k">def</span> <span class="nf">children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterates over all children.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">c</span>
+</div>
+<div class="viewcode-block" id="Event.get_serializeable_properties"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method is used for serialisation, has to be implemented by the subclass. Should return a dict with all</span>
+<span class="sd">        important information about the event.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Event.adjust_times"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.adjust_times">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adjust times (e.g. emulator time -&gt; system time)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">adjust_times</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Event.to_serializeable"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.to_serializeable">[docs]</a>    <span class="k">def</span> <span class="nf">to_serializeable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a dict that can be used for serialization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
+        <span class="n">refs</span><span class="p">,</span> <span class="n">props</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vals</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Entity</span><span class="p">):</span>
+                <span class="n">refs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">primary_key</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">props</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="n">classname</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span>
+                <span class="s">&#39;children&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">to_serializeable</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">],</span>
+                <span class="s">&#39;startTS&#39;</span><span class="p">:</span> <span class="n">js_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span><span class="p">),</span>
+                <span class="s">&#39;endTS&#39;</span><span class="p">:</span> <span class="n">js_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_ts</span><span class="p">),</span>
+                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+                <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="n">props</span><span class="p">,</span>
+                <span class="s">&#39;references&#39;</span><span class="p">:</span> <span class="n">refs</span><span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Event.cmp_by_time"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.cmp_by_time">[docs]</a>    <span class="k">def</span> <span class="nf">cmp_by_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compares two events by start timestamp</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (Event): the other event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Event.sort"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.sort">[docs]</a>    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sort events by start timestamp</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="nb">cmp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">cmp_by_time</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="Entity"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Entity">[docs]</a><span class="k">class</span> <span class="nc">Entity</span><span class="p">(</span><span class="n">Persistent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An Entity represents a static element without a timestamp e.g. a file or a server.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        primary_identifier (str): A identifier that identifies the entity. This does not have to be unique</span>
+<span class="sd">         (e.g. PID).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">primary_identifier</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_primary_identifier</span> <span class="o">=</span> <span class="n">primary_identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">primary_key</span> <span class="o">=</span> <span class="n">unique_id</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;A generated unique key</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Entity.primary_identifier"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Entity.primary_identifier">[docs]</a>    <span class="k">def</span> <span class="nf">primary_identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the primary identifier for the entity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_primary_identifier</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Entity.find"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Entity.find">[docs]</a>    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">identifier_btree</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Should find and return an entity based on the \*args. Must be implemented by subclass.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entities (list): all entities known</span>
+<span class="sd">            identifier_btree (BTrees.OOBTree.BTree): a binary tree where the keys are the primary identifier and the</span>
+<span class="sd">             values are a list containg the matching entity.</span>
+<span class="sd">            *args: the arguments identifying the entity. Must be identical to the constructor parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Entity</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">primary_key</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">primary_key</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Entity.to_serializeable"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Entity.to_serializeable">[docs]</a>    <span class="k">def</span> <span class="nf">to_serializeable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a dict containing all relevant information about the entity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">properties</span><span class="p">,</span> <span class="n">references</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
+
+        <span class="n">props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Entity</span><span class="p">):</span>
+                <span class="n">references</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">primary_key</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">properties</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary_key</span><span class="p">,</span>
+            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="n">classname</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span>
+            <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="n">properties</span><span class="p">,</span>
+            <span class="s">&#39;references&#39;</span><span class="p">:</span> <span class="n">references</span><span class="p">,</span>
+            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="p">}</span>
+</div>
+<div class="viewcode-block" id="Entity.get_serializeable_properties"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Entity.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Should return all information relevant about the specific entity. Must be implemented by subclass.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../ambrosia.html" >ambrosia</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

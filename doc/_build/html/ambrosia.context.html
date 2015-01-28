@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia.context package &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ambrosia-context-package">
+<h1>ambrosia.context package<a class="headerlink" href="#ambrosia-context-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ambrosia.context">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ambrosia.context" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia.context.AmbrosiaContext">
+<em class="property">class </em><tt class="descclassname">ambrosia.context.</tt><tt class="descname">AmbrosiaContext</tt><big>(</big><em>configfile</em><big>)</big><a class="reference internal" href="_modules/ambrosia/context.html#AmbrosiaContext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.context.AmbrosiaContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Objects of this class hold all relevant information for <strong>one</strong> run of Ambrosia:</p>
+<ul class="simple">
+<li><em>config</em> (<a class="reference internal" href="ambrosia.config.html#ambrosia.config.Config" title="ambrosia.config.Config"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.config.Config</span></tt></a>): the configuration</li>
+<li><em>db</em> (<a class="reference internal" href="ambrosia.db.html#ambrosia.db.AmbrosiaDb" title="ambrosia.db.AmbrosiaDb"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.db.AmbrosiaDb</span></tt></a>): the database (currently not used)</li>
+<li><em>analysis</em> (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.Analysis" title="ambrosia.model.Analysis"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Analysis</span></tt></a>): the object containing the Analysis results.</li>
+<li><em>clock_syncer</em> (<a class="reference internal" href="ambrosia.clocks.html#ambrosia.clocks.ClockSyncer" title="ambrosia.clocks.ClockSyncer"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.clocks.ClockSyncer</span></tt></a>): used to syncronize clocks (emulator &lt;-&gt; host)</li>
+<li><em>plugin_manager</em> (<a class="reference internal" href="ambrosia.plugins.html#ambrosia.plugins.PluginManager" title="ambrosia.plugins.PluginManager"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.plugins.PluginManager</span></tt></a>): the object holding information about the Ambrosia
+plugins</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>configfile</strong> (<em>str</em>) &#8211; path to configuration file</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ambrosia.context package</a><ul>
+<li><a class="reference internal" href="#module-ambrosia.context">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia.context.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

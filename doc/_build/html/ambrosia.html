@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia package &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="ambrosia-package">
+<h1>ambrosia package<a class="headerlink" href="#ambrosia-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ambrosia.clocks.html">ambrosia.clocks package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ambrosia.clocks.html#module-ambrosia.clocks">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ambrosia.config.html">ambrosia.config package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ambrosia.config.html#module-ambrosia.config">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ambrosia.context.html">ambrosia.context package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ambrosia.context.html#module-ambrosia.context">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ambrosia.db.html">ambrosia.db package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ambrosia.db.html#module-ambrosia.db">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ambrosia.model.html">ambrosia.model package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ambrosia.model.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ambrosia.model.html#module-ambrosia.model.entities">ambrosia.model.entities module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ambrosia.model.html#module-ambrosia.model">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ambrosia.plugins.html">ambrosia.plugins package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ambrosia.plugins.html#module-ambrosia.plugins">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ambrosia.util.html">ambrosia.util package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ambrosia.util.html#module-ambrosia.util">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="module-ambrosia">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ambrosia" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia.Ambrosia">
+<em class="property">class </em><tt class="descclassname">ambrosia.</tt><tt class="descname">Ambrosia</tt><big>(</big><em>root</em>, <em>configfile</em><big>)</big><a class="reference internal" href="_modules/ambrosia.html#Ambrosia"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Ambrosia" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>This class is the main class that performs starts all actions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>root</strong> (<em>xml.etree.Element</em>) &#8211; The document root of the XML report</li>
+<li><strong>configfile</strong> (<em>str</em>) &#8211; the config file path</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Upon object creation the report is being parsed. General information (such as the APK filename) as well as
+Plugin-specific values are obtained. Plugin-specific values are parsed using <a class="reference internal" href="#ambrosia.ResultParser" title="ambrosia.ResultParser"><tt class="xref py py-class docutils literal"><span class="pre">ResultParser</span></tt></a> instances.</p>
+<dl class="method">
+<dt id="ambrosia.Ambrosia.adjust_times">
+<tt class="descname">adjust_times</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia.html#Ambrosia.adjust_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Ambrosia.adjust_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method adjusts the timestamps of all events.</p>
+<p>Since the emulator clock and the clock of the analysis machine may be different (e.g. when the simulation plugin
+turns time ahead) the timestamps of several Events (with timestamps comming from the emulator) have to be
+adjusted (to the clock of the analysis machine). See <a class="reference internal" href="ambrosia.clocks.html#ambrosia.clocks.ClockSyncer" title="ambrosia.clocks.ClockSyncer"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.clocks.ClockSyncer</span></tt></a>.</p>
+<p>This method should be called right after the <a class="reference internal" href="#ambrosia.Ambrosia" title="ambrosia.Ambrosia"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Ambrosia</span></tt></a> class has been created.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.Ambrosia.correlate">
+<tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia.html#Ambrosia.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Ambrosia.correlate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Correlates the events</p>
+<p>This method finds all Correlaters (see <a class="reference internal" href="ambrosia.plugins.html#ambrosia.plugins.PluginManager" title="ambrosia.plugins.PluginManager"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.plugins.PluginManager</span></tt></a>) and starts them.</p>
+<p>A <a class="reference internal" href="#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">Correlator</span></tt></a> searches for specific events (at top level) and wraps them into other events. E.g. a
+open(), read() and close() SyscallEvents are wrapped into a FileEvent. The <a class="reference internal" href="#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">Correlator</span></tt></a> can also do
+several passes (e.g. wrap 3 events of type A into a event B, then wrap several B events and wrap them into a C
+event).</p>
+<p>Should be called after <a class="reference internal" href="#ambrosia.Ambrosia.adjust_times" title="ambrosia.Ambrosia.adjust_times"><tt class="xref py py-func docutils literal"><span class="pre">Ambrosia.adjust_times()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.Ambrosia.serialize">
+<tt class="descname">serialize</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia.html#Ambrosia.serialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Ambrosia.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize Events into a compact text format (see <a class="reference internal" href="ambrosia.util.html#ambrosia.util.serialize_obj" title="ambrosia.util.serialize_obj"><tt class="xref py py-func docutils literal"><span class="pre">ambrosia.util.serialize_obj()</span></tt></a>).</p>
+<p>Should be called after <a class="reference internal" href="#ambrosia.Ambrosia.correlate" title="ambrosia.Ambrosia.correlate"><tt class="xref py py-func docutils literal"><span class="pre">Ambrosia.correlate()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the serialized string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia.Correlator">
+<em class="property">class </em><tt class="descclassname">ambrosia.</tt><tt class="descname">Correlator</tt><a class="reference internal" href="_modules/ambrosia.html#Correlator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Correlator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Base class for Correlators.</p>
+<p>A Correlator is called after all primitive events (like Syscalls, API calls etc.) have been acquired. The Correlator
+is responsible to find matching primitive events (or events generated by other Correlators) and wrap them into
+higher-level Events.</p>
+<p>The <a class="reference internal" href="ambrosia.plugins.html#ambrosia.plugins.PluginInfoTop" title="ambrosia.plugins.PluginInfoTop"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.plugins.PluginInfoTop</span></tt></a> specifies a priority for each Correlator. This allows to force a
+specific order in which the Correlators are called (e.g. if a Correlator relies on Events generated by another
+Correlator).</p>
+<dl class="method">
+<dt id="ambrosia.Correlator.correlate">
+<tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia.html#Correlator.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Correlator.correlate" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Must</strong> be implemented by the specific class.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia.ResultParser">
+<em class="property">class </em><tt class="descclassname">ambrosia.</tt><tt class="descname">ResultParser</tt><a class="reference internal" href="_modules/ambrosia.html#ResultParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.ResultParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Allows a plugin to implement parsers for the results in the XML report (Abstract base class).</p>
+<p>When the <em>result</em> section of a report is parsed <strong>all</strong> ResultParsers of all plugins are called for each result
+section. Each ResultParser may generate primitive events from the supplied XML Element.</p>
+<dl class="method">
+<dt id="ambrosia.ResultParser.finish">
+<tt class="descname">finish</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia.html#ResultParser.finish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.ResultParser.finish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called after all parsing has been done</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; The current context.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.ResultParser.parse">
+<tt class="descname">parse</tt><big>(</big><em>name</em>, <em>el</em>, <em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia.html#ResultParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.ResultParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>The actual parsing routine <strong>must</strong> be implemented by the specific class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; The name of the tag (child of the <em>results</em> element).</li>
+<li><strong>el</strong> (<em>xml.etree.Element</em>) &#8211; The result element to parse.</li>
+<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; The current context.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.ResultParser.prepare">
+<tt class="descname">prepare</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia.html#ResultParser.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.ResultParser.prepare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called before any parsing is done by any ResultParser. <strong>May</strong> be overwritten by specific class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; The current context.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ambrosia.ResultParser.start_parsers">
+<em class="property">static </em><tt class="descname">start_parsers</tt><big>(</big><em>el</em>, <em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia.html#ResultParser.start_parsers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.ResultParser.start_parsers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts all ResultParsers registered in the <a class="reference internal" href="ambrosia.plugins.html#ambrosia.plugins.PluginManager" title="ambrosia.plugins.PluginManager"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.plugins.PluginManager</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; The current context.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ambrosia package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#module-ambrosia">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
