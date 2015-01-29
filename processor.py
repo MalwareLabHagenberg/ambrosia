@@ -12,10 +12,11 @@ sys.path.append(".")
 import ambrosia
 
 
-def _print_tree(t, i=''):
-    print str(t.start_ts)+i+str(t)
+def _print_tree(output, t, i=''):
+    output.write(i + str(t) + '\n')
+
     for c in t.children:
-        _print_tree(c, i+' ')
+        _print_tree(output, c, i+' ')
 
 
 def main():
@@ -46,7 +47,7 @@ def main():
         args.output.write(runner.serialize())
     elif args.output_type == 'tree':
         for e in runner.context.analysis.iter_events(runner.context):
-            _print_tree(e)
+            _print_tree(args.output, e)
     elif args.output_type == 'interactive':
         code.interact(local=locals())
 

@@ -29,14 +29,15 @@ class AmbrosiaFormater(logging.Formatter):
             return s
 
     def format(self, record):
-        self._fmt = (self._color("4;30", "%(asctime)s") +
-                     ":" +
-                     self._color("1;36", "%(name)s") + " " +
-                     self._color("33", "(%(filename)s:%(lineno)d)") +
-                     ":" +
-                     self._color(self.color_mapping[record.levelname], "%(levelname)s") +
+        self._fmt = (self._color("1;30", "%(asctime)s") +
                      ": " +
-                     self._color("1;30", "%(message)s"))
+                     self._color(self.color_mapping[record.levelname], "%(levelname)s") +
+                     " " +
+                     self._color("1;30", "%(message)s") +
+                     " (" +
+                     self._color("4;30", "%(name)s") +
+                     self._color("30", ":%(lineno)d") +
+                     ")")
 
         return super(AmbrosiaFormater, self).format(record)
 
@@ -50,8 +51,12 @@ def init_logging(log_level):
     main_logger = logging.getLogger("ambrosia")
     main_logger.setLevel(log_level)
 
+    plugin_logger = logging.getLogger("ambrosia_plugins")
+    plugin_logger.setLevel(log_level)
+
     formatter = AmbrosiaFormater(sys.stderr.isatty())
 
     ch = logging.StreamHandler(sys.stderr)
     ch.setFormatter(formatter)
     main_logger.addHandler(ch)
+    plugin_logger.addHandler(ch)

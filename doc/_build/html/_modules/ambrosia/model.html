@@ -306,7 +306,7 @@
         <span class="k">for</span> <span class="n">entity_class</span><span class="p">,</span> <span class="n">class_entities</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entities</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">class_entities</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="n">Entity</span><span class="p">)</span>
-                <span class="n">entities</span><span class="p">[</span><span class="n">entity</span><span class="o">.</span><span class="n">primary_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">get_vals</span><span class="p">()</span>
+                <span class="n">entities</span><span class="p">[</span><span class="n">entity</span><span class="o">.</span><span class="n">primary_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">to_serializeable</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="s">&#39;start_time&#39;</span><span class="p">:</span> <span class="n">js_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">),</span>

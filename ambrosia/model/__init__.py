@@ -256,7 +256,7 @@ class Analysis(Persistent):
         for entity_class, class_entities in self._entities.iteritems():
             for entity in class_entities[0]:
                 assert isinstance(entity, Entity)
-                entities[entity.primary_key] = entity.get_vals()
+                entities[entity.primary_key] = entity.to_serializeable()
 
         return {
             'start_time': js_date(self.start_time),
