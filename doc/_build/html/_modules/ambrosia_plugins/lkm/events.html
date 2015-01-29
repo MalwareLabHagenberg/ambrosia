@@ -57,6 +57,8 @@
 
 
 <div class="viewcode-block" id="SyscallEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SyscallEvent">[docs]</a><span class="k">class</span> <span class="nc">SyscallEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a system call from lkm</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">monotonic_ts</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">spawned_child</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -115,6 +117,8 @@
 
 </div>
 <div class="viewcode-block" id="CommandExecuteEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.CommandExecuteEvent">[docs]</a><span class="k">class</span> <span class="nc">CommandExecuteEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents the execution of a command (including fork, exec, library loads, etc.)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
@@ -136,6 +140,8 @@
 
 </div>
 <div class="viewcode-block" id="FileDescriptorEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.FileDescriptorEvent">[docs]</a><span class="k">class</span> <span class="nc">FileDescriptorEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The base event for all file descriptor related events</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
@@ -151,10 +157,12 @@
         <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;[File Descriptor Event]&#39;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
 </div>
 <div class="viewcode-block" id="UnknownFdEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.UnknownFdEvent">[docs]</a><span class="k">class</span> <span class="nc">UnknownFdEvent</span><span class="p">(</span><span class="n">FileDescriptorEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a fd event where no syscall opening the fd has been found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">fd_number</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">UnknownFdEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fd_number</span> <span class="o">=</span> <span class="n">fd_number</span>
@@ -173,6 +181,8 @@
 
 </div>
 <div class="viewcode-block" id="FileEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.FileEvent">[docs]</a><span class="k">class</span> <span class="nc">FileEvent</span><span class="p">(</span><span class="n">FileDescriptorEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a normal file operation on a file, directory or pipe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">FileDescriptorEvent</span><span class="o">.</span><span class="n">indices</span> <span class="o">|</span> <span class="p">{</span><span class="s">&#39;abspath&#39;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_entity</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
@@ -198,6 +208,8 @@
 
 </div>
 <div class="viewcode-block" id="AnonymousFileEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.AnonymousFileEvent">[docs]</a><span class="k">class</span> <span class="nc">AnonymousFileEvent</span><span class="p">(</span><span class="n">FileEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents an operation that happens on a file without a name (e.g. an unnamed pipe)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">FileDescriptorEvent</span><span class="o">.</span><span class="n">indices</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">successful</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
@@ -210,6 +222,8 @@
 
 </div>
 <div class="viewcode-block" id="SocketEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SocketEvent">[docs]</a><span class="k">class</span> <span class="nc">SocketEvent</span><span class="p">(</span><span class="n">FileDescriptorEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents an operation on a socket</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">FileDescriptorEvent</span><span class="o">.</span><span class="n">indices</span> <span class="o">|</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
@@ -219,9 +233,17 @@
         <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SocketEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">props</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[Socket Event]&#39;</span>
 
-</div></div>
+</div>
 <div class="viewcode-block" id="SocketAccept"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SocketAccept">[docs]</a><span class="k">class</span> <span class="nc">SocketAccept</span><span class="p">(</span><span class="n">FileDescriptorEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a successful accept() on a socket</span>
+
+<span class="sd">    This event&#39;s parent normally is a :class:`ambrosia_plugins.lkm.events.SocketEvent` and it is a</span>
+<span class="sd">    :class:`ambrosia_plugins.lkm.events.FileDescriptorEvent` and therefore itself is a file descriptor operation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">FileDescriptorEvent</span><span class="o">.</span><span class="n">indices</span> <span class="o">|</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
@@ -237,6 +259,8 @@
 
 </div>
 <div class="viewcode-block" id="MemoryMapEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.MemoryMapEvent">[docs]</a><span class="k">class</span> <span class="nc">MemoryMapEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a call to mmap(). It&#39;s parent normally is a :class:`ambrosia_plugins.lkm.events.FileDescriptorEvent`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process_entity&#39;</span><span class="p">}</span>
 
     <span class="n">mmap_flags</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;MAP_SHARED&#39;</span><span class="p">:</span> <span class="mh">0x1</span><span class="p">,</span>
@@ -255,7 +279,7 @@
                   <span class="s">&#39;MAP_UNINITIALIZED&#39;</span><span class="p">:</span> <span class="mh">0x4000000</span><span class="p">,</span>
                   <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">successful</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process_entity</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MemoryMapEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span> <span class="o">=</span> <span class="n">process_entity</span>
@@ -263,7 +287,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flags_val</span> <span class="o">=</span> <span class="n">flags</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">successful</span> <span class="o">=</span> <span class="n">successful</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successful</span> <span class="o">=</span> <span class="n">return_value</span> <span class="o">!=</span> <span class="mi">4294967295</span>  <span class="c"># this is -1 (signed) written in unsigned, called MAP_FAILED</span>
         <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">MemoryMapEvent</span><span class="o">.</span><span class="n">mmap_flags</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -300,6 +324,8 @@
 
 </div>
 <div class="viewcode-block" id="StartTaskEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.StartTaskEvent">[docs]</a><span class="k">class</span> <span class="nc">StartTaskEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a fork()-like syscall</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">child_pid</span><span class="p">,</span> <span class="n">spawned_child</span><span class="p">):</span>
@@ -324,6 +350,8 @@
 
 </div>
 <div class="viewcode-block" id="SuperUserRequest"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SuperUserRequest">[docs]</a><span class="k">class</span> <span class="nc">SuperUserRequest</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Indicates that the process tried to run &quot;su&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">):</span>
@@ -341,6 +369,8 @@
 
 </div>
 <div class="viewcode-block" id="CreateDir"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.CreateDir">[docs]</a><span class="k">class</span> <span class="nc">CreateDir</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents an mkdir() syscall</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">file_entity</span><span class="p">):</span>
@@ -361,6 +391,8 @@
 
 </div>
 <div class="viewcode-block" id="SendSignal"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SendSignal">[docs]</a><span class="k">class</span> <span class="nc">SendSignal</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a kill() syscall</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">target_process</span><span class="p">):</span>
@@ -383,6 +415,8 @@
 
 </div>
 <div class="viewcode-block" id="DeleteFileEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.DeleteFileEvent">[docs]</a><span class="k">class</span> <span class="nc">DeleteFileEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents an unlink() syscall</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">successful</span><span class="p">,</span> <span class="n">file_entity</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
@@ -404,6 +438,8 @@
 
 </div>
 <div class="viewcode-block" id="ExecEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ExecEvent">[docs]</a><span class="k">class</span> <span class="nc">ExecEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents an execve() syscall</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process_entity&#39;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">):</span>
@@ -426,6 +462,8 @@
 
 </div>
 <div class="viewcode-block" id="ANANASAdbShellExec"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ANANASAdbShellExec">[docs]</a><span class="k">class</span> <span class="nc">ANANASAdbShellExec</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents a command that has been executed by ANANAS</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -439,6 +477,8 @@
 
 </div>
 <div class="viewcode-block" id="LibraryLoad"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.LibraryLoad">[docs]</a><span class="k">class</span> <span class="nc">LibraryLoad</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents mmap() operations on a library file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>

@@ -55,6 +55,7 @@
 <dt id="ambrosia_plugins.lkm.events.ANANASAdbShellExec">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">ANANASAdbShellExec</tt><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#ANANASAdbShellExec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.ANANASAdbShellExec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents a command that has been executed by ANANAS</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.ANANASAdbShellExec.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#ANANASAdbShellExec.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.ANANASAdbShellExec.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -71,6 +72,7 @@
 <dt id="ambrosia_plugins.lkm.events.AnonymousFileEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">AnonymousFileEvent</tt><big>(</big><em>description</em>, <em>process</em>, <em>context</em>, <em>successful=True</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#AnonymousFileEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.AnonymousFileEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileEvent" title="ambrosia_plugins.lkm.events.FileEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileEvent</span></tt></a></p>
+<p>Represents an operation that happens on a file without a name (e.g. an unnamed pipe)</p>
 <dl class="attribute">
 <dt id="ambrosia_plugins.lkm.events.AnonymousFileEvent.indices">
 <tt class="descname">indices</tt><em class="property"> = set(['process'])</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.AnonymousFileEvent.indices" title="Permalink to this definition">¶</a></dt>
@@ -82,6 +84,7 @@
 <dt id="ambrosia_plugins.lkm.events.CommandExecuteEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">CommandExecuteEvent</tt><big>(</big><em>path</em>, <em>command</em>, <em>process</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#CommandExecuteEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.CommandExecuteEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents the execution of a command (including fork, exec, library loads, etc.)</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.CommandExecuteEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#CommandExecuteEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.CommandExecuteEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -98,6 +101,7 @@
 <dt id="ambrosia_plugins.lkm.events.CreateDir">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">CreateDir</tt><big>(</big><em>start_ts</em>, <em>end_ts</em>, <em>process_entity</em>, <em>file_entity</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#CreateDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.CreateDir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents an mkdir() syscall</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.CreateDir.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#CreateDir.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.CreateDir.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -114,6 +118,7 @@
 <dt id="ambrosia_plugins.lkm.events.DeleteFileEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">DeleteFileEvent</tt><big>(</big><em>start_ts</em>, <em>end_ts</em>, <em>successful</em>, <em>file_entity</em>, <em>process</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#DeleteFileEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.DeleteFileEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents an unlink() syscall</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.DeleteFileEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#DeleteFileEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.DeleteFileEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -130,6 +135,7 @@
 <dt id="ambrosia_plugins.lkm.events.ExecEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">ExecEvent</tt><big>(</big><em>start_ts</em>, <em>end_ts</em>, <em>path</em>, <em>argv</em>, <em>env</em>, <em>process_entity</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#ExecEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.ExecEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents an execve() syscall</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.ExecEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#ExecEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.ExecEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -146,6 +152,7 @@
 <dt id="ambrosia_plugins.lkm.events.FileDescriptorEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">FileDescriptorEvent</tt><big>(</big><em>process</em>, <em>successful</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#FileDescriptorEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>The base event for all file descriptor related events</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.FileDescriptorEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#FileDescriptorEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -162,6 +169,7 @@
 <dt id="ambrosia_plugins.lkm.events.FileEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">FileEvent</tt><big>(</big><em>file_entity</em>, <em>mode</em>, <em>process</em>, <em>successful</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#FileEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="ambrosia_plugins.lkm.events.FileDescriptorEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileDescriptorEvent</span></tt></a></p>
+<p>Represents a normal file operation on a file, directory or pipe</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.FileEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#FileEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -178,6 +186,7 @@
 <dt id="ambrosia_plugins.lkm.events.LibraryLoad">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">LibraryLoad</tt><big>(</big><em>file</em>, <em>process</em>, <em>successful</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#LibraryLoad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.LibraryLoad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents mmap() operations on a library file</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.LibraryLoad.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#LibraryLoad.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.LibraryLoad.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -192,8 +201,9 @@
 
 <dl class="class">
 <dt id="ambrosia_plugins.lkm.events.MemoryMapEvent">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">MemoryMapEvent</tt><big>(</big><em>flags</em>, <em>fd</em>, <em>address</em>, <em>process_entity</em>, <em>successful</em>, <em>start_ts</em>, <em>end_ts</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#MemoryMapEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.MemoryMapEvent" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">MemoryMapEvent</tt><big>(</big><em>flags</em>, <em>fd</em>, <em>address</em>, <em>process_entity</em>, <em>return_value</em>, <em>start_ts</em>, <em>end_ts</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#MemoryMapEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.MemoryMapEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents a call to mmap(). It&#8217;s parent normally is a <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="ambrosia_plugins.lkm.events.FileDescriptorEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileDescriptorEvent</span></tt></a></p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.MemoryMapEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#MemoryMapEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.MemoryMapEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -215,6 +225,7 @@
 <dt id="ambrosia_plugins.lkm.events.SendSignal">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">SendSignal</tt><big>(</big><em>start_ts</em>, <em>end_ts</em>, <em>number</em>, <em>process_entity</em>, <em>target_process</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SendSignal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SendSignal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents a kill() syscall</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.SendSignal.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SendSignal.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SendSignal.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -231,6 +242,9 @@
 <dt id="ambrosia_plugins.lkm.events.SocketAccept">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">SocketAccept</tt><big>(</big><em>process</em>, <em>successful</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SocketAccept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SocketAccept" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="ambrosia_plugins.lkm.events.FileDescriptorEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileDescriptorEvent</span></tt></a></p>
+<p>Represents a successful accept() on a socket</p>
+<p>This event&#8217;s parent normally is a <a class="reference internal" href="#ambrosia_plugins.lkm.events.SocketEvent" title="ambrosia_plugins.lkm.events.SocketEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.SocketEvent</span></tt></a> and it is a
+<a class="reference internal" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="ambrosia_plugins.lkm.events.FileDescriptorEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileDescriptorEvent</span></tt></a> and therefore itself is a file descriptor operation.</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.SocketAccept.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SocketAccept.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SocketAccept.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -247,6 +261,7 @@
 <dt id="ambrosia_plugins.lkm.events.SocketEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">SocketEvent</tt><big>(</big><em>process</em>, <em>successful</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SocketEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SocketEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="ambrosia_plugins.lkm.events.FileDescriptorEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileDescriptorEvent</span></tt></a></p>
+<p>Represents an operation on a socket</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.SocketEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SocketEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SocketEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -263,6 +278,7 @@
 <dt id="ambrosia_plugins.lkm.events.StartTaskEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">StartTaskEvent</tt><big>(</big><em>start_ts</em>, <em>end_ts</em>, <em>process_entity</em>, <em>child_pid</em>, <em>spawned_child</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#StartTaskEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.StartTaskEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents a fork()-like syscall</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.StartTaskEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#StartTaskEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.StartTaskEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -279,6 +295,7 @@
 <dt id="ambrosia_plugins.lkm.events.SuperUserRequest">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">SuperUserRequest</tt><big>(</big><em>start_ts</em>, <em>end_ts</em>, <em>process_entity</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SuperUserRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SuperUserRequest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Indicates that the process tried to run &#8220;su&#8221;</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.SuperUserRequest.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SuperUserRequest.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SuperUserRequest.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -295,6 +312,7 @@
 <dt id="ambrosia_plugins.lkm.events.SyscallEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">SyscallEvent</tt><big>(</big><em>context</em>, <em>props</em>, <em>time</em>, <em>monotonic_ts</em>, <em>process_entity</em>, <em>spawned_child=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SyscallEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SyscallEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents a system call from lkm</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.SyscallEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SyscallEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SyscallEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -311,6 +329,7 @@
 <dt id="ambrosia_plugins.lkm.events.UnknownFdEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">UnknownFdEvent</tt><big>(</big><em>process</em>, <em>fd_number</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#UnknownFdEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.UnknownFdEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="ambrosia_plugins.lkm.events.FileDescriptorEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileDescriptorEvent</span></tt></a></p>
+<p>Represents a fd event where no syscall opening the fd has been found.</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.UnknownFdEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#UnknownFdEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.UnknownFdEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -322,18 +341,115 @@
 <div class="section" id="module-ambrosia_plugins.lkm">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ambrosia_plugins.lkm" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
+<dt id="ambrosia_plugins.lkm.AdbCommandCorrelator">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">AdbCommandCorrelator</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#AdbCommandCorrelator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.AdbCommandCorrelator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ambrosia.html#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Correlator</span></tt></a></p>
+<p>Find command executions that happen because of ANANAS (through ADB)</p>
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.AdbCommandCorrelator.correlate">
+<tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#AdbCommandCorrelator.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.AdbCommandCorrelator.correlate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia_plugins.lkm.CommandExecuteCorrelator">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">CommandExecuteCorrelator</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#CommandExecuteCorrelator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.CommandExecuteCorrelator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ambrosia.html#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Correlator</span></tt></a></p>
+<p>Finds events that form the execution of a command.</p>
+<ul>
+<li><p class="first"><a class="reference internal" href="#ambrosia_plugins.lkm.events.StartTaskEvent" title="ambrosia_plugins.lkm.events.StartTaskEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.StartTaskEvent</span></tt></a>: indicate the creation of a new process</p>
+</li>
+<li><p class="first"><a class="reference internal" href="#ambrosia_plugins.lkm.events.ExecEvent" title="ambrosia_plugins.lkm.events.ExecEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.ExecEvent</span></tt></a>: commands are started using a fork-and-exec</p>
+</li>
+<li><dl class="first docutils">
+<dt><a class="reference internal" href="#ambrosia_plugins.lkm.events.LibraryLoad" title="ambrosia_plugins.lkm.events.LibraryLoad"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.LibraryLoad</span></tt></a>: shortly after a fork indicates that a library is loaded that</dt>
+<dd><p class="first last">is essential to run the command.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><a class="reference internal" href="#ambrosia_plugins.lkm.events.FileEvent" title="ambrosia_plugins.lkm.events.FileEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileEvent</span></tt></a>: several file events happen at the begin of a command execution</p>
+</li>
+</ul>
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.CommandExecuteCorrelator.correlate">
+<tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#CommandExecuteCorrelator.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.CommandExecuteCorrelator.correlate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia_plugins.lkm.FileEventCorrelator">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">FileEventCorrelator</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#FileEventCorrelator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.FileEventCorrelator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ambrosia.html#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Correlator</span></tt></a></p>
+<p>Finds library load events (mmap to *.so files)</p>
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.FileEventCorrelator.correlate">
+<tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#FileEventCorrelator.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.FileEventCorrelator.correlate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ambrosia_plugins.lkm.LkmPluginParser">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">LkmPluginParser</tt><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#LkmPluginParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.LkmPluginParser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.html#ambrosia.ResultParser" title="ambrosia.ResultParser"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.ResultParser</span></tt></a></p>
+<p>Parses the <em>process</em> and <em>syscalltrace</em> elements of the result set.</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.LkmPluginParser.finish">
 <tt class="descname">finish</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#LkmPluginParser.finish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.LkmPluginParser.finish" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Calculate additional information for each process.</p>
+<p>This method is executed after all processes have been parsed. This allows to reliably reference other processes
+(E.g. when the first process is being parsed no other proccess is known, therefore no other process can be
+referenced). The method sets the tg_leader and the parent. Moreover, it copies the reference to <em>fds</em> from the
+parent for all threads (in linux a thread <em>normally</em> shares FDs with its thread group leader).</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.LkmPluginParser.parse">
 <tt class="descname">parse</tt><big>(</big><em>name</em>, <em>el</em>, <em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#LkmPluginParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.LkmPluginParser.parse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Does the acutual parsing.</p>
+<ul>
+<li><p class="first"><em>process</em> elment: All processes reported by the LKM/ANANAS are parsed and
+<tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.entities.Process</span></tt> entities are created. Moreover, the attributes
+* <em>ananas_id</em> (id in the ANANAS db)
+* <em>parent_id</em> (the ANANAS db id of the parent task)
+* <em>comm</em> (description of the process in thekernel)
+* <em>path</em> (of the executable)
+* <em>type</em> (the type of the task ANANAS figured out)
+* <em>fds</em> (a dict of all file descriptors and the path during LKM load)
+* <em>tdgid</em> (the PID of the task group leader)
+* <em>tg_leader_id</em> (The ANANAS db id of the thread group leader)</p>
+</li>
+<li><p class="first"><em>syscalltrace</em> element: A <a class="reference internal" href="#ambrosia_plugins.lkm.events.SyscallEvent" title="ambrosia_plugins.lkm.events.SyscallEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.SyscallEvent</span></tt></a> event is create for each syscall
+using all the information ANANAS provides. Moreover the <a class="reference internal" href="ambrosia.clocks.html#ambrosia.clocks.ClockSyncer" title="ambrosia.clocks.ClockSyncer"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.clocks.ClockSyncer</span></tt></a>.translate_table
+attribute is filled. ANANAS records two timestamps for each syscall. There is a <em>normal</em> timestamp (which is
+the system time when the syscall returned) and the <em>monotonic</em> timestamp (which is the time that passed since
+the system booted). When the system clock is not changed, the <em>monotonic</em> and the <em>normal</em> clock are in sync
+(e.g. if 10 seconds pass on one clock 10 seconds pass on the other clock). Therefore the <em>normal</em> clock is
+ahead of the <em>monotonic</em> clock (a constant offset = the time the emulator booted). By calculating the
+<em>normal</em> clock minus the <em>monotonic</em> clock we always get this offset. When this offset changes, the system
+clock has been altered.</p>
+<dl class="docutils">
+<dt>This algorithm is implemented using the following variables:</dt>
+<dd><ul class="first last simple">
+<li>boot_time: the actual time the emulator is booted (calculated <em>normal</em> - <em>monotonic</em> time on the first
+syscall = when emulator time and host time are still in sync)</li>
+<li>error: how much the expected offset (boot_time) is off from the acutal offset (<em>normal</em> - <em>monotonic</em>).
+This is also the error of the emulator clock (compared to the host clock)</li>
+<li>adjtime: the adjusted time (the captured <em>normal</em> time - error).</li>
+<li>lasterror: the error of the last syscall. If the error of two consecutive syscall changes, we know that
+the system clock has been altered (and we need to make an entry in
+<a class="reference internal" href="ambrosia.clocks.html#ambrosia.clocks.ClockSyncer" title="ambrosia.clocks.ClockSyncer"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.clocks.ClockSyncer</span></tt></a>.translate_table). The comparison sees two errors that are at a maximum
+of 1 second apart as a clock change. This is because the error is not absolutely precise (the <em>monotonic</em>
+and <em>normal</em> timestamps are not captured at exactly the same time, even a context switch may happen in
+between).</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd></dl>
 
 </dd></dl>
 
@@ -357,12 +473,119 @@
 <dt id="ambrosia_plugins.lkm.SyscallCorrelator">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">SyscallCorrelator</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.html#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Correlator</span></tt></a></p>
+<p>Wraps primitive events into higher-level events</p>
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.SyscallCorrelator._check_syscall">
+<tt class="descname">_check_syscall</tt><big>(</big><em>evt</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator._check_syscall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator._check_syscall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps a single syscall event into a higher-level event</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>evt</strong> (<a class="reference internal" href="#ambrosia_plugins.lkm.events.SyscallEvent" title="ambrosia_plugins.lkm.events.SyscallEvent"><em>ambrosia_plugins.lkm.events.SyscallEvent</em></a>) &#8211; the syscall event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.SyscallCorrelator._generate_start_fd_directory">
+<tt class="descname">_generate_start_fd_directory</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator._generate_start_fd_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator._generate_start_fd_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates the initial fd directory.</p>
+<p>Before the correlation is started the fd directory is filed with file descriptor events of processes that
+existed before the LKM was loaded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.SyscallCorrelator._get_del_fd_event">
+<tt class="descname">_get_del_fd_event</tt><big>(</big><em>fd</em>, <em>process</em>, <em>success</em>, <em>clazz=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator._get_del_fd_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator._get_del_fd_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets an fd event from the fd directory and deletes it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fd</strong> (<em>int</em>) &#8211; the file descriptor number we are searching for</li>
+<li><strong>process</strong> (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.entities.Task" title="ambrosia.model.entities.Task"><em>ambrosia.model.entities.Task</em></a>) &#8211; the task the fd belongs to</li>
+<li><strong>clazz</strong> (<em>class</em>) &#8211; (optional) only return an event of this type</li>
+<li><strong>process</strong> &#8211; the task the fd belongs to</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.SyscallCorrelator._get_dup">
+<tt class="descname">_get_dup</tt><big>(</big><em>evt</em>, <em>oldfd</em>, <em>newfd</em>, <em>process</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator._get_dup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator._get_dup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duplicate an fd (dup and dup2 syscalls)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>evt</strong> (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><em>ambrosia.model.Event</em></a>) &#8211; the dup syscall event</li>
+<li><strong>oldfd</strong> (<em>int</em>) &#8211; the old file descriptor number</li>
+<li><strong>newfd</strong> (<em>int</em>) &#8211; the new file descriptor number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.SyscallCorrelator._get_fd_event">
+<tt class="descname">_get_fd_event</tt><big>(</big><em>fd</em>, <em>process</em>, <em>success</em>, <em>clazz=None</em>, <em>default_start_ts=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator._get_fd_event"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator._get_fd_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an fd event from the a fd directory entry.</p>
+<p>The fd directory (<cite>fd_directory</cite>) is a dict in the form of</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="n">pid</span><span class="p">:</span> <span class="p">{</span>
+        <span class="n">fd_number</span><span class="p">:</span> <span class="n">fd_event</span><span class="p">,</span>
+        <span class="o">...</span>
+    <span class="p">},</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The fd directory represents all file descriptors of the emulator <strong>at a specific point in time</strong>. This means
+that the fd directory is constantly changed as syscalls are being processed (e.g. open() creates an entry, close
+removes an entry).</p>
+<p>If (for some reason) the fd is not found, this method returns an
+<a class="reference internal" href="#ambrosia_plugins.lkm.events.UnknownFdEvent" title="ambrosia_plugins.lkm.events.UnknownFdEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.UnknownFdEvent</span></tt></a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">One value of the fd dictionary dict may be stored under multiple pid keys since tasks (especially threads)
+may share file descriptors.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fd</strong> (<em>int</em>) &#8211; the file descriptor number we are searching for</li>
+<li><strong>process</strong> (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.entities.Task" title="ambrosia.model.entities.Task"><em>ambrosia.model.entities.Task</em></a>) &#8211; the task the fd belongs to</li>
+<li><strong>clazz</strong> (<em>class</em>) &#8211; (optional) only return an event of this type</li>
+<li><strong>default_start_ts</strong> (<em>datetime.datetime</em>) &#8211; if this fd is unknown, return an event with this start timestamp</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.SyscallCorrelator.correlate">
 <tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator.correlate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
+
+<dl class="function">
+<dt id="ambrosia_plugins.lkm._timedelta_diff">
+<tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">_timedelta_diff</tt><big>(</big><em>td1</em>, <em>td2</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#_timedelta_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm._timedelta_diff" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 </div>

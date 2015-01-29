@@ -7,6 +7,8 @@ __author__ = 'Wolfgang Ettlinger'
 
 
 class SyscallEvent(model.Event):
+    """Represents a system call from lkm
+    """
     indices = {'name'}
 
     def __init__(self, context, props, time, monotonic_ts, process_entity, spawned_child=None):
@@ -65,6 +67,8 @@ class SyscallEvent(model.Event):
 
 
 class CommandExecuteEvent(model.Event):
+    """Represents the execution of a command (including fork, exec, library loads, etc.)
+    """
     indices = {'process'}
 
     def __init__(self, path, command, process):
@@ -86,6 +90,8 @@ class CommandExecuteEvent(model.Event):
 
 
 class FileDescriptorEvent(model.Event):
+    """The base event for all file descriptor related events
+    """
     indices = {'process'}
 
     def __init__(self, process, successful):
@@ -101,10 +107,12 @@ class FileDescriptorEvent(model.Event):
         }
 
     def __str__(self):
-        return '[File Descriptor Event]'
+        raise NotImplementedError()
 
 
 class UnknownFdEvent(FileDescriptorEvent):
+    """Represents a fd event where no syscall opening the fd has been found.
+    """
     def __init__(self, process, fd_number):
         super(UnknownFdEvent, self).__init__(process, True)
         self.fd_number = fd_number
@@ -123,6 +131,8 @@ class UnknownFdEvent(FileDescriptorEvent):
 
 
 class FileEvent(FileDescriptorEvent):
+    """Represents a normal file operation on a file, directory or pipe
+    """
     indices = FileDescriptorEvent.indices | {'abspath'}
 
     def __init__(self, file_entity, mode, process, successful):
@@ -148,6 +158,8 @@ class FileEvent(FileDescriptorEvent):
 
 
 class AnonymousFileEvent(FileEvent):
+    """Represents an operation that happens on a file without a name (e.g. an unnamed pipe)
+    """
     indices = FileDescriptorEvent.indices
 
     def __init__(self, description, process, context, successful=True):
@@ -160,6 +172,8 @@ class AnonymousFileEvent(FileEvent):
 
 
 class SocketEvent(FileDescriptorEvent):
+    """Represents an operation on a socket
+    """
     indices = FileDescriptorEvent.indices | set()
 
     def __init__(self, process, successful):
@@ -170,8 +184,16 @@ class SocketEvent(FileDescriptorEvent):
 
         return props
 
+    def __str__(self):
+        return '[Socket Event]'
+
 
 class SocketAccept(FileDescriptorEvent):
+    """Represents a successful accept() on a socket
+
+    This event's parent normally is a :class:`ambrosia_plugins.lkm.events.SocketEvent` and it is a
+    :class:`ambrosia_plugins.lkm.events.FileDescriptorEvent` and therefore itself is a file descriptor operation.
+    """
     indices = FileDescriptorEvent.indices | set()
 
     def __init__(self, process, successful):
@@ -187,6 +209,8 @@ class SocketAccept(FileDescriptorEvent):
 
 
 class MemoryMapEvent(model.Event):
+    """Represents a call to mmap(). It's parent normally is a :class:`ambrosia_plugins.lkm.events.FileDescriptorEvent`
+    """
     indices = {'process_entity'}
 
     mmap_flags = {'MAP_SHARED': 0x1,
@@ -205,7 +229,7 @@ class MemoryMapEvent(model.Event):
                   'MAP_UNINITIALIZED': 0x4000000,
                   }
 
-    def __init__(self, flags, fd, address, process_entity, successful, start_ts, end_ts):
+    def __init__(self, flags, fd, address, process_entity, return_value, start_ts, end_ts):
         assert isinstance(process_entity, Task)
         super(MemoryMapEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
         self.process_entity = process_entity
@@ -213,7 +237,7 @@ class MemoryMapEvent(model.Event):
         self.address = address
         self.flags_val = flags
         self.flags = set()
-        self.successful = successful
+        self.successful = return_value != 4294967295  # this is -1 (signed) written in unsigned, called MAP_FAILED
         for f, v in MemoryMapEvent.mmap_flags.iteritems():
             if (v & flags) != 0:
                 self.flags.add(f)
@@ -250,6 +274,8 @@ class MemoryMapEvent(model.Event):
 
 
 class StartTaskEvent(model.Event):
+    """Represents a fork()-like syscall
+    """
     indices = set()
 
     def __init__(self, start_ts, end_ts, process_entity, child_pid, spawned_child):
@@ -274,6 +300,8 @@ class StartTaskEvent(model.Event):
 
 
 class SuperUserRequest(model.Event):
+    """Indicates that the process tried to run "su"
+    """
     indices = set()
 
     def __init__(self, start_ts, end_ts, process_entity):
@@ -291,6 +319,8 @@ class SuperUserRequest(model.Event):
 
 
 class CreateDir(model.Event):
+    """Represents an mkdir() syscall
+    """
     indices = set()
 
     def __init__(self, start_ts, end_ts, process_entity, file_entity):
@@ -311,6 +341,8 @@ class CreateDir(model.Event):
 
 
 class SendSignal(model.Event):
+    """Represents a kill() syscall
+    """
     indices = set()
 
     def __init__(self, start_ts, end_ts, number, process_entity, target_process):
@@ -333,6 +365,8 @@ class SendSignal(model.Event):
 
 
 class DeleteFileEvent(model.Event):
+    """Represents an unlink() syscall
+    """
     indices = set()
 
     def __init__(self, start_ts, end_ts, successful, file_entity, process):
@@ -354,6 +388,8 @@ class DeleteFileEvent(model.Event):
 
 
 class ExecEvent(model.Event):
+    """Represents an execve() syscall
+    """
     indices = {'process_entity'}
 
     def __init__(self, start_ts, end_ts, path, argv, env, process_entity):
@@ -376,6 +412,8 @@ class ExecEvent(model.Event):
 
 
 class ANANASAdbShellExec(model.Event):
+    """Represents a command that has been executed by ANANAS
+    """
     indices = set()
 
     def __init__(self):
@@ -389,6 +427,8 @@ class ANANASAdbShellExec(model.Event):
 
 
 class LibraryLoad(model.Event):
+    """Represents mmap() operations on a library file
+    """
     indices = {'process'}
 
     def __init__(self, file, process, successful):

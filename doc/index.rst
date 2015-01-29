@@ -1,4 +1,7 @@
-Ambrosia Code Documentation
-***************************
+Ambrosia Documentation
+**********************
 
+.. toctree::
 
+    ambrosia
+    processor

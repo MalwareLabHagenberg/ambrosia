@@ -145,7 +145,7 @@ event).</p>
 
 <dl class="class">
 <dt id="ambrosia.Correlator">
-<em class="property">class </em><tt class="descclassname">ambrosia.</tt><tt class="descname">Correlator</tt><a class="reference internal" href="_modules/ambrosia.html#Correlator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Correlator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">ambrosia.</tt><tt class="descname">Correlator</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia.html#Correlator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Correlator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Base class for Correlators.</p>
 <p>A Correlator is called after all primitive events (like Syscalls, API calls etc.) have been acquired. The Correlator
@@ -158,6 +158,16 @@ Correlator).</p>
 <dt id="ambrosia.Correlator.correlate">
 <tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia.html#Correlator.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Correlator.correlate" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Must</strong> be implemented by the specific class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.Correlator.update_tree">
+<tt class="descname">update_tree</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia.html#Correlator.update_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.Correlator.update_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method may be used by subclasses to update the result event tree.</p>
+<p>If the subclass uses the <tt class="xref py py-func docutils literal"><span class="pre">ambrosia.model.Event.iter_events()</span></tt> in a loop it may not add or remove events from
+the event tree. Otherwise events may be skipped or processed twice. Therefore the subclass may use the <cite>to_add</cite>
+and <cite>to_remove</cite> attributes to store events that should be added and removed from the top level of the event
+tree. Afterwards this method can be used to process the pending adds/removes.</p>
 </dd></dl>
 
 </dd></dl>

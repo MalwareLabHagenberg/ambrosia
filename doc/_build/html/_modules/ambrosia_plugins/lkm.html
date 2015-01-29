@@ -55,7 +55,7 @@
 <span class="kn">import</span> <span class="nn">ambrosia</span>
 <span class="kn">from</span> <span class="nn">ambrosia.plugins</span> <span class="kn">import</span> <span class="n">PluginInfoTop</span>
 <span class="kn">from</span> <span class="nn">ambrosia.util</span> <span class="kn">import</span> <span class="n">get_logger</span><span class="p">,</span> <span class="n">join_command</span>
-<span class="kn">from</span> <span class="nn">ambrosia</span> <span class="kn">import</span> <span class="n">model</span>
+<span class="kn">from</span> <span class="nn">ambrosia</span> <span class="kn">import</span> <span class="n">model</span><span class="p">,</span> <span class="n">Correlator</span>
 <span class="kn">from</span> <span class="nn">ambrosia.context</span> <span class="kn">import</span> <span class="n">AmbrosiaContext</span>
 <span class="kn">from</span> <span class="nn">ambrosia.model.entities</span> <span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">File</span>
 <span class="kn">from</span> <span class="nn">ambrosia_plugins.events</span> <span class="kn">import</span> <span class="n">ANANASEvent</span>
@@ -69,19 +69,63 @@
 <div class="viewcode-block" id="PluginInfo"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.PluginInfo">[docs]</a><span class="k">class</span> <span class="nc">PluginInfo</span><span class="p">(</span><span class="n">PluginInfoTop</span><span class="p">):</span>
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="PluginInfo.correlators"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.PluginInfo.correlators">[docs]</a>    <span class="k">def</span> <span class="nf">correlators</span><span class="p">():</span>
-        <span class="k">return</span> <span class="p">[(</span><span class="n">SyscallCorrelator</span><span class="p">,</span> <span class="mi">10</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">SyscallCorrelator</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>  <span class="c"># basic correlation</span>
+            <span class="p">(</span><span class="n">FileEventCorrelator</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>  <span class="c"># classifies file events</span>
+            <span class="p">(</span><span class="n">CommandExecuteCorrelator</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>  <span class="c"># finds command executions</span>
+            <span class="p">(</span><span class="n">AdbCommandCorrelator</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>  <span class="c"># correlates command executions with adb commands</span>
+        <span class="p">]</span>
 </div>
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="PluginInfo.parsers"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.PluginInfo.parsers">[docs]</a>    <span class="k">def</span> <span class="nf">parsers</span><span class="p">():</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">LkmPluginParser</span><span class="p">]</span>
+
 </div></div>
 <div class="viewcode-block" id="LkmPluginParser"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.LkmPluginParser">[docs]</a><span class="k">class</span> <span class="nc">LkmPluginParser</span><span class="p">(</span><span class="n">ambrosia</span><span class="o">.</span><span class="n">ResultParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parses the *process* and *syscalltrace* elements of the result set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LkmPluginParser</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">processes</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="LkmPluginParser.parse"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.LkmPluginParser.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">el</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Does the acutual parsing.</span>
+
+<span class="sd">        * *process* elment: All processes reported by the LKM/ANANAS are parsed and</span>
+<span class="sd">          :class:`ambrosia.model.entities.Process` entities are created. Moreover, the attributes</span>
+<span class="sd">          * *ananas_id* (id in the ANANAS db)</span>
+<span class="sd">          * *parent_id* (the ANANAS db id of the parent task)</span>
+<span class="sd">          * *comm* (description of the process in thekernel)</span>
+<span class="sd">          * *path* (of the executable)</span>
+<span class="sd">          * *type* (the type of the task ANANAS figured out)</span>
+<span class="sd">          * *fds* (a dict of all file descriptors and the path during LKM load)</span>
+<span class="sd">          * *tdgid* (the PID of the task group leader)</span>
+<span class="sd">          * *tg_leader_id* (The ANANAS db id of the thread group leader)</span>
+<span class="sd">        * *syscalltrace* element: A :class:`ambrosia_plugins.lkm.events.SyscallEvent` event is create for each syscall</span>
+<span class="sd">          using all the information ANANAS provides. Moreover the :class:`ambrosia.clocks.ClockSyncer`.translate_table</span>
+<span class="sd">          attribute is filled. ANANAS records two timestamps for each syscall. There is a *normal* timestamp (which is</span>
+<span class="sd">          the system time when the syscall returned) and the *monotonic* timestamp (which is the time that passed since</span>
+<span class="sd">          the system booted). When the system clock is not changed, the *monotonic* and the *normal* clock are in sync</span>
+<span class="sd">          (e.g. if 10 seconds pass on one clock 10 seconds pass on the other clock). Therefore the *normal* clock is</span>
+<span class="sd">          ahead of the *monotonic* clock (a constant offset = the time the emulator booted). By calculating the</span>
+<span class="sd">          *normal* clock minus the *monotonic* clock we always get this offset. When this offset changes, the system</span>
+<span class="sd">          clock has been altered.</span>
+
+<span class="sd">          This algorithm is implemented using the following variables:</span>
+<span class="sd">           * boot_time: the actual time the emulator is booted (calculated *normal* - *monotonic* time on the first</span>
+<span class="sd">             syscall = when emulator time and host time are still in sync)</span>
+<span class="sd">           * error: how much the expected offset (boot_time) is off from the acutal offset (*normal* - *monotonic*).</span>
+<span class="sd">             This is also the error of the emulator clock (compared to the host clock)</span>
+<span class="sd">           * adjtime: the adjusted time (the captured *normal* time - error).</span>
+<span class="sd">           * lasterror: the error of the last syscall. If the error of two consecutive syscall changes, we know that</span>
+<span class="sd">             the system clock has been altered (and we need to make an entry in</span>
+<span class="sd">             :class:`ambrosia.clocks.ClockSyncer`.translate_table). The comparison sees two errors that are at a maximum</span>
+<span class="sd">             of 1 second apart as a clock change. This is because the error is not absolutely precise (the *monotonic*</span>
+<span class="sd">             and *normal* timestamps are not captured at exactly the same time, even a context switch may happen in</span>
+<span class="sd">             between).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
         <span class="n">analysis</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">analysis</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;processes&#39;</span><span class="p">:</span>
@@ -170,6 +214,7 @@
 
                 <span class="n">mt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;monotonic_time&#39;</span><span class="p">])</span>
 
+                <span class="c"># calculate boot_time on first syscall</span>
                 <span class="k">if</span> <span class="n">boot_time</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                     <span class="n">boot_time</span> <span class="o">=</span> <span class="n">time</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">mt</span><span class="p">)</span>
 
@@ -192,6 +237,13 @@
                 <span class="n">analysis</span><span class="o">.</span><span class="n">add_event</span><span class="p">(</span><span class="n">syscall_event</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="LkmPluginParser.finish"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.LkmPluginParser.finish">[docs]</a>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate additional information for each process.</span>
+
+<span class="sd">        This method is executed after all processes have been parsed. This allows to reliably reference other processes</span>
+<span class="sd">        (E.g. when the first process is being parsed no other proccess is known, therefore no other process can be</span>
+<span class="sd">        referenced). The method sets the tg_leader and the parent. Moreover, it copies the reference to *fds* from the</span>
+<span class="sd">        parent for all threads (in linux a thread *normally* shares FDs with its thread group leader).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">ananas_id</span><span class="p">,</span> <span class="n">proc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processes</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proc</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
 
@@ -211,8 +263,9 @@
 
         <span class="k">for</span> <span class="n">ananas_id</span><span class="p">,</span> <span class="n">proc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processes</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
             <span class="k">assert</span> <span class="n">proc</span><span class="o">.</span><span class="n">tg_leader</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">proc</span><span class="o">.</span><span class="n">tg_leader</span><span class="o">.</span><span class="n">is_process</span>
+
 </div></div>
-<span class="k">def</span> <span class="nf">_timedelta_diff</span><span class="p">(</span><span class="n">td1</span><span class="p">,</span> <span class="n">td2</span><span class="p">):</span>
+<div class="viewcode-block" id="_timedelta_diff"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm._timedelta_diff">[docs]</a><span class="k">def</span> <span class="nf">_timedelta_diff</span><span class="p">(</span><span class="n">td1</span><span class="p">,</span> <span class="n">td2</span><span class="p">):</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">td1</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">)</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">td2</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">)</span>
 
@@ -221,18 +274,22 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">td1</span> <span class="o">-</span> <span class="n">td2</span>
 
-
+</div>
 <div class="viewcode-block" id="SyscallCorrelator"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.SyscallCorrelator">[docs]</a><span class="k">class</span> <span class="nc">SyscallCorrelator</span><span class="p">(</span><span class="n">ambrosia</span><span class="o">.</span><span class="n">Correlator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wraps primitive events into higher-level events</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SyscallCorrelator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fd_directory</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_generate_start_fd_directory</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_generate_start_fd_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SyscallCorrelator._generate_start_fd_directory"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.SyscallCorrelator._generate_start_fd_directory">[docs]</a>    <span class="k">def</span> <span class="nf">_generate_start_fd_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates the initial fd directory.</span>
+
+<span class="sd">        Before the correlation is started the fd directory is filed with file descriptor events of processes that</span>
+<span class="sd">        existed before the LKM was loaded.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">proc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_entities</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">Task</span><span class="p">):</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proc</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
 
@@ -266,13 +323,48 @@
                 <span class="n">fds</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_event</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">fd_directory</span><span class="p">[</span><span class="n">proc</span><span class="p">]</span> <span class="o">=</span> <span class="n">fds</span>
+</div>
+<div class="viewcode-block" id="SyscallCorrelator._get_fd_event"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.SyscallCorrelator._get_fd_event">[docs]</a>    <span class="k">def</span> <span class="nf">_get_fd_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">clazz</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">default_start_ts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get an fd event from the a fd directory entry.</span>
 
+<span class="sd">        The fd directory (`fd_directory`) is a dict in the form of</span>
 
-    <span class="k">def</span> <span class="nf">_get_fd_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">clazz</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">default_start_ts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            {</span>
+<span class="sd">                pid: {</span>
+<span class="sd">                    fd_number: fd_event,</span>
+<span class="sd">                    ...</span>
+<span class="sd">                },</span>
+<span class="sd">                ...</span>
+<span class="sd">            }</span>
+
+<span class="sd">        The fd directory represents all file descriptors of the emulator **at a specific point in time**. This means</span>
+<span class="sd">        that the fd directory is constantly changed as syscalls are being processed (e.g. open() creates an entry, close</span>
+<span class="sd">        removes an entry).</span>
+
+<span class="sd">        If (for some reason) the fd is not found, this method returns an</span>
+<span class="sd">        :class:`ambrosia_plugins.lkm.events.UnknownFdEvent`.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            One value of the fd dictionary dict may be stored under multiple pid keys since tasks (especially threads)</span>
+<span class="sd">            may share file descriptors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fd (int): the file descriptor number we are searching for</span>
+<span class="sd">            process (ambrosia.model.entities.Task): the task the fd belongs to</span>
+<span class="sd">            clazz (class): (optional) only return an event of this type</span>
+<span class="sd">            default_start_ts (datetime.datetime): if this fd is unknown, return an event with this start timestamp</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
 
+        <span class="n">proc_fds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fd_directory</span><span class="p">[</span><span class="n">process</span><span class="p">]</span>
+
         <span class="k">if</span> <span class="n">fd</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">proc_fds</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;operation on unknown fd, process {}, fd&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">fd</span><span class="p">))</span>
+
             <span class="n">fdevt</span> <span class="o">=</span> <span class="n">UnknownFdEvent</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">fd</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">default_start_ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">fdevt</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">=</span> <span class="n">default_start_ts</span>
@@ -286,10 +378,18 @@
                 <span class="k">return</span>
 
         <span class="k">return</span> <span class="n">res</span>
+</div>
+<div class="viewcode-block" id="SyscallCorrelator._get_del_fd_event"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.SyscallCorrelator._get_del_fd_event">[docs]</a>    <span class="k">def</span> <span class="nf">_get_del_fd_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">clazz</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets an fd event from the fd directory and deletes it.</span>
 
-    <span class="k">def</span> <span class="nf">_get_del_fd_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">,</span> <span class="n">clazz</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span>
-        <span class="n">evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
+<span class="sd">        Args:</span>
+<span class="sd">            fd (int): the file descriptor number we are searching for</span>
+<span class="sd">            process (ambrosia.model.entities.Task): the task the fd belongs to</span>
+<span class="sd">            clazz (class): (optional) only return an event of this type</span>
+<span class="sd">            process (ambrosia.model.entities.Task): the task the fd belongs to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">proc_fds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fd_directory</span><span class="p">[</span><span class="n">process</span><span class="p">]</span>
+        <span class="n">evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">evt</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span>
@@ -297,204 +397,50 @@
         <span class="k">del</span> <span class="n">proc_fds</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">evt</span>
+</div>
+<div class="viewcode-block" id="SyscallCorrelator._get_dup"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.SyscallCorrelator._get_dup">[docs]</a>    <span class="k">def</span> <span class="nf">_get_dup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">oldfd</span><span class="p">,</span> <span class="n">newfd</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Duplicate an fd (dup and dup2 syscalls)</span>
 
-    <span class="k">def</span> <span class="nf">_get_dup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">oldfd</span><span class="p">,</span> <span class="n">newfd</span><span class="p">,</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">):</span>
+<span class="sd">        Args:</span>
+<span class="sd">            evt (ambrosia.model.Event): the dup syscall event</span>
+<span class="sd">            oldfd (int): the old file descriptor number</span>
+<span class="sd">            newfd (int): the new file descriptor number</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span>
 
+        <span class="n">proc_fds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fd_directory</span><span class="p">[</span><span class="n">process</span><span class="p">]</span>
+
+        <span class="n">success</span> <span class="o">=</span> <span class="n">evt</span><span class="o">.</span><span class="n">returnval</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+
         <span class="k">if</span> <span class="n">oldfd</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">proc_fds</span><span class="p">:</span>
-            <span class="n">fdevt</span> <span class="o">=</span> <span class="n">UnknownFdEvent</span><span class="p">(</span><span class="n">proc</span><span class="p">,</span> <span class="n">oldfd</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;dup on an unknown fd, process {}, fd&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">oldfd</span><span class="p">))</span>
+
+            <span class="n">fdevt</span> <span class="o">=</span> <span class="n">UnknownFdEvent</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">oldfd</span><span class="p">)</span>
             <span class="n">proc_fds</span><span class="p">[</span><span class="n">oldfd</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdevt</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fdevt</span><span class="p">)</span>
 
         <span class="n">fevt</span> <span class="o">=</span> <span class="n">proc_fds</span><span class="p">[</span><span class="n">oldfd</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">evt</span><span class="o">.</span><span class="n">returnval</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
             <span class="n">proc_fds</span><span class="p">[</span><span class="n">newfd</span><span class="p">]</span> <span class="o">=</span> <span class="n">fevt</span>
 
         <span class="k">return</span> <span class="n">fevt</span>
-
-    <span class="k">def</span> <span class="nf">_update_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Updating Event tree&#39;</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">del_event</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">evt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">add_event</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-
+</div>
 <div class="viewcode-block" id="SyscallCorrelator.correlate"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.SyscallCorrelator.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Generating events from syscalls&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">SyscallEvent</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_check_syscall</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_update_tree</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_classify_file_events</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_update_tree</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_find_execs</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_update_tree</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_correlate_adb_cmds</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_update_tree</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_tree</span><span class="p">()</span>
 </div>
-    <span class="k">def</span> <span class="nf">_classify_file_events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">fe</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">FileEvent</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;^/vendor/lib/.+\.so&#39;</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span> <span class="ow">or</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;^/system/lib/.+\.so&#39;</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span><span class="p">):</span>
+<div class="viewcode-block" id="SyscallCorrelator._check_syscall"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.SyscallCorrelator._check_syscall">[docs]</a>    <span class="k">def</span> <span class="nf">_check_syscall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Wraps a single syscall event into a higher-level event</span>
 
-                <span class="n">lle</span> <span class="o">=</span> <span class="bp">None</span>
-
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">fe</span><span class="o">.</span><span class="n">successful</span><span class="p">:</span>
-                    <span class="c"># failed library load</span>
-                    <span class="n">lle</span> <span class="o">=</span> <span class="n">LibraryLoad</span><span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">process</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="n">lle</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">fe</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">MemoryMapEvent</span><span class="p">):</span>
-                            <span class="n">lle</span> <span class="o">=</span> <span class="n">LibraryLoad</span><span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">process</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
-                            <span class="k">break</span>
-
-                <span class="k">if</span> <span class="n">lle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">lle</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lle</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>
-
-
-    <span class="k">def</span> <span class="nf">_correlate_adb_cmds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Correlating ADB commands with command executions&#39;</span><span class="p">)</span>
-
-        <span class="n">found_matches</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">for</span> <span class="n">cmd_evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">CommandExecuteEvent</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">[</span><span class="s">&#39;/system/bin/sh&#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">command</span><span class="p">[:</span><span class="mi">2</span><span class="p">]:</span>
-                <span class="c"># adb commands are started using /system/bin/sh</span>
-                <span class="k">continue</span>
-
-            <span class="k">if</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s">&#39;ADBD_CHILD&#39;</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="n">cmd_str</span> <span class="o">=</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">command</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-
-            <span class="k">for</span> <span class="n">adb_cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">ANANASEvent</span><span class="p">,</span> <span class="s">&#39;start_ts&#39;</span><span class="p">,</span>
-                                                             <span class="n">min_value</span><span class="o">=</span><span class="n">cmd_evt</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="n">adb_cmd</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s">&#39;adb_cmd&#39;</span><span class="p">:</span>
-                    <span class="k">continue</span>
-
-                <span class="k">if</span> <span class="n">adb_cmd</span> <span class="ow">in</span> <span class="n">found_matches</span><span class="p">:</span>
-                        <span class="k">continue</span>
-
-                <span class="k">if</span> <span class="s">&#39;shell&#39;</span> <span class="ow">in</span> <span class="n">adb_cmd</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
-                    <span class="n">idx</span> <span class="o">=</span> <span class="n">adb_cmd</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;shell&#39;</span><span class="p">)</span>
-                    <span class="n">cmd</span> <span class="o">=</span> <span class="n">adb_cmd</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
-
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">cmd</span> <span class="o">=</span> <span class="n">join_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-                    <span class="k">if</span> <span class="n">cmd</span> <span class="o">==</span> <span class="n">cmd_str</span><span class="p">:</span>
-                        <span class="n">found_matches</span><span class="p">[</span><span class="n">adb_cmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmd_evt</span>
-                        <span class="k">break</span>
-
-        <span class="k">for</span> <span class="n">adb_cmd</span><span class="p">,</span> <span class="n">cmd_evt</span> <span class="ow">in</span> <span class="n">found_matches</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">adb_cmd</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cmd_evt</span><span class="p">)</span>
-
-            <span class="n">ase</span> <span class="o">=</span> <span class="n">ANANASAdbShellExec</span><span class="p">()</span>
-            <span class="n">ase</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">adb_cmd</span><span class="p">)</span>
-            <span class="n">ase</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">cmd_evt</span><span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ase</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_find_execs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Searching for command executions&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">fork</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">StartTaskEvent</span><span class="p">):</span>
-            <span class="n">exec_</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="n">mintimediff</span> <span class="o">=</span> <span class="bp">None</span>
-            <span class="n">execs_to_add</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-
-            <span class="n">exes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">ExecEvent</span><span class="p">,</span> <span class="s">&#39;process_entity&#39;</span><span class="p">,</span>
-                                                          <span class="n">value</span><span class="o">=</span><span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">))</span>
-
-            <span class="k">for</span> <span class="n">exe</span> <span class="ow">in</span> <span class="n">exes</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exe</span><span class="p">,</span> <span class="n">ExecEvent</span><span class="p">)</span>
-                <span class="n">timediff</span> <span class="o">=</span> <span class="n">exe</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">-</span> <span class="n">fork</span><span class="o">.</span><span class="n">end_ts</span>
-
-                <span class="k">if</span> <span class="n">mintimediff</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">timediff</span> <span class="o">&lt;</span> <span class="n">mintimediff</span><span class="p">:</span>
-                    <span class="n">mintimediff</span> <span class="o">=</span> <span class="n">timediff</span>
-                    <span class="n">exec_</span> <span class="o">=</span> <span class="n">exe</span>
-
-            <span class="k">if</span> <span class="n">exec_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">mintimediff</span> <span class="o">&lt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">):</span>
-                <span class="c"># a fork-and-exec should not take longer then 1000ms</span>
-                <span class="c"># find additional execs: search whole $PATH for actual executeable</span>
-                <span class="n">lastexe</span> <span class="o">=</span> <span class="n">exec_</span>
-                <span class="k">for</span> <span class="n">exe</span> <span class="ow">in</span> <span class="n">exes</span><span class="p">:</span>
-                    <span class="n">timediff</span> <span class="o">=</span> <span class="n">exe</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">-</span> <span class="n">exec_</span><span class="o">.</span><span class="n">end_ts</span>
-
-                    <span class="k">if</span> <span class="n">timediff</span> <span class="o">&lt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">):</span>
-                        <span class="n">execs_to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">exe</span><span class="p">)</span>
-
-                        <span class="k">if</span> <span class="n">exe</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">&gt;</span> <span class="n">lastexe</span><span class="o">.</span><span class="n">end_ts</span><span class="p">:</span>
-                            <span class="n">lastexe</span> <span class="o">=</span> <span class="n">exe</span>
-
-                <span class="c"># we use the argv of the first execve. e.g. sh -c &#39;xxx&#39; instead of xxx</span>
-                <span class="n">cmd_evt</span> <span class="o">=</span> <span class="n">CommandExecuteEvent</span><span class="p">(</span><span class="n">lastexe</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">exec_</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">)</span>
-                <span class="n">cmd_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">fork</span><span class="p">)</span>
-
-                <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">execs_to_add</span><span class="p">:</span>
-                    <span class="n">cmd_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s">&#39;/system/xbin/su&#39;</span><span class="p">:</span>
-                    <span class="n">su_evt</span> <span class="o">=</span> <span class="n">SuperUserRequest</span><span class="p">(</span><span class="n">cmd_evt</span><span class="o">.</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">process</span><span class="p">)</span>
-                    <span class="n">su_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">cmd_evt</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">su_evt</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cmd_evt</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="k">for</span> <span class="n">mmap</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">MemoryMapEvent</span><span class="p">,</span> <span class="s">&#39;process_entity&#39;</span><span class="p">,</span>
-                                                          <span class="n">value</span><span class="o">=</span><span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">mmap</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">&gt;=</span> <span class="n">exec_</span><span class="o">.</span><span class="n">end_ts</span> <span class="ow">and</span> \
-                        <span class="p">(</span><span class="n">mmap</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">-</span> <span class="n">exec_</span><span class="o">.</span><span class="n">end_ts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">):</span>
-                    <span class="c"># mmaps within first 1000ms are considered to be initialisation calls</span>
-                    <span class="n">cmd_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">mmap</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mmap</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">fe</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">FileEvent</span><span class="p">,</span> <span class="s">&#39;process&#39;</span><span class="p">,</span>
-                                                        <span class="n">value</span><span class="o">=</span><span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">):</span>
-                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fe</span><span class="p">,</span> <span class="n">FileEvent</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">-</span> <span class="n">fork</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
-                    <span class="c"># we consider everything within 2 seconds as startup</span>
-                    <span class="k">continue</span>
-
-                <span class="k">if</span> <span class="n">fe</span><span class="o">.</span><span class="n">successful</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span> <span class="o">==</span> <span class="s">&#39;/proc/mounts&#39;</span> <span class="ow">or</span> \
-                            <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span> <span class="o">==</span> <span class="s">&#39;/proc/filesystems&#39;</span> <span class="ow">or</span> \
-                            <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span> <span class="o">==</span> <span class="s">&#39;/&#39;</span> <span class="ow">or</span> \
-                            <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;/acct/uid/\d+/tasks&#39;</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span> <span class="ow">or</span> \
-                            <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span> <span class="o">==</span> <span class="s">&#39;/proc/&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;/oom_adj&#39;</span><span class="p">:</span>
-                        <span class="c"># startup stuff</span>
-                        <span class="n">cmd_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">lle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">LibraryLoad</span><span class="p">,</span> <span class="s">&#39;process&#39;</span><span class="p">,</span>
-                                                         <span class="n">value</span><span class="o">=</span><span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">):</span>
-
-                <span class="k">if</span> <span class="p">(</span><span class="n">lle</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">-</span> <span class="n">fork</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
-                    <span class="c"># we consider everything within 2 seconds as startup</span>
-                    <span class="k">continue</span>
-
-                <span class="n">cmd_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">lle</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lle</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_check_syscall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">):</span>
+<span class="sd">        Args:</span>
+<span class="sd">            evt (ambrosia_plugins.lkm.events.SyscallEvent): the syscall event</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">SyscallEvent</span><span class="p">)</span>
 
         <span class="n">proc</span> <span class="o">=</span> <span class="n">evt</span><span class="o">.</span><span class="n">process</span>
@@ -552,11 +498,12 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">parent_evt</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;accept&quot;</span><span class="p">:</span>
-            <span class="n">mainsocket</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
 
             <span class="n">parent_evt</span> <span class="o">=</span> <span class="n">SocketAccept</span><span class="p">(</span>
                 <span class="n">proc</span><span class="p">,</span>
                 <span class="n">evt</span><span class="o">.</span><span class="n">returnval</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">mainsocket</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">proc</span><span class="p">,</span> <span class="n">parent_evt</span><span class="o">.</span><span class="n">successful</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">parent_evt</span><span class="o">.</span><span class="n">successful</span><span class="p">:</span>
                 <span class="n">proc_fds</span><span class="p">[</span><span class="n">evt</span><span class="o">.</span><span class="n">returnval</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent_evt</span>
@@ -564,7 +511,7 @@
             <span class="n">mainsocket</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">parent_evt</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mainsocket</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;connect&quot;</span><span class="p">:</span>
-            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">proc</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">returnval</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;read&quot;</span> <span class="ow">or</span> \
                 <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;write&quot;</span> <span class="ow">or</span> \
                 <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;sendto&quot;</span> <span class="ow">or</span> \
@@ -572,24 +519,23 @@
                 <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;recvfrom&quot;</span> <span class="ow">or</span> \
                 <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;recvmsg&quot;</span><span class="p">:</span>
 
-            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">proc</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">returnval</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;close&quot;</span><span class="p">:</span>
-            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_del_fd_event</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_del_fd_event</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">proc</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">returnval</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;dup&quot;</span><span class="p">:</span>
-            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dup</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">evt</span><span class="o">.</span><span class="n">returnval</span><span class="p">,</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dup</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">evt</span><span class="o">.</span><span class="n">returnval</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;dup2&quot;</span><span class="p">:</span>
-            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dup</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+            <span class="n">parent_evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dup</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">proc</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">evt</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&quot;mmap2&quot;</span><span class="p">:</span>
             <span class="n">fd</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
             <span class="n">flags</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
             <span class="n">address</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">returnval</span><span class="p">)</span>
 
-            <span class="c">#  check if successfull</span>
-            <span class="n">parent_evt</span> <span class="o">=</span> <span class="n">MemoryMapEvent</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">proc</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">end_ts</span><span class="p">)</span>
+            <span class="n">parent_evt</span> <span class="o">=</span> <span class="n">MemoryMapEvent</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">proc</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">returnval</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">end_ts</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="s">&#39;MAP_ANONYMOUS&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parent_evt</span><span class="o">.</span><span class="n">flags</span><span class="p">:</span>
-                <span class="n">fdevt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">proc_fds</span><span class="p">,</span> <span class="n">proc</span><span class="p">,</span> <span class="n">FileDescriptorEvent</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span>
+                <span class="n">fdevt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">proc</span><span class="p">,</span> <span class="n">parent_evt</span><span class="o">.</span><span class="n">successful</span><span class="p">,</span> <span class="n">FileDescriptorEvent</span><span class="p">,</span> <span class="n">evt</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span>
                 <span class="n">fdevt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">parent_evt</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">parent_evt</span><span class="p">)</span>
@@ -641,11 +587,179 @@
                                         <span class="n">evt</span><span class="o">.</span><span class="n">end_ts</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">parent_evt</span><span class="p">)</span>
 
-
         <span class="k">if</span> <span class="n">parent_evt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_evt</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span>
             <span class="n">parent_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="FileEventCorrelator"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.FileEventCorrelator">[docs]</a><span class="k">class</span> <span class="nc">FileEventCorrelator</span><span class="p">(</span><span class="n">Correlator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds library load events (mmap to \*.so files)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="FileEventCorrelator.correlate"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.FileEventCorrelator.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">fe</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">FileEvent</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;^/vendor/lib/.+\.so&#39;</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span> <span class="ow">or</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;^/system/lib/.+\.so&#39;</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span><span class="p">):</span>
+
+                <span class="n">lle</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">fe</span><span class="o">.</span><span class="n">successful</span><span class="p">:</span>
+                    <span class="c"># failed library load</span>
+                    <span class="n">lle</span> <span class="o">=</span> <span class="n">LibraryLoad</span><span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">process</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">lle</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">fe</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">MemoryMapEvent</span><span class="p">):</span>
+                            <span class="n">lle</span> <span class="o">=</span> <span class="n">LibraryLoad</span><span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">process</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+                            <span class="k">break</span>
+
+                <span class="k">if</span> <span class="n">lle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">lle</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lle</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_tree</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="CommandExecuteCorrelator"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.CommandExecuteCorrelator">[docs]</a><span class="k">class</span> <span class="nc">CommandExecuteCorrelator</span><span class="p">(</span><span class="n">Correlator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Finds events that form the execution of a command.</span>
+
+<span class="sd">    * :class:`ambrosia_plugins.lkm.events.StartTaskEvent`: indicate the creation of a new process</span>
+<span class="sd">    * :class:`ambrosia_plugins.lkm.events.ExecEvent`: commands are started using a fork-and-exec</span>
+<span class="sd">    * :class:`ambrosia_plugins.lkm.events.LibraryLoad`: shortly after a fork indicates that a library is loaded that</span>
+<span class="sd">        is essential to run the command.</span>
+<span class="sd">    * :class:`ambrosia_plugins.lkm.events.FileEvent`: several file events happen at the begin of a command execution</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CommandExecuteCorrelator.correlate"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.CommandExecuteCorrelator.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Searching for command executions&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">fork</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">StartTaskEvent</span><span class="p">):</span>
+            <span class="n">exec_</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">mintimediff</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">execs_to_add</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+            <span class="n">exes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">ExecEvent</span><span class="p">,</span> <span class="s">&#39;process_entity&#39;</span><span class="p">,</span>
+                                                          <span class="n">value</span><span class="o">=</span><span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">exe</span> <span class="ow">in</span> <span class="n">exes</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exe</span><span class="p">,</span> <span class="n">ExecEvent</span><span class="p">)</span>
+                <span class="n">timediff</span> <span class="o">=</span> <span class="n">exe</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">-</span> <span class="n">fork</span><span class="o">.</span><span class="n">end_ts</span>
+
+                <span class="k">if</span> <span class="n">mintimediff</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">timediff</span> <span class="o">&lt;</span> <span class="n">mintimediff</span><span class="p">:</span>
+                    <span class="n">mintimediff</span> <span class="o">=</span> <span class="n">timediff</span>
+                    <span class="n">exec_</span> <span class="o">=</span> <span class="n">exe</span>
+
+            <span class="k">if</span> <span class="n">exec_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">mintimediff</span> <span class="o">&lt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">):</span>
+                <span class="c"># a fork-and-exec should not take longer then 1000ms</span>
+                <span class="c"># find additional execs: search whole $PATH for actual executeable</span>
+                <span class="n">lastexe</span> <span class="o">=</span> <span class="n">exec_</span>
+                <span class="k">for</span> <span class="n">exe</span> <span class="ow">in</span> <span class="n">exes</span><span class="p">:</span>
+                    <span class="n">timediff</span> <span class="o">=</span> <span class="n">exe</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">-</span> <span class="n">exec_</span><span class="o">.</span><span class="n">end_ts</span>
+
+                    <span class="k">if</span> <span class="n">timediff</span> <span class="o">&lt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">):</span>
+                        <span class="n">execs_to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">exe</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">exe</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">&gt;</span> <span class="n">lastexe</span><span class="o">.</span><span class="n">end_ts</span><span class="p">:</span>
+                            <span class="n">lastexe</span> <span class="o">=</span> <span class="n">exe</span>
+
+                <span class="c"># we use the argv of the first execve. e.g. sh -c &#39;xxx&#39; instead of xxx</span>
+                <span class="n">cmd_evt</span> <span class="o">=</span> <span class="n">CommandExecuteEvent</span><span class="p">(</span><span class="n">lastexe</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">exec_</span><span class="o">.</span><span class="n">argv</span><span class="p">,</span> <span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">)</span>
+                <span class="n">cmd_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">fork</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">execs_to_add</span><span class="p">:</span>
+                    <span class="n">cmd_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="s">&#39;/system/xbin/su&#39;</span><span class="p">:</span>
+                    <span class="n">su_evt</span> <span class="o">=</span> <span class="n">SuperUserRequest</span><span class="p">(</span><span class="n">cmd_evt</span><span class="o">.</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">process</span><span class="p">)</span>
+                    <span class="n">su_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">cmd_evt</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">su_evt</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cmd_evt</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">fe</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">FileEvent</span><span class="p">,</span> <span class="s">&#39;process&#39;</span><span class="p">,</span>
+                                                        <span class="n">value</span><span class="o">=</span><span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fe</span><span class="p">,</span> <span class="n">FileEvent</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">fe</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">-</span> <span class="n">fork</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                    <span class="c"># we consider everything within 2 seconds as startup</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">fe</span><span class="o">.</span><span class="n">successful</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span> <span class="o">==</span> <span class="s">&#39;/proc/mounts&#39;</span> <span class="ow">or</span> \
+                            <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span> <span class="o">==</span> <span class="s">&#39;/proc/filesystems&#39;</span> <span class="ow">or</span> \
+                            <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span> <span class="o">==</span> <span class="s">&#39;/&#39;</span> <span class="ow">or</span> \
+                            <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">&#39;/acct/uid/\d+/tasks&#39;</span><span class="p">,</span> <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span> <span class="ow">or</span> \
+                            <span class="n">fe</span><span class="o">.</span><span class="n">abspath</span> <span class="o">==</span> <span class="s">&#39;/proc/&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;/oom_adj&#39;</span><span class="p">:</span>
+                        <span class="c"># startup stuff</span>
+                        <span class="n">cmd_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fe</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">lle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">LibraryLoad</span><span class="p">,</span> <span class="s">&#39;process&#39;</span><span class="p">,</span>
+                                                         <span class="n">value</span><span class="o">=</span><span class="n">fork</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">):</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">lle</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">-</span> <span class="n">fork</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                    <span class="c"># we consider everything within 2 seconds as startup</span>
+                    <span class="k">continue</span>
+
+                <span class="n">cmd_evt</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">lle</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lle</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_tree</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="AdbCommandCorrelator"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.AdbCommandCorrelator">[docs]</a><span class="k">class</span> <span class="nc">AdbCommandCorrelator</span><span class="p">(</span><span class="n">Correlator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find command executions that happen because of ANANAS (through ADB)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="AdbCommandCorrelator.correlate"><a class="viewcode-back" href="../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.AdbCommandCorrelator.correlate">[docs]</a>    <span class="k">def</span> <span class="nf">correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Correlating ADB commands with command executions&#39;</span><span class="p">)</span>
+
+        <span class="n">found_matches</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">cmd_evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">CommandExecuteEvent</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">[</span><span class="s">&#39;/system/bin/sh&#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">command</span><span class="p">[:</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="c"># adb commands are started using /system/bin/sh</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="s">&#39;ADBD_CHILD&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">cmd_str</span> <span class="o">=</span> <span class="n">cmd_evt</span><span class="o">.</span><span class="n">command</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">adb_cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">ANANASEvent</span><span class="p">,</span> <span class="s">&#39;start_ts&#39;</span><span class="p">,</span>
+                                                             <span class="n">min_value</span><span class="o">=</span><span class="n">cmd_evt</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">adb_cmd</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s">&#39;adb_cmd&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">adb_cmd</span> <span class="ow">in</span> <span class="n">found_matches</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="s">&#39;shell&#39;</span> <span class="ow">in</span> <span class="n">adb_cmd</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">adb_cmd</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;shell&#39;</span><span class="p">)</span>
+                    <span class="n">cmd</span> <span class="o">=</span> <span class="n">adb_cmd</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">cmd</span> <span class="o">=</span> <span class="n">join_command</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">cmd</span> <span class="o">==</span> <span class="n">cmd_str</span><span class="p">:</span>
+                        <span class="n">found_matches</span><span class="p">[</span><span class="n">adb_cmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmd_evt</span>
+                        <span class="k">break</span>
+
+        <span class="k">for</span> <span class="n">adb_cmd</span><span class="p">,</span> <span class="n">cmd_evt</span> <span class="ow">in</span> <span class="n">found_matches</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">adb_cmd</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_remove</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cmd_evt</span><span class="p">)</span>
+
+            <span class="n">ase</span> <span class="o">=</span> <span class="n">ANANASAdbShellExec</span><span class="p">()</span>
+            <span class="n">ase</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">adb_cmd</span><span class="p">)</span>
+            <span class="n">ase</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">cmd_evt</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_add</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ase</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_tree</span><span class="p">()</span></div></div>
 </pre></div>
 
           </div>
