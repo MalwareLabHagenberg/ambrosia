@@ -1,14 +1,16 @@
 "use strict";
 
-function EntityView(){
-    
-}
+ambrosia.view = ambrosia.view || {};
 
-EntityView.prototype.setup = function(){
-    $('#entityview').text('no entity selected');
-}
+ambrosia.view.entityview = {
+    EntityView: function(){
+        this.setup = function(){
+            $('#entityview').text('no entity selected');
+        }
+    }
+};
 
-Entity.onSelectHandler.push(function(entity){
+A.entity.onSelectHandler.push(function(entity){
     $('#entityview').empty();
     
     var tab = $('<table/>');
@@ -21,12 +23,12 @@ Entity.onSelectHandler.push(function(entity){
 
     var fths = $('<button type="button"/>').text('this');
     fths.click(function(){
-        Event.addFilter(null, new Filter('"'+entity.id+'" : references.id', true));
+        A.event.addFilter(null, new A.filter.Filter('"'+entity.id+'" : references.id', true));
     });
     
     var fnths = $('<button type="button"/>').text('not this');
     fnths.click(function(){
-        Event.addFilter(null, new Filter('"'+entity.id+'" !: references.id', true));
+        A.event.addFilter(null, new A.filter.Filter('"'+entity.id+'" !: references.id', true));
     });
 
     add('description', entity.getLink());

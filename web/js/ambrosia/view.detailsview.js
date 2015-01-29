@@ -1,14 +1,16 @@
 "use strict";
 
-function DetailsView(){
-    
-}
+ambrosia.view = ambrosia.view || {};
 
-DetailsView.prototype.setup = function(){
-    $('#detailsview').text('No Event selected');
-}
+ambrosia.view.detailsview = {
+    DetailsView: function(){
+        this.setup = function(){
+            $('#detailsview').text('No Event selected');
+        }
+    }
+};
 
-Event.onSelectHandler.push(function(){
+A.event.onSelectHandler.push(function(){
     var props = {};
     
     props['Description'] = this.description;

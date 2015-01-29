@@ -32,13 +32,13 @@ expression
   / "(" exp:expression ")" { return exp }
 
 statement
-  = c1:comparison ws op:logical_operator ws c2:statement { return new Statement(c1, op, c2) }
+  = c1:comparison ws op:logical_operator ws c2:statement { return new ambrosia.filter.Statement(c1, op, c2) }
   / c:comparison { return c }
-  / lo:unary_operator ex:expression { return new UnaryOperator(lo, ex); }
+  / lo:unary_operator ex:expression { return new ambrosia.filter.UnaryOperator(lo, ex); }
 
 
 comparison
-  = p1:value ws op:operand ws p2:value { return new Comparison(p1, op, p2) }
+  = p1:value ws op:operand ws p2:value { return new ambrosia.filter.Comparison(p1, op, p2) }
 
 value
   = property
@@ -64,7 +64,7 @@ logical_operator
   / op:'||' { return 'OR' }
 
 property
-  = p1:[a-zA-Z]+ "."? p2:[a-zA-Z]* { return new Property(p1.join(""), p2.join("")) }
+  = p1:[a-zA-Z_]+ "."? p2:[a-zA-Z_]* { return new ambrosia.filter.Property(p1.join(""), p2.join("")) }
 
 string
   = '"' str:[^\"]* '"' { return str.join("") }
