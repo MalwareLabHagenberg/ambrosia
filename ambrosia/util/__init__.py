@@ -138,3 +138,4 @@ def serialize_obj(obj):
     res = _serialize_entry(obj, objs, set())
 
     return json.dumps([res, objs])
+

@@ -51,46 +51,54 @@
 <span class="c"># -*- coding: utf-8 -*-</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">as</span> <span class="nn">ET</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">as</span> <span class="nn">ElementTree</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
-<span class="kn">from</span> <span class="nn">ambrosia_plugins.events</span> <span class="kn">import</span> <span class="n">ANANASEvent</span>
-<span class="kn">from</span> <span class="nn">ambrosia_plugins.lkm</span> <span class="kn">import</span> <span class="n">FileEvent</span><span class="p">,</span> <span class="n">StartTaskEvent</span><span class="p">,</span> <span class="n">CommandExecuteEvent</span><span class="p">,</span> <span class="n">SuperUserRequest</span>
-<span class="kn">from</span> <span class="nn">ambrosia_plugins.lkm.events</span> <span class="kn">import</span> <span class="n">SyscallEvent</span><span class="p">,</span> <span class="n">CommandExecuteEvent</span><span class="p">,</span> <span class="n">FileEvent</span><span class="p">,</span> <span class="n">StartTaskEvent</span><span class="p">,</span> <span class="n">SuperUserRequest</span>
+<span class="kn">import</span> <span class="nn">code</span>
+<span class="kn">from</span> <span class="nn">ambrosia.util.log</span> <span class="kn">import</span> <span class="n">init_logging</span>
 
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">ambrosia</span>
 
-<div class="viewcode-block" id="print_tree"><a class="viewcode-back" href="../processor.html#processor.print_tree">[docs]</a><span class="k">def</span> <span class="nf">print_tree</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+
+<span class="k">def</span> <span class="nf">_print_tree</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
     <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">start_ts</span><span class="p">)</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
-        <span class="n">print_tree</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="p">)</span>
-</div>
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../processor.html#processor.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="s"> - </span><span class="si">%(name)s</span><span class="s"> - </span><span class="si">%(levelname)s</span><span class="s"> - </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">_print_tree</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="s">&#39; &#39;</span><span class="p">)</span>
 
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../processor.html#processor.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;The main method</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">&#39;process ANANAS report for Ambrosia&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;report&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">file</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;the XML report input&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--config&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">file</span><span class="p">,</span>
-                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;the config file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;report&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">file</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;the XML report input&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--config&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">file</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;the config file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--loglevel&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;FATAL&#39;</span><span class="p">,</span> <span class="s">&#39;ERROR&#39;</span><span class="p">,</span> <span class="s">&#39;WARN&#39;</span><span class="p">,</span> <span class="s">&#39;INFO&#39;</span><span class="p">,</span> <span class="s">&#39;DEBUG&#39;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;the log level for stderr&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--output&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">FileType</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">),</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;the output file, default is stdout&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--output-type&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;serialized&#39;</span><span class="p">,</span> <span class="s">&#39;none&#39;</span><span class="p">,</span> <span class="s">&#39;tree&#39;</span><span class="p">,</span> <span class="s">&#39;interactive&#39;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;serialized&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&#39;define what should be printed&#39;</span><span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
-    
-    <span class="n">xmltree</span> <span class="o">=</span> <span class="n">ET</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">report</span><span class="p">)</span>
-    <span class="n">xmlroot</span> <span class="o">=</span> <span class="n">xmltree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
 
-    <span class="n">runner</span> <span class="o">=</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">Ambrosia</span><span class="p">(</span><span class="n">xmlroot</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+    <span class="n">init_logging</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">)</span>
+
+    <span class="n">xml_tree</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">report</span><span class="p">)</span>
+    <span class="n">xml_root</span> <span class="o">=</span> <span class="n">xml_tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+
+    <span class="n">runner</span> <span class="o">=</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">Ambrosia</span><span class="p">(</span><span class="n">xml_root</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
     <span class="n">runner</span><span class="o">.</span><span class="n">adjust_times</span><span class="p">()</span>
     <span class="n">runner</span><span class="o">.</span><span class="n">correlate</span><span class="p">()</span>
-    <span class="k">print</span> <span class="n">runner</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    for e in runner.context.analysis.iter_events(runner.context):</span>
-<span class="sd">        #if not isinstance(e, FileEvent) and not isinstance(e, ANANASEvent):</span>
-<span class="sd">        #    print e</span>
-<span class="sd">        print_tree(e)</span>
-<span class="sd">    &#39;&#39;&#39;</span></div>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">output_type</span> <span class="o">==</span> <span class="s">&#39;serialized&#39;</span><span class="p">:</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">serialize</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">output_type</span> <span class="o">==</span> <span class="s">&#39;tree&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">runner</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">context</span><span class="p">):</span>
+            <span class="n">_print_tree</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">output_type</span> <span class="o">==</span> <span class="s">&#39;interactive&#39;</span><span class="p">:</span>
+        <span class="n">code</span><span class="o">.</span><span class="n">interact</span><span class="p">(</span><span class="n">local</span><span class="o">=</span><span class="nb">locals</span><span class="p">())</span>
+</div>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
 </pre></div>

@@ -460,6 +460,7 @@ class Entity(Persistent):
         """A generated unique key
         """
 
+    @property
     def primary_identifier(self):
         """Returns the primary identifier for the entity.
         """

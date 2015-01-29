@@ -3,5 +3,4 @@ Ambrosia Documentation
 
 .. toctree::
 
-    ambrosia
-    processor
+    modules

@@ -5,6 +5,8 @@ __author__ = 'Wolfgang Ettlinger'
 
 
 class Config(SafeConfigParser):
+    """Allows simple access to the configuration file (currently not used or implemented)
+    """
     def __init__(self, configfile):
         SafeConfigParser.__init__(self)
         self.read(

@@ -1,0 +1,57 @@
+import logging
+import sys
+
+__author__ = 'Wolfgang Ettlinger'
+
+
+class AmbrosiaFormater(logging.Formatter):
+    """A custom log formatter that can use colors
+    """
+
+    color_mapping = {
+        "DEBUG": "1;32",
+        "WARNING": "1;33",
+        "WARN": "1;33",
+        "INFO": "1;35",
+        "CRITICAL": "1;31",
+        "ERROR": "1;31"
+    }
+
+    def __init__(self, use_colors):
+        super(AmbrosiaFormater, self).__init__(
+            datefmt="%Y-%m-%d_%H:%M:%S")
+        self._use_colors = use_colors
+
+    def _color(self, color, s):
+        if self._use_colors:
+            return '\x1b[{}m{}\x1b[0m'.format(color, s)
+        else:
+            return s
+
+    def format(self, record):
+        self._fmt = (self._color("4;30", "%(asctime)s") +
+                     ":" +
+                     self._color("1;36", "%(name)s") + " " +
+                     self._color("33", "(%(filename)s:%(lineno)d)") +
+                     ":" +
+                     self._color(self.color_mapping[record.levelname], "%(levelname)s") +
+                     ": " +
+                     self._color("1;30", "%(message)s"))
+
+        return super(AmbrosiaFormater, self).format(record)
+
+
+def init_logging(log_level):
+    """Initialize logging to stderr
+
+    Args:
+        log_level (str): the minimum log level
+    """
+    main_logger = logging.getLogger("ambrosia")
+    main_logger.setLevel(log_level)
+
+    formatter = AmbrosiaFormater(sys.stderr.isatty())
+
+    ch = logging.StreamHandler(sys.stderr)
+    ch.setFormatter(formatter)
+    main_logger.addHandler(ch)
