@@ -30,28 +30,27 @@ ambrosia_web.filter = {
      * "someidofanentity" : references.id).
      *
      * @param {String} str the condition for the filter
-     * @param forceShowParents TODO
+     * @param enabled whether the filter is effective
      * @constructor
      */
-    Filter: function(str, forceShowParents){
+    Filter: function(str, enabled){
         if(!str){
             str = 'true';
         }
-    
-        if(!forceShowParents){
-            forceShowParents = false;
+
+        if(enabled == undefined){
+            enabled = true;
         }
-        
-        var force_show_parents = forceShowParents;
+
         var input = $('<input class="filterinput"/>').val(str);
-        var err = $('<div class="filtererror"/>');
-        var del = $('<button type="button"/>').text('del');
-        var force_parent_checkbox = $('<input type="checkbox"/>').prop('checked', force_show_parents);
+        var error_label = $('<div class="filtererror"/>');
+        var delete_button = $('<button type="button"/>').text('del');
+        var enable_checkbox = $('<input type="checkbox"/>').prop('checked', enabled);
         this._div = ($('<div/>')
             .append(input)
-            .append(force_parent_checkbox)
-            .append(del)
-            .append(err));
+            .append(enable_checkbox)
+            .append(delete_button)
+            .append(error_label));
         var error = false;
         var filter = null;
 
@@ -63,12 +62,12 @@ ambrosia_web.filter = {
         this.setRule = function(r){
             try{
                 var f = ambrosia_web.filter.parser.parse(r);
-                err.text('');
+                error_label.text('');
                 input.removeClass('errorinput');
                 error = false;
                 filter = f;
             }catch(ex){
-                err.text(ex);
+                error_label.text(ex);
                 input.addClass('errorinput');
                 error = true;
             }
@@ -83,16 +82,25 @@ ambrosia_web.filter = {
             ths.setRule(input.val());
         });
 
-        del.click(function(){
+        delete_button.click(function(){
             A.event.removeFilter(ths);
         });
 
-        this.forcesShowParents = function(){
-            return force_show_parents;
+        enable_checkbox.click(function(){
+            enabled = enable_checkbox.is(':checked');
+            A.redraw();
+        });
+
+        /**
+         * Checks whether this filter is enabled
+         * @returns {bool} true if enabled
+         */
+        this.isEnabled = function (){
+            return enabled;
         };
 
         /**
-         * Evaluate if an avent matches this filter
+         * Evaluate if an an event matches this filter
          * @returns {bool} true if the event matches
          */
         this.evaluate = function(evt){

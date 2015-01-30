@@ -95,38 +95,27 @@ ambrosia_web.event = {
 
         /**
          * This is the first method called when drawing events. It calculates if an element should be shown.
-         * @returns {boolean} TODO
          */
         this.calcVisible = function(){
             this.visible = true;
 
-            var childForcesShow = false;
             for(var i in this.children){
-                childForcesShow = childForcesShow || this.children[i].calcVisible();
+                this.children[i].calcVisible();
             }
 
-            if(childForcesShow){
-                /* child forces parent views */
-                return true; // also force parent to show parents
-            }
-
-            /* visibility is not forced by any child */
             var filters = A.event.getEffectiveFilters(A.event.events.event_registry[this.type]);
-            var forceShowParents = false;
 
             for(var i in filters){
+                if(!filters[i].isEnabled()){
+                    continue;
+                }
+
                 if(filters[i].evaluate(this) == false){
                     /* filter explicitly says hide */
                     this.visible = false;
-                    return false;
+                    return;
                 }
-
-                /* filter says "visible", does it force show parents? */
-                forceShowParents = forceShowParents || filters[i].forcesShowParents();
             }
-
-            /* all filters match */
-            return forceShowParents;
         };
 
         /**
