@@ -94,28 +94,35 @@ ambrosia_web.event = {
         this.calcDimensions = function(blockLayoutManager){ };
 
         /**
-         * This is the first method called when drawing events. It calculates if an element should be shown.
+         * This is the first method called when drawing events. It calculates if an element should be shown and also
+         * considers the visibility of the child elements (if a child event is shown show this event)
          */
         this.calcVisible = function(){
             this.visible = true;
 
-            for(var i in this.children){
-                this.children[i].calcVisible();
-            }
-
             var filters = A.event.getEffectiveFilters(A.event.events.event_registry[this.type]);
 
-            for(var i in filters){
-                if(!filters[i].isEnabled()){
+            for (var i in filters) {
+                if (!filters[i].isEnabled()) {
                     continue;
                 }
 
-                if(filters[i].evaluate(this) == false){
+                if (filters[i].evaluate(this) == false) {
                     /* filter explicitly says hide */
                     this.visible = false;
-                    return;
+                    break;
                 }
             }
+
+            var child_forces_visible = false;
+            for(var i in this.children) {
+                /* a child is visible, parent needs to be visible too */
+                child_forces_visible = this.children[i].calcVisible() || child_forces_visible;
+            }
+
+            this.visible = this.visible || child_forces_visible;
+
+            return this.visible;
         };
 
         /**

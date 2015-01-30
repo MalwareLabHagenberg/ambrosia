@@ -118,46 +118,67 @@ ambrosia_web.filter = {
 
     /**
      * A property used in a filter. Used by the parser.
-     * @param prop the string before the dot
+     * @param prop1 the string before the dot
      * @param prop2 the string after the dot or empty
      * @constructor
      */
-    Property: function(prop, prop2){
+    Property: function(prop1, prop2){
         this.evaluate = function(evt){
             assert(evt instanceof A.event.Event);
 
-            if(prop == 'references'){
-                assert(prop2 != undefined);
+            var res_prop1;
 
-                var vals = [];
+            if(prop1 == 'references'){
+                res_prop1 = [];
                 for(var ref in evt.references){
+                    if(evt.references[ref] == undefined) {
+                        continue;
+                    }
+
                     if(evt.references[ref].properties[prop2] !== undefined){
-                        vals.push(evt.references[ref].properties[prop2]);
+                        res_prop1.push(evt.references[ref].properties[prop2]);
                     }else{
-                        vals.push(evt.references[ref][prop2]);
+                        res_prop1.push(evt.references[ref][prop2]);
                     }
                 }
-                return vals;
-            }else if(prop == 'true'){
-                return true;
-            }else if(prop == 'false'){
-                return false;
-            }else if(prop == 'null'){
-                return null;
-            }else if(evt.properties[prop]){
-                return evt.properties[prop];
-            }else if(evt[prop]){
-                return evt[prop];
-            }else{
-                /* references */
-                if(!evt.references[prop]){
-                    return undefined;
-                }
+            }else if(prop1 == 'true'){
+                res_prop1 = true;
+            }else if(prop1 == 'false'){
+                res_prop1 = false;
+            }else if(prop1 == 'null'){
+                res_prop1 = null;
+            }else if(prop1 == 'undefined'){
+                res_prop1 = undefined;
+            }else if(evt.properties[prop1]){
+                res_prop1 = evt.properties[prop1];
+            }else if(evt[prop1]){
+                res_prop1 = evt[prop1];
+            }else {
+                res_prop1 = evt.references[prop1];
+            }
 
-                if(evt.references[prop].properties[prop2] !== undefined){
-                    return evt.references[prop].properties[prop2];
-                }else{
-                    return evt.references[prop][prop2];
+            if(!prop2) {
+                /* there is nothing after the dot, return what we have */
+                return res_prop1;
+            }
+
+            if($.isArray(res_prop1)) {
+                /* if the first property is an array, return an array containing all properties from each element */
+
+                var res = [];
+
+                for(var i in res_prop1) {
+                    if(res_prop1[i] == undefined) {
+                        res.push(undefined);
+                    }else {
+                        res.push(res_prop1[i][prop2]);
+                    }
+                }
+            }else {
+                if(res_prop1 == undefined) {
+                    return undefined;
+                }else {
+                    return res_prop1[prop2];
                 }
             }
         };
