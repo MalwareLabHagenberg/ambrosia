@@ -25,15 +25,16 @@ ambrosia_web.filter = {
      * also match a specific reference (e.g. process.pid, file.abspath). The reference defined in a property may be a
      * specific reference (like file or process) or the string "references". This special reference matches all
      * references in an event. Therefore, the value of any property using "references" (e.g. references.id) must be
-     * treated as an array (Array operations ":" and "!:" must be used). A filter general filter (that is applied to all
+     * treated as an array (Array operations ":" and "!:" must be used). A general filter (that is applied to all
      * events regardless of their type) can therefore be used to find all events related to a certain entity (e.g.
      * "someidofanentity" : references.id).
      *
      * @param {String} str the condition for the filter
+     * @param {String} description a string describing the filter
      * @param enabled whether the filter is effective
      * @constructor
      */
-    Filter: function(str, enabled){
+    Filter: function(str, description, enabled){
         if(!str){
             str = 'true';
         }
@@ -42,12 +43,14 @@ ambrosia_web.filter = {
             enabled = true;
         }
 
-        var input = $('<input class="filterinput"/>').val(str);
+        var rule_input = $('<input class="filterinput"/>').val(str);
+        var description_input = $('<input class="filterdescription"/>').val(description);
         var error_label = $('<div class="filtererror"/>');
         var delete_button = $('<button type="button"/>').text('del');
         var enable_checkbox = $('<input type="checkbox"/>').prop('checked', enabled);
         this._div = ($('<div/>')
-            .append(input)
+            .append(description_input)
+            .append(rule_input)
             .append(enable_checkbox)
             .append(delete_button)
             .append(error_label));
@@ -63,12 +66,12 @@ ambrosia_web.filter = {
             try{
                 var f = ambrosia_web.filter.parser.parse(r);
                 error_label.text('');
-                input.removeClass('errorinput');
+                rule_input.removeClass('errorinput');
                 error = false;
                 filter = f;
             }catch(ex){
                 error_label.text(ex);
-                input.addClass('errorinput');
+                rule_input.addClass('errorinput');
                 error = true;
             }
         };
@@ -77,9 +80,9 @@ ambrosia_web.filter = {
         
         var ths = this;
         
-        input.keyup(function(){
-            input.addClass('filterchanged');
-            ths.setRule(input.val());
+        rule_input.keyup(function(){
+            rule_input.addClass('filterchanged');
+            ths.setRule(rule_input.val());
         });
 
         delete_button.click(function(){

@@ -13,7 +13,7 @@ ambrosia_web.event.events = function(){
 
     }
     SyscallEvent.prototype = new A.event.BlockEvent();
-    SyscallEvent.filters = [new A.filter.Filter('false')];
+    SyscallEvent.filters = [new A.filter.Filter('false', 'disable all syscall events')];
 
 
     /**
@@ -24,7 +24,7 @@ ambrosia_web.event.events = function(){
         this.getColor = function(){ return '#ff008a'; };
     }
     StartTaskEvent.filters = [
-        new A.filter.Filter('is_process==false')
+        new A.filter.Filter('is_process==false', 'hide forks that spawn a thread')
     ];
     StartTaskEvent.prototype = new A.event.BlockEvent();
 
@@ -37,7 +37,7 @@ ambrosia_web.event.events = function(){
         this.getColor = function(){ return '#eb00ff'; };
     }
     MemoryMapEvent.prototype = new A.event.BlockEvent();
-    MemoryMapEvent.filters = [new A.filter.Filter('anonymous==false')];
+    MemoryMapEvent.filters = [new A.filter.Filter('anonymous==false', 'hide mmaps that do not operate on a file')];
 
 
     /**
@@ -48,7 +48,7 @@ ambrosia_web.event.events = function(){
         this.getColor = function(){ return '#c6005d'; };
     }
     DeleteFileEvent.filters = [
-        new A.filter.Filter('file.abspath != "/data/ananaslkm.ko"')
+        new A.filter.Filter('file.abspath != "/data/ananaslkm.ko"', 'hide the removal of the lkm file (done by ANANAS)')
     ];
     DeleteFileEvent.prototype = new A.event.BlockEvent();
 
@@ -92,14 +92,16 @@ ambrosia_web.event.events = function(){
     }
     FileEvent.prototype = new A.event.BlockEvent();
     FileEvent.filters = [
-        new A.filter.Filter('!(abspath~"/proc/\\d+/oom_adj" && mode==131073)'),
-        new A.filter.Filter('!(abspath~"/proc/\\d+/stat" && mode==131072)'),
-        new A.filter.Filter('!(abspath~"/proc/\\d+/task" && mode==147456)'),
-        new A.filter.Filter('!(abspath=="/proc/net/xt_qtaguid/iface_stat_fmt" && mode==131072)'),
-        new A.filter.Filter('!(abspath=="/dev/binder" && mode==131074)'),
-        new A.filter.Filter('!(abspath=="/dev/__properties__" && mode==688128)'),
-        new A.filter.Filter('!(abspath=="/dev/ashmem" && mode==131074)'),
-        new A.filter.Filter('!(abspath ~ "/system/framework/.*\\.jar" && mode==131072 && process.type=="ADBD_CHILD")')
+        new A.filter.Filter('parent.visible != false', 'hide all file events where the parent would not be visible'),
+        new A.filter.Filter('!(abspath~"/proc/\\d+/oom_adj" && mode==131073)', ''),
+        new A.filter.Filter('!(abspath~"/proc/\\d+/stat" && mode==131072)', ''),
+        new A.filter.Filter('!(abspath~"/proc/\\d+/task" && mode==147456)', ''),
+        new A.filter.Filter('!(abspath=="/proc/net/xt_qtaguid/iface_stat_fmt" && mode==131072)', ''),
+        new A.filter.Filter('!(abspath=="/dev/binder" && mode==131074)', ''),
+        new A.filter.Filter('!(abspath=="/dev/__properties__" && mode==688128)', ''),
+        new A.filter.Filter('!(abspath=="/dev/ashmem" && mode==131074)', ''),
+        new A.filter.Filter('!(abspath ~ "/system/framework/.*\\.jar" && mode==131072 && process.type=="ADBD_CHILD")',
+            '')
     ];
 
 
@@ -121,7 +123,7 @@ ambrosia_web.event.events = function(){
         this.getColor = function(){ return '#1dff00'; };
     }
     UnknownFdEvent.prototype = new A.event.BlockEvent();
-    UnknownFdEvent.filters = [new A.filter.Filter('false')];
+    UnknownFdEvent.filters = [new A.filter.Filter('false', 'hide all unknown fd events')];
 
 
     /**
@@ -132,7 +134,7 @@ ambrosia_web.event.events = function(){
         this.getColor = function(){ return '#00ff6d'; };
     }
     SocketEvent.filters = [
-        new A.filter.Filter('process.type != "ADBD"')
+        new A.filter.Filter('process.type != "ADBD"', 'hide the socket created by ADBD')
     ];
     SocketEvent.prototype = new A.event.BlockEvent();
 
@@ -165,7 +167,7 @@ ambrosia_web.event.events = function(){
         this.getColor = function(){ return '#a9cccc'; };
     }
     AndroidApicall.filters = [
-        new A.filter.Filter('false')
+        new A.filter.Filter('false', 'hide all low-level API call events')
     ];
     AndroidApicall.prototype = new A.event.BlockEvent();
 
@@ -247,7 +249,7 @@ ambrosia_web.event.events = function(){
         this.getColor = function(){ return '#000000'; };
     }
     LibraryLoad.filters = [
-        new A.filter.Filter("false")
+        new A.filter.Filter("false", 'hide all library loads')
     ];
     LibraryLoad.prototype = new A.event.BlockEvent();
 
