@@ -62,12 +62,12 @@
 <span class="sd">    optimized (e.g. BTree module). Ambrosia already uses these data structures. The following classes are already</span>
 <span class="sd">    designed to be stored in ZODB:</span>
 
-<span class="sd">    * :class:`ambrosia.model.Analysis`</span>
-<span class="sd">    * :class:`ambrosia.model.Entity`</span>
-<span class="sd">    * :class:`ambrosia.model.Event`</span>
+<span class="sd">    * :class:`ambrosia_web.model.Analysis`</span>
+<span class="sd">    * :class:`ambrosia_web.model.Entity`</span>
+<span class="sd">    * :class:`ambrosia_web.model.Event`</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        context (ambrosia.context.AmbrosiaContext): The current context.</span>
+<span class="sd">        context (ambrosia_web.context.AmbrosiaContext): The current context.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>

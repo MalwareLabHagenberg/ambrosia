@@ -1,8 +1,13 @@
 "use strict";
 
-ambrosia.view = ambrosia.view || {};
-
-ambrosia.view.entityview = {
+/**
+ * @namespace contains the entity view
+ */
+ambrosia_web.view.entityview = {
+    /**
+     * Implements a simple view that shows details about the selected entity
+     * @constructor
+     */
     EntityView: function(){
         this.setup = function(){
             $('#entityview').text('no entity selected');

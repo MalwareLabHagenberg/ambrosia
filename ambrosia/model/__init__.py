@@ -22,8 +22,8 @@ class Analysis(Persistent):
     * plugins (dict): the plugins (key) and wheter they were active during ANANAS analysis (value, bool)
     * hashes (dict): the hashes of the APK in the form {type: hash}
 
-    Analysis also manages all (top-level) Events and Entities (see :class:`ambrosia.model.Event`,
-    :class:`ambrosia.model.Entity`) and tries to optimize for searching performance.
+    Analysis also manages all (top-level) Events and Entities (see :class:`ambrosia_web.model.Event`,
+    :class:`ambrosia_web.model.Entity`) and tries to optimize for searching performance.
     """
     def __init__(self):
         self.filename = None
@@ -68,7 +68,7 @@ class Analysis(Persistent):
         """iterate all known entities of a specific class.
 
         Args:
-            context (ambrosia.context.AmbrosiaContext): the current context
+            context (ambrosia_web.context.AmbrosiaContext): the current context
             cls (class): the class of the entity we are looking for
         """
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
@@ -84,7 +84,7 @@ class Analysis(Persistent):
         """Search for a specific entity, if it does not exist, create a new one
 
         Args:
-            context (ambrosia.context.AmbrosiaContext): the current context
+            context (ambrosia_web.context.AmbrosiaContext): the current context
             cls (class): the class of the entity we are looking for
             *args: the arguments that would construct an entity
 
@@ -127,7 +127,7 @@ class Analysis(Persistent):
         """Iterates over all events matching specific conditions in an efficient manner.
 
         Args:
-            context (ambrosia.context.AmbrosiaContext): the current context
+            context (ambrosia_web.context.AmbrosiaContext): the current context
             cls (class): the class of the events we are looking for
             key: the key we are searching for
             min_value: the minimum value
@@ -396,7 +396,7 @@ class Event(Persistent):
         """Adjust times (e.g. emulator time -> system time)
 
         Args:
-            context (ambrosia.context.AmbrosiaContext): the current context
+            context (ambrosia_web.context.AmbrosiaContext): the current context
         """
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
 
@@ -404,7 +404,11 @@ class Event(Persistent):
             c.adjust_times(context)
 
     def to_serializeable(self):
-        """Returns a dict that can be used for serialization
+        """Returns a dict that can be used for serialization.
+
+        The primary keys of entities this entity refers to (e.g. parent process) are stored in the attribute
+        "references". This way any entity only has to be transmitted once, when the entity is referenced only the
+        primary key is used.
         """
         vals = self.get_serializeable_properties()
         refs, props = {}, {}

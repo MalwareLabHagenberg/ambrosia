@@ -1,4 +1,5 @@
-/*{
+/*
+{
 function Property(prop, p2){
     this.prop = prop;
     this.p2 = p2;
@@ -10,7 +11,7 @@ function Comparison(p1, op, p2){
     this.p2 = p2;
 }
 
-function Statement(p1, op, p2){
+function LogicalOperation(p1, op, p2){
     this.p1 = p1;
     this.op = op;
     this.p2 = p2;
@@ -21,24 +22,37 @@ function UnaryOperator(op, ex){
     this.ex = ex;
 }
 
+function handleLogicalOperation(ex1, rest){
+    if(rest){
+        return new LogicalOperation(ex1, rest[0], rest[1]);
+    }else{
+        return ex1;
+    }
+}
+
 }
 */
 
+
 start
-  = expression
+  = ws ex1:expression ws rest:(logical_operator start)? 
+    { return A.filter.handleLogicalOperation(arguments[0], arguments[1])}
 
 expression
-  = statement
-  / "(" exp:expression ")" { return exp }
-
-statement
-  = c1:comparison ws op:logical_operator ws c2:statement { return new ambrosia.filter.Statement(c1, op, c2) }
-  / c:comparison { return c }
-  / lo:unary_operator ex:expression { return new ambrosia.filter.UnaryOperator(lo, ex); }
-
+  = "(" exp:start ws ")" 
+    { return exp; }
+  / cmp:comparison 
+    { return cmp; }
+  / uo:unary_operator ex:start 
+    { return new A.filter.UnaryOperator(uo, ex); }
 
 comparison
-  = p1:value ws op:operand ws p2:value { return new ambrosia.filter.Comparison(p1, op, p2) }
+  = p1:value ws op:operand ws p2:value
+    { return new A.filter.Comparison(p1, op, p2) }
+  / "true"
+    { return new A.filter.Comparison(1, "EQ", 1); }
+  / "false"
+    { return new A.filter.Comparison(1, "EQ", 0); }
 
 value
   = property
@@ -64,10 +78,12 @@ logical_operator
   / op:'||' { return 'OR' }
 
 property
-  = p1:[a-zA-Z_]+ "."? p2:[a-zA-Z_]* { return new ambrosia.filter.Property(p1.join(""), p2.join("")) }
+  = p1:[a-zA-Z_]+ "."? p2:[a-zA-Z_]* 
+    { return new A.filter.Property(p1.join(""), p2.join("")) }
 
 string
-  = '"' str:[^\"]* '"' { return str.join("") }
+  = '"' str:[^\"]* '"' 
+    { return str.join("") }
 
 number
   = num:[0-9\.]+ { return parseFloat(num.join("")) }

@@ -3,23 +3,61 @@
 /***
  * @namespace several utilities
  */
-ambrosia.util = {
+ambrosia_web.util = {
+    /**
+     * The class that handles logging
+     * @constructor
+     */
     Log: function(){
+        /**
+         * log an event
+         * @param {String} str the message to log
+         * @param {String} level the level: DEBUG, INFO, WARN, ERROR
+         */
         this.log = function (str, level){
             console.log(level+": "+str);
         };
 
+        /**
+         * shortcut for debug logging
+         * @param {String} str the message to log
+         */
         this.D = function(str) {
             this.log(str, "DEBUG");
         };
 
+        /**
+         * shortcut for info logging
+         * @param {String} str the message to log
+         */
+        this.I = function(str) {
+            this.log(str, "INFO");
+        };
+
+        /**
+         * shortcut for warn logging
+         * @param {String} str the message to log
+         */
+        this.W = function(str) {
+            this.log(str, "WARN");
+        };
+
+        /**
+         * shortcut for error logging
+         * @param {String} str the message to log
+         */
         this.E = function(str){
             this.log(str, "ERROR");
         };
     },
 
+    /**
+     * Simple helper function that raises an exception when false is passed
+     * @param {bool} b
+     */
     assert: function(b){
         if(b === false){
+            A.log.E("Assertion failed");
             throw "Assertion failed";
         }
     },

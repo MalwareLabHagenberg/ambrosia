@@ -44,7 +44,7 @@ class LkmPluginParser(ambrosia.ResultParser):
         """Does the acutual parsing.
 
         * *process* elment: All processes reported by the LKM/ANANAS are parsed and
-          :class:`ambrosia.model.entities.Process` entities are created. Moreover, the attributes
+          :class:`ambrosia_web.model.entities.Process` entities are created. Moreover, the attributes
           * *ananas_id* (id in the ANANAS db)
           * *parent_id* (the ANANAS db id of the parent task)
           * *comm* (description of the process in thekernel)
@@ -54,7 +54,7 @@ class LkmPluginParser(ambrosia.ResultParser):
           * *tdgid* (the PID of the task group leader)
           * *tg_leader_id* (The ANANAS db id of the thread group leader)
         * *syscalltrace* element: A :class:`ambrosia_plugins.lkm.events.SyscallEvent` event is create for each syscall
-          using all the information ANANAS provides. Moreover the :class:`ambrosia.clocks.ClockSyncer`.translate_table
+          using all the information ANANAS provides. Moreover the :class:`ambrosia_web.clocks.ClockSyncer`.translate_table
           attribute is filled. ANANAS records two timestamps for each syscall. There is a *normal* timestamp (which is
           the system time when the syscall returned) and the *monotonic* timestamp (which is the time that passed since
           the system booted). When the system clock is not changed, the *monotonic* and the *normal* clock are in sync
@@ -71,7 +71,7 @@ class LkmPluginParser(ambrosia.ResultParser):
            * adjtime: the adjusted time (the captured *normal* time - error).
            * lasterror: the error of the last syscall. If the error of two consecutive syscall changes, we know that
              the system clock has been altered (and we need to make an entry in
-             :class:`ambrosia.clocks.ClockSyncer`.translate_table). The comparison sees two errors that are at a maximum
+             :class:`ambrosia_web.clocks.ClockSyncer`.translate_table). The comparison sees two errors that are at a maximum
              of 1 second apart as a clock change. This is because the error is not absolutely precise (the *monotonic*
              and *normal* timestamps are not captured at exactly the same time, even a context switch may happen in
              between).
@@ -303,7 +303,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
         Args:
             fd (int): the file descriptor number we are searching for
-            process (ambrosia.model.entities.Task): the task the fd belongs to
+            process (ambrosia_web.model.entities.Task): the task the fd belongs to
             clazz (class): (optional) only return an event of this type
             default_start_ts (datetime.datetime): if this fd is unknown, return an event with this start timestamp
 
@@ -335,9 +335,9 @@ class SyscallCorrelator(ambrosia.Correlator):
 
         Args:
             fd (int): the file descriptor number we are searching for
-            process (ambrosia.model.entities.Task): the task the fd belongs to
+            process (ambrosia_web.model.entities.Task): the task the fd belongs to
             clazz (class): (optional) only return an event of this type
-            process (ambrosia.model.entities.Task): the task the fd belongs to
+            process (ambrosia_web.model.entities.Task): the task the fd belongs to
         """
         proc_fds = self.fd_directory[process]
         evt = self._get_fd_event(fd, process, success, clazz)
@@ -353,7 +353,7 @@ class SyscallCorrelator(ambrosia.Correlator):
         """Duplicate an fd (dup and dup2 syscalls)
 
         Args:
-            evt (ambrosia.model.Event): the dup syscall event
+            evt (ambrosia_web.model.Event): the dup syscall event
             oldfd (int): the old file descriptor number
             newfd (int): the new file descriptor number
 

@@ -234,7 +234,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'ambrosia', u'Ambrosia Documentation',
+    ('index', 'ambrosia_web', u'Ambrosia Documentation',
      [u'Wolfgang Ettlinger'], 1)
 ]
 

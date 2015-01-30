@@ -23,7 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" /> 
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" />
+    <link rel="up" title="ambrosia_plugins package" href="ambrosia_plugins.html" />
+    <link rel="next" title="ambrosia_plugins.network package" href="ambrosia_plugins.network.html" />
+    <link rel="prev" title="ambrosia_plugins.events package" href="ambrosia_plugins.events.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +38,15 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="ambrosia_plugins.network.html" title="ambrosia_plugins.network package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_plugins.events.html" title="ambrosia_plugins.events package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >&lt;no title&gt;</a> &raquo;</li>
+          <li><a href="ambrosia_plugins.html" accesskey="U">ambrosia_plugins package</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -411,7 +422,7 @@ parent for all threads (in linux a thread <em>normally</em> shares FDs with its 
 <dd><p>Does the acutual parsing.</p>
 <ul>
 <li><p class="first"><em>process</em> elment: All processes reported by the LKM/ANANAS are parsed and
-<tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.entities.Process</span></tt> entities are created. Moreover, the attributes
+<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.model.entities.Process</span></tt> entities are created. Moreover, the attributes
 * <em>ananas_id</em> (id in the ANANAS db)
 * <em>parent_id</em> (the ANANAS db id of the parent task)
 * <em>comm</em> (description of the process in thekernel)
@@ -422,7 +433,7 @@ parent for all threads (in linux a thread <em>normally</em> shares FDs with its 
 * <em>tg_leader_id</em> (The ANANAS db id of the thread group leader)</p>
 </li>
 <li><p class="first"><em>syscalltrace</em> element: A <a class="reference internal" href="#ambrosia_plugins.lkm.events.SyscallEvent" title="ambrosia_plugins.lkm.events.SyscallEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.SyscallEvent</span></tt></a> event is create for each syscall
-using all the information ANANAS provides. Moreover the <a class="reference internal" href="ambrosia.clocks.html#ambrosia.clocks.ClockSyncer" title="ambrosia.clocks.ClockSyncer"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.clocks.ClockSyncer</span></tt></a>.translate_table
+using all the information ANANAS provides. Moreover the <tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.clocks.ClockSyncer</span></tt>.translate_table
 attribute is filled. ANANAS records two timestamps for each syscall. There is a <em>normal</em> timestamp (which is
 the system time when the syscall returned) and the <em>monotonic</em> timestamp (which is the time that passed since
 the system booted). When the system clock is not changed, the <em>monotonic</em> and the <em>normal</em> clock are in sync
@@ -440,7 +451,7 @@ This is also the error of the emulator clock (compared to the host clock)</li>
 <li>adjtime: the adjusted time (the captured <em>normal</em> time - error).</li>
 <li>lasterror: the error of the last syscall. If the error of two consecutive syscall changes, we know that
 the system clock has been altered (and we need to make an entry in
-<a class="reference internal" href="ambrosia.clocks.html#ambrosia.clocks.ClockSyncer" title="ambrosia.clocks.ClockSyncer"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.clocks.ClockSyncer</span></tt></a>.translate_table). The comparison sees two errors that are at a maximum
+<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.clocks.ClockSyncer</span></tt>.translate_table). The comparison sees two errors that are at a maximum
 of 1 second apart as a clock change. This is because the error is not absolutely precise (the <em>monotonic</em>
 and <em>normal</em> timestamps are not captured at exactly the same time, even a context switch may happen in
 between).</li>
@@ -506,7 +517,7 @@ existed before the LKM was loaded.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>fd</strong> (<em>int</em>) &#8211; the file descriptor number we are searching for</li>
-<li><strong>process</strong> (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.entities.Task" title="ambrosia.model.entities.Task"><em>ambrosia.model.entities.Task</em></a>) &#8211; the task the fd belongs to</li>
+<li><strong>process</strong> (<em>ambrosia_web.model.entities.Task</em>) &#8211; the task the fd belongs to</li>
 <li><strong>clazz</strong> (<em>class</em>) &#8211; (optional) only return an event of this type</li>
 <li><strong>process</strong> &#8211; the task the fd belongs to</li>
 </ul>
@@ -525,7 +536,7 @@ existed before the LKM was loaded.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>evt</strong> (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><em>ambrosia.model.Event</em></a>) &#8211; the dup syscall event</li>
+<li><strong>evt</strong> (<em>ambrosia_web.model.Event</em>) &#8211; the dup syscall event</li>
 <li><strong>oldfd</strong> (<em>int</em>) &#8211; the old file descriptor number</li>
 <li><strong>newfd</strong> (<em>int</em>) &#8211; the new file descriptor number</li>
 </ul>
@@ -565,7 +576,7 @@ may share file descriptors.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>fd</strong> (<em>int</em>) &#8211; the file descriptor number we are searching for</li>
-<li><strong>process</strong> (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.entities.Task" title="ambrosia.model.entities.Task"><em>ambrosia.model.entities.Task</em></a>) &#8211; the task the fd belongs to</li>
+<li><strong>process</strong> (<em>ambrosia_web.model.entities.Task</em>) &#8211; the task the fd belongs to</li>
 <li><strong>clazz</strong> (<em>class</em>) &#8211; (optional) only return an event of this type</li>
 <li><strong>default_start_ts</strong> (<em>datetime.datetime</em>) &#8211; if this fd is unknown, return an event with this start timestamp</li>
 </ul>
@@ -606,6 +617,12 @@ may share file descriptors.</p>
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ambrosia_plugins.events.html"
+                        title="previous chapter">ambrosia_plugins.events package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ambrosia_plugins.network.html"
+                        title="next chapter">ambrosia_plugins.network package</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/ambrosia_plugins.lkm.txt"
@@ -637,7 +654,15 @@ may share file descriptors.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="ambrosia_plugins.network.html" title="ambrosia_plugins.network package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_plugins.events.html" title="ambrosia_plugins.events package"
+             >previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >&lt;no title&gt;</a> &raquo;</li>
+          <li><a href="ambrosia_plugins.html" >ambrosia_plugins package</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

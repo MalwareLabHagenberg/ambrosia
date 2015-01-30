@@ -142,7 +142,7 @@ class ApiCallCorrelator(ambrosia.Correlator):
     """Goes through all API calls and wraps known API calls into higher-level events.
 
     Args:
-        context (ambrosia.context.AmbrosiaContext): the current context.
+        context (ambrosia_web.context.AmbrosiaContext): the current context.
     """
     def __init__(self, context):
         assert isinstance(context, AmbrosiaContext)

@@ -1,0 +1,50 @@
+﻿
+
+
+
+
+
+..
+    Classes and methods
+
+Class ambrosia_web.util.Log#E
+================================================================================
+
+..
+   class-title
+
+
+shortcut for error logging
+
+
+
+
+
+
+
+
+    
+
+
+Constructor
+-----------
+
+.. js:class:: ambrosia_web.util.Log#E(str)
+
+
+
+    
+    :param String str: 
+        the message to log 
+    
+
+
+
+
+
+
+
+    
+
+
+

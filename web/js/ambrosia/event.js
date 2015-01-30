@@ -1,28 +1,102 @@
 "use strict";
 
-ambrosia.event = {
+/**
+ * @namespace the namespace used for classes related to events
+ */
+ambrosia_web.event = {
+    /**
+     * contains all handlers for selecting events. Any part of the application may listen to those events (i.e. add a
+     * function to this array). If the user select an entity the interface can adapt to this (e.g. the
+     * :js:class:`ambrosia_web.view.detailsview.DetailsView` shows details about this event).
+     */
     onSelectHandler: [],
-    onUnSelectHandler: [],
-    addFilterHandler: [],
-    removeFilterHandler: [],
-    generalFilters: [],
-    _selected: [],
-    DEFAULT_BLOCK_HEIGHT: 0.1,
-    BLOCK_WIDTH: 20,
-    BLOCK_PADDING: 8,
-    BLOCK_MARGIN_X: 4,
-    BLOCK_MARGIN_Y: 3,
-    DEFAULT_BLOCK_LAYOUT_MANAGER: new ambrosia.layout.BlockLayoutManager(),
 
+    /**
+     * contains all handlers for unselecting events. Any part of the application may listen to those events (i.e. add a
+     * function to this array). If the user unselect an entity the interface can adapt to this (e.g. the
+     * :js:class:`ambrosia_web.view.detailsview.DetailsView` shows details about this event).
+     */
+    onUnSelectHandler: [],
+
+    /**
+     * contains all handlers for adding filters to an  event class. Any part of the application may listen to those
+     * events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.
+     */
+    addFilterHandler: [],
+
+    /**
+     * contains all handlers for removing filters from an  event class. Any part of the application may listen to those
+     * events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.
+     */
+    removeFilterHandler: [],
+
+    _generalFilters: [],
+    _selected: [],
+
+    /**
+     * The default height in seconds for an event
+     * @constant
+     */
+    DEFAULT_BLOCK_HEIGHT: 0.1,
+
+    /**
+     * The minimum width of a block (in pixel)
+     * @contant
+     */
+    BLOCK_WIDTH: 20,
+
+    /**
+     * The horizontal space Ambrosia should keep between the borders of a child event and its parent (in pixel)
+     * @constant
+     */
+    BLOCK_PADDING: 8,
+
+    /**
+     * The horizontal space Ambrosia should keep between two adjacent event
+     * @constant
+     */
+    BLOCK_MARGIN_X: 4,
+
+    /**
+     *  The vertical space Ambrosia should keep between two adjacent event
+     *  @constant
+     */
+    BLOCK_MARGIN_Y: 3,
+
+    /**
+     * The default :js:class:`ambrosia_web.layout.BlockLayoutManager` that is used on the top level
+     * @constant
+     */
+    DEFAULT_BLOCK_LAYOUT_MANAGER: new ambrosia_web.layout.BlockLayoutManager(),
+
+    /**
+     * The client side counterpart for an event
+     * @see :class:`ambrosia.model.Event`
+     * @constructor
+     */
     Event: function(){
         this.references = {};
         this.properties = {};
         this.startTS = 0;
         this.endTS = 0;
+        this.children = [];
 
+        /**
+         * Draw the event. Should be called third when drawing. Must be implemented by subclass.
+         */
         this.draw = function(){ assert(false); };
+
+        /**
+         * Calculates the dimensions of the visualisation (for block events). Should be called second when drawing.
+         * events.
+         * @param {ambrosia_web.layout.BlockLayoutManager} blockLayoutManager the block layout manager to use
+         */
         this.calcDimensions = function(blockLayoutManager){ };
 
+        /**
+         * This is the first method called when drawing events. It calculates if an element should be shown.
+         * @returns {boolean} TODO
+         */
         this.calcVisible = function(){
             this.visible = true;
 
@@ -55,6 +129,10 @@ ambrosia.event = {
             return forceShowParents;
         };
 
+        /**
+         * Returns a jQuery element containing a link that, when clicked, selects the event.
+         * @returns {jQuery} the link
+         */
         this.getLink = function(){
             var a = $('<a href="javascript:void(0)">');
             var ths = this;
@@ -69,11 +147,17 @@ ambrosia.event = {
             return a;
         };
 
+        /**
+         * This method should be called when the user selects one event.
+         */
         this.select = function(){
             A.event.clearSelect();
             this.selectAdd();
         };
 
+        /**
+         * This method should be called when the user adds an event to a selection.
+         */
         this.selectAdd = function(){
             for(var i in A.event.onSelectHandler){
                 A.event.onSelectHandler[i].apply(this);
@@ -82,6 +166,9 @@ ambrosia.event = {
             A.event._selected.push(this);
         };
 
+        /**
+         * This method should be called when the user unselects one event.
+         */
         this.unselect = function(){
             var idx = A.event._selected.indexOf(this);
 
@@ -103,6 +190,12 @@ ambrosia.event = {
 
     },
 
+    /**
+     * Receives an object containing the deserialized data from the server and returns an instance of the class
+     * :js:class:`ambrosia_web.event.Event`
+     * @param {object} el the deserialized data
+     * @param {ambrosia_web.event.Event} parent the events parent event (if exists)
+     */
     enrich: function(el, parent){
         var new_el = new (A.event.events.event_registry[el.type]);
 
@@ -124,6 +217,11 @@ ambrosia.event = {
         return new_el;
     },
 
+    /**
+     * Returns the filters that are effective for a specific event class.
+     * @param {class} cls the event class
+     * @returns {Array} the filters
+     */
     getEffectiveFilters: function(cls){
         var res = [];
 
@@ -133,16 +231,21 @@ ambrosia.event = {
             }
         }
 
-        for(var i in A.event.generalFilters){
-            res.push(A.event.generalFilters[i]);
+        for(var i in A.event._generalFilters){
+            res.push(A.event._generalFilters[i]);
         }
 
         return res;
     },
 
+    /**
+     * Returns all filter for a class. If null is passed, returns the general filters.
+     * @param {class} cls the event class
+     * @returns {Array} the filter
+     */
     getFilters: function(cls){
         if(!cls){
-            return A.event.generalFilters;
+            return A.event._generalFilters;
         }else{
             if(!cls.filters){
                 cls.filters = [];
@@ -152,8 +255,13 @@ ambrosia.event = {
         }
     },
 
+    /**
+     * Add a filter to an event class. If null is passed, the filter is added to the general filters.
+     * @param {class} cls the event class
+     * @param {ambrosia_web.filter.Filter} filter the filter to add
+     */
     addFilter: function(cls, filter){
-        var filters = A.event.generalFilters;
+        var filters = A.event._generalFilters;
 
         if(cls){
             if(!cls.filters){
@@ -172,10 +280,14 @@ ambrosia.event = {
         A.redraw();
     },
 
+    /**
+     * Removes a filter
+     * @param {ambrosia_web.filter.Filter} filter the filter to remove
+     */
     removeFilter: function(filter){
-        for(var i in A.event.generalFilters){
-            if(A.event.generalFilters[i] == filter){
-                A.event.generalFilters.splice(i, 1);
+        for(var i in A.event._generalFilters){
+            if(A.event._generalFilters[i] == filter){
+                A.event._generalFilters.splice(i, 1);
             }
         }
 
@@ -196,17 +308,36 @@ ambrosia.event = {
         A.redraw();
     },
 
+    /**
+     * Resets the default :js:class:`A.layout.BlockLayoutManager`
+     */
     reset: function(){
-        A.event.DEFAULT_BLOCK_LAYOUT_MAMAGER = new A.layout.BlockLayoutManager();
+        A.event.DEFAULT_BLOCK_LAYOUT_MANAGER = new A.layout.BlockLayoutManager();
     },
 
+    /**
+     * unselect all events
+     */
     clearSelect: function(){
         for(var i in A.event._selected){
             A.event._selected[i].unselect();
         }
     },
 
+    /**
+     * Base class for all events that are drawn as a block.
+     * @constructor
+     */
     BlockEvent: function(){
+        /**
+         * Calculates the dimensions of the visualisation (for block events). The top level events are drawn using the
+         * default block layout manager. Each event that has visible children creates a new block layout manager that
+         * is used to position the children (the children's calcDimensions method is called). The block layout manager
+         * that was used to position the children holds the width and height that is required to draw all children.
+         * Afterwards (using this width/height) the parent event is drawn.
+         *
+         * @param {ambrosia_web.layout.BlockLayoutManager} blockLayoutManager the block layout manager to use
+         */
         this.calcDimensions = function(blockLayoutManager){
             assert(blockLayoutManager instanceof A.layout.BlockLayoutManager);
 
@@ -238,9 +369,9 @@ ambrosia.event = {
                 end = begin + A.event.DEFAULT_BLOCK_HEIGHT;
             }
 
-            this.dimensions = new A.event.Dimensions(0, begin * 1000, A.event.BLOCK_WIDTH, (end - begin) * 1000);
+            this.dimensions = new A.layout.Dimensions(0, begin * 1000, A.event.BLOCK_WIDTH, (end - begin) * 1000);
 
-            var childBlockLayoutManager = new ambrosia.layout.BlockLayoutManager();
+            var childBlockLayoutManager = new ambrosia_web.layout.BlockLayoutManager();
 
             for(var i in this.children){
                 this.children[i].calcDimensions(childBlockLayoutManager);
@@ -256,6 +387,11 @@ ambrosia.event = {
 
             this.dimensions = blockLayoutManager.fitBlock(this.dimensions, A.event.BLOCK_MARGIN_X, A.event.BLOCK_MARGIN_Y);
         };
+
+        /**
+         * draws the event
+         * @param {int} xOffset (optional) if this is a child object, the x position of the parent
+         */
         this.draw = function(xOffset){
             if(!this.visible){
                 return;
@@ -286,9 +422,16 @@ ambrosia.event = {
         }
     },
 
+    /**
+     * Base class for all events that are drawn as a horizontal line across the main view.
+     * @constructor
+     */
     LineEvent: function(){
         this.calcDimensions = function(blockLayoutManager){};
 
+        /**
+         * draws the line
+         */
         this.draw = function(){
             if(!this.visible)
                 return;
@@ -306,25 +449,6 @@ ambrosia.event = {
                  fill: 'none',
                  strokeWidth: width});
         }
-    },
-    
-    Dimensions: function (x, y, width, height){
-        assert(isFinite(x));
-        assert(isFinite(y));
-        assert(isFinite(width));
-        assert(isFinite(height));
-
-        this.getX = function(){ return x; };
-        this.getY = function(){ return y; };
-        this.getWidth = function(){ return width; };
-        this.getHeight = function(){ return height; };
-        this.getEndX = function(){ return x + width; };
-        this.getEndY = function(){ return y + height; };
-        
-        this.setX = function(v){ assert(isFinite(v)); x = v; };
-        this.setY = function(v){ assert(isFinite(v)); y = v; };
-        this.setHeight = function(v){ assert(isFinite(v)); height = v; };
-        this.setWidth = function(v){ assert(isFinite(v)); width = v; };
     }
 };
 

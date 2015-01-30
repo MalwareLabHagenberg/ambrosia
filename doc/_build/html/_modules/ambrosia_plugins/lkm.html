@@ -93,7 +93,7 @@
         <span class="sd">&quot;&quot;&quot;Does the acutual parsing.</span>
 
 <span class="sd">        * *process* elment: All processes reported by the LKM/ANANAS are parsed and</span>
-<span class="sd">          :class:`ambrosia.model.entities.Process` entities are created. Moreover, the attributes</span>
+<span class="sd">          :class:`ambrosia_web.model.entities.Process` entities are created. Moreover, the attributes</span>
 <span class="sd">          * *ananas_id* (id in the ANANAS db)</span>
 <span class="sd">          * *parent_id* (the ANANAS db id of the parent task)</span>
 <span class="sd">          * *comm* (description of the process in thekernel)</span>
@@ -103,7 +103,7 @@
 <span class="sd">          * *tdgid* (the PID of the task group leader)</span>
 <span class="sd">          * *tg_leader_id* (The ANANAS db id of the thread group leader)</span>
 <span class="sd">        * *syscalltrace* element: A :class:`ambrosia_plugins.lkm.events.SyscallEvent` event is create for each syscall</span>
-<span class="sd">          using all the information ANANAS provides. Moreover the :class:`ambrosia.clocks.ClockSyncer`.translate_table</span>
+<span class="sd">          using all the information ANANAS provides. Moreover the :class:`ambrosia_web.clocks.ClockSyncer`.translate_table</span>
 <span class="sd">          attribute is filled. ANANAS records two timestamps for each syscall. There is a *normal* timestamp (which is</span>
 <span class="sd">          the system time when the syscall returned) and the *monotonic* timestamp (which is the time that passed since</span>
 <span class="sd">          the system booted). When the system clock is not changed, the *monotonic* and the *normal* clock are in sync</span>
@@ -120,7 +120,7 @@
 <span class="sd">           * adjtime: the adjusted time (the captured *normal* time - error).</span>
 <span class="sd">           * lasterror: the error of the last syscall. If the error of two consecutive syscall changes, we know that</span>
 <span class="sd">             the system clock has been altered (and we need to make an entry in</span>
-<span class="sd">             :class:`ambrosia.clocks.ClockSyncer`.translate_table). The comparison sees two errors that are at a maximum</span>
+<span class="sd">             :class:`ambrosia_web.clocks.ClockSyncer`.translate_table). The comparison sees two errors that are at a maximum</span>
 <span class="sd">             of 1 second apart as a clock change. This is because the error is not absolutely precise (the *monotonic*</span>
 <span class="sd">             and *normal* timestamps are not captured at exactly the same time, even a context switch may happen in</span>
 <span class="sd">             between).</span>
@@ -352,7 +352,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            fd (int): the file descriptor number we are searching for</span>
-<span class="sd">            process (ambrosia.model.entities.Task): the task the fd belongs to</span>
+<span class="sd">            process (ambrosia_web.model.entities.Task): the task the fd belongs to</span>
 <span class="sd">            clazz (class): (optional) only return an event of this type</span>
 <span class="sd">            default_start_ts (datetime.datetime): if this fd is unknown, return an event with this start timestamp</span>
 
@@ -384,9 +384,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            fd (int): the file descriptor number we are searching for</span>
-<span class="sd">            process (ambrosia.model.entities.Task): the task the fd belongs to</span>
+<span class="sd">            process (ambrosia_web.model.entities.Task): the task the fd belongs to</span>
 <span class="sd">            clazz (class): (optional) only return an event of this type</span>
-<span class="sd">            process (ambrosia.model.entities.Task): the task the fd belongs to</span>
+<span class="sd">            process (ambrosia_web.model.entities.Task): the task the fd belongs to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">proc_fds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fd_directory</span><span class="p">[</span><span class="n">process</span><span class="p">]</span>
         <span class="n">evt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fd_event</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
@@ -402,7 +402,7 @@
         <span class="sd">&quot;&quot;&quot;Duplicate an fd (dup and dup2 syscalls)</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            evt (ambrosia.model.Event): the dup syscall event</span>
+<span class="sd">            evt (ambrosia_web.model.Event): the dup syscall event</span>
 <span class="sd">            oldfd (int): the old file descriptor number</span>
 <span class="sd">            newfd (int): the new file descriptor number</span>
 

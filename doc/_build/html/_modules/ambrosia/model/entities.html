@@ -62,7 +62,7 @@
     <span class="sd">&quot;&quot;&quot;Represents a process or thread running on the emulator.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">        context (ambrosia_web.context.AmbrosiaContext): the current context</span>
 <span class="sd">        pid (int): the PID/TID of the task</span>
 <span class="sd">        start_ts (datetime.datetime): the timestamp the task started or `None` if unknown</span>
 <span class="sd">        end_ts (datetime.datetime): the timestamp the task ended or `None` if unknown</span>
@@ -151,7 +151,7 @@
     <span class="sd">&quot;&quot;&quot;Represents file (existing or not) on the emulator.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">        context (ambrosia_web.context.AmbrosiaContext): the current context</span>
 <span class="sd">        abspath (str): the absolute path of the file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -176,7 +176,7 @@
         <span class="sd">&quot;&quot;&quot;Get the file representing unknonw files</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">            context (ambrosia_web.context.AmbrosiaContext): the current context</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
 
@@ -205,7 +205,7 @@
     <span class="sd">&quot;&quot;&quot;Represents a server endpoint i.e. a server and port.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">        context (ambrosia_web.context.AmbrosiaContext): the current context</span>
 <span class="sd">        protocol (str): the network protocol used (e.g. TCP)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 

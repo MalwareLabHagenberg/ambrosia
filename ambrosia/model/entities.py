@@ -11,7 +11,7 @@ class Task(Entity):
     """Represents a process or thread running on the emulator.
 
     Args:
-        context (ambrosia.context.AmbrosiaContext): the current context
+        context (ambrosia_web.context.AmbrosiaContext): the current context
         pid (int): the PID/TID of the task
         start_ts (datetime.datetime): the timestamp the task started or `None` if unknown
         end_ts (datetime.datetime): the timestamp the task ended or `None` if unknown
@@ -100,7 +100,7 @@ class File(Entity):
     """Represents file (existing or not) on the emulator.
 
     Args:
-        context (ambrosia.context.AmbrosiaContext): the current context
+        context (ambrosia_web.context.AmbrosiaContext): the current context
         abspath (str): the absolute path of the file
     """
 
@@ -125,7 +125,7 @@ class File(Entity):
         """Get the file representing unknonw files
 
         Args:
-            context (ambrosia.context.AmbrosiaContext): the current context
+            context (ambrosia_web.context.AmbrosiaContext): the current context
         """
         assert isinstance(context, ambrosia.AmbrosiaContext)
 
@@ -154,7 +154,7 @@ class ServerEndpoint(Entity):
     """Represents a server endpoint i.e. a server and port.
 
     Args:
-        context (ambrosia.context.AmbrosiaContext): the current context
+        context (ambrosia_web.context.AmbrosiaContext): the current context
         protocol (str): the network protocol used (e.g. TCP)
     """
 

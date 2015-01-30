@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Class ambrosia_web.filter.Filter &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" />
+    <link rel="up" title="Ambrosia Client Documentation" href="client.html" />
+    <link rel="next" title="Class ambrosia_web.filter.LogicalOperation" href="ambrosia_web.filter.LogicalOperation.html" />
+    <link rel="prev" title="Class ambrosia_web.filter.Comparison" href="ambrosia_web.filter.Comparison.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.filter.LogicalOperation.html" title="Class ambrosia_web.filter.LogicalOperation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.filter.Comparison.html" title="Class ambrosia_web.filter.Comparison"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="client.html" accesskey="U">Ambrosia Client Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="class-ambrosia-web-filter-filter">
+<h1>Class ambrosia_web.filter.Filter<a class="headerlink" href="#class-ambrosia-web-filter-filter" title="Permalink to this headline">¶</a></h1>
+<p>A Filter represents a single condition (either entered by the user or a default condition).</p>
+<p>The following shows example for the filter syntax:</p>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-javascript"><div class="highlight"><pre><span class="o">!</span><span class="p">(</span><span class="nx">test</span> <span class="o">==</span> <span class="mf">1.2</span> <span class="o">||</span> <span class="p">(</span><span class="nx">test</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">&amp;&amp;</span> <span class="nx">foo</span><span class="p">.</span><span class="nx">bar</span> <span class="o">!=</span> <span class="s2">&quot;foobar&quot;</span><span class="p">)</span> <span class="o">||</span> <span class="kc">true</span> <span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="kc">false</span>
+</pre></div>
+</div>
+<p>The logical operations &#8220;&amp;&amp;&#8221; and &#8216;!!&#8217; as well as the unary logical operation &#8221;!&#8221; are allowed. Parentheses may be
+used to change the default precedence of the operations.</p>
+<p>These logical operations manage &#8220;comparisons&#8221;. A &#8220;comparison&#8221; may compare two values using the operators &#8220;==&#8221;,
+&#8221;!=&#8221;, &#8220;&gt;=&#8221;, &#8220;&lt;=&#8221;, &#8220;&lt;&#8221;, &#8220;~&#8221; (the first value matches a regex defined by the second value), &#8221;:&#8221; (the second value
+is an array and the first element is contained in the second one) and &#8221;!:&#8221; (the first value is not contained
+in the second value).</p>
+<p>A value may be a string in the form of &#8220;string&#8221;, a number in the form of 1.0 or 1, true or false or a property.
+A property is a string describing an attribute of an event (e.g. abspath, successful). Moreover a property may
+also match a specific reference (e.g. process.pid, file.abspath). The reference defined in a property may be a
+specific reference (like file or process) or the string &#8220;references&#8221;. This special reference matches all
+references in an event. Therefore, the value of any property using &#8220;references&#8221; (e.g. references.id) must be
+treated as an array (Array operations &#8221;:&#8221; and &#8221;!:&#8221; must be used). A filter general filter (that is applied to all
+events regardless of their type) can therefore be used to find all events related to a certain entity (e.g.
+&#8220;someidofanentity&#8221; : references.id).</p>
+</div>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia_web.filter.Filter">
+<em class="property">class </em><tt class="descclassname">ambrosia_web.filter.</tt><tt class="descname">Filter</tt><big>(</big><em>str</em>, <em>forceShowParents</em><big>)</big><a class="headerlink" href="#ambrosia_web.filter.Filter" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>str</strong> (<em>String</em>) &#8211; the condition for the filter</li>
+<li><strong>forceShowParents</strong> &#8211; TODO</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="evaluate">
+<h3>evaluate<a class="headerlink" href="#evaluate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.filter.Filter#evaluate">
+<tt class="descclassname">ambrosia_web.filter.</tt><tt class="descname">Filter#evaluate</tt><big>(</big><em>evt</em><big>)</big><a class="headerlink" href="#ambrosia_web.filter.Filter#evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>evt</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns bool:</th><td class="field-body"><p class="first last">true if the event matches</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Evaluate if an avent matches this filter</p>
+</div>
+<div class="section" id="getinput">
+<h3>getInput<a class="headerlink" href="#getinput" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.filter.Filter#getInput">
+<tt class="descclassname">ambrosia_web.filter.</tt><tt class="descname">Filter#getInput</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.filter.Filter#getInput" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns jQuery:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Get a jQuery Element that can be used as an graphical representation of the filter (a textbox)</p>
+</div>
+<div class="section" id="setrule">
+<h3>setRule<a class="headerlink" href="#setrule" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.filter.Filter#setRule">
+<tt class="descclassname">ambrosia_web.filter.</tt><tt class="descname">Filter#setRule</tt><big>(</big><em>r</em><big>)</big><a class="headerlink" href="#ambrosia_web.filter.Filter#setRule" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>r</strong> &#8211; {String} the new rule in filter syntax</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>replaces the current rule with a new one</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Class ambrosia_web.filter.Filter</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#evaluate">evaluate</a></li>
+<li><a class="reference internal" href="#getinput">getInput</a></li>
+<li><a class="reference internal" href="#setrule">setRule</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ambrosia_web.filter.Comparison.html"
+                        title="previous chapter">Class ambrosia_web.filter.Comparison</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ambrosia_web.filter.LogicalOperation.html"
+                        title="next chapter">Class ambrosia_web.filter.LogicalOperation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia_web.filter.Filter.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.filter.LogicalOperation.html" title="Class ambrosia_web.filter.LogicalOperation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.filter.Comparison.html" title="Class ambrosia_web.filter.Comparison"
+             >previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="client.html" >Ambrosia Client Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

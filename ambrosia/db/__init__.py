@@ -12,12 +12,12 @@ class AmbrosiaDb(object):
     optimized (e.g. BTree module). Ambrosia already uses these data structures. The following classes are already
     designed to be stored in ZODB:
 
-    * :class:`ambrosia.model.Analysis`
-    * :class:`ambrosia.model.Entity`
-    * :class:`ambrosia.model.Event`
+    * :class:`ambrosia_web.model.Analysis`
+    * :class:`ambrosia_web.model.Entity`
+    * :class:`ambrosia_web.model.Event`
 
     Args:
-        context (ambrosia.context.AmbrosiaContext): The current context.
+        context (ambrosia_web.context.AmbrosiaContext): The current context.
     """
     def __init__(self, context):
         assert isinstance(context, AmbrosiaContext)

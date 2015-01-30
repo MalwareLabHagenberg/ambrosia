@@ -1,0 +1,387 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Namespace ambrosia_web.event &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" />
+    <link rel="up" title="Ambrosia Client Documentation" href="client.html" />
+    <link rel="next" title="Class ambrosia_web.event.BlockEvent" href="ambrosia_web.event.BlockEvent.html" />
+    <link rel="prev" title="Class ambrosia_web.entity.entities-Task" href="ambrosia_web.entity.entities-Task.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.event.BlockEvent.html" title="Class ambrosia_web.event.BlockEvent"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.entity.entities-Task.html" title="Class ambrosia_web.entity.entities-Task"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="client.html" accesskey="U">Ambrosia Client Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="namespace-ambrosia-web-event">
+<h1>Namespace ambrosia_web.event<a class="headerlink" href="#namespace-ambrosia-web-event" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia_web.event">
+<em class="property">class </em><tt class="descclassname">ambrosia_web.</tt><tt class="descname">event</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="addfilter">
+<h3>addFilter<a class="headerlink" href="#addfilter" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.event.addFilter">
+<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">addFilter</tt><big>(</big><em>cls</em>, <em>filter</em><big>)</big><a class="headerlink" href="#ambrosia_web.event.addFilter" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cls</strong> (<em>class</em>) &#8211; the event class</li>
+<li><strong>filter</strong> (<a class="reference internal" href="ambrosia_web.filter.Filter.html#ambrosia_web.filter.Filter" title="ambrosia_web.filter.Filter"><em>ambrosia_web.filter.Filter</em></a>) &#8211; the filter to add</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Add a filter to an event class. If null is passed, the filter is added to the general filters.</p>
+</div>
+<div class="section" id="clearselect">
+<h3>clearSelect<a class="headerlink" href="#clearselect" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.event.clearSelect">
+<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">clearSelect</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.clearSelect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>unselect all events</p>
+</div>
+<div class="section" id="enrich">
+<h3>enrich<a class="headerlink" href="#enrich" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.event.enrich">
+<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">enrich</tt><big>(</big><em>el</em>, <em>parent</em><big>)</big><a class="headerlink" href="#ambrosia_web.event.enrich" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>el</strong> (<em>object</em>) &#8211; the deserialized data</li>
+<li><strong>parent</strong> (<a class="reference internal" href="ambrosia_web.event.Event.html#ambrosia_web.event.Event" title="ambrosia_web.event.Event"><em>ambrosia_web.event.Event</em></a>) &#8211; the events parent event (if exists)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Receives an object containing the deserialized data from the server and returns an instance of the class
+<a class="reference internal" href="ambrosia_web.event.Event.html#ambrosia_web.event.Event" title="ambrosia_web.event.Event"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.event.Event()</span></tt></a></p>
+</div>
+<div class="section" id="geteffectivefilters">
+<h3>getEffectiveFilters<a class="headerlink" href="#geteffectivefilters" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.event.getEffectiveFilters">
+<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">getEffectiveFilters</tt><big>(</big><em>cls</em><big>)</big><a class="headerlink" href="#ambrosia_web.event.getEffectiveFilters" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>cls</strong> (<em>class</em>) &#8211; the event class</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns Array:</th><td class="field-body"><p class="first last">the filters</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Returns the filters that are effective for a specific event class.</p>
+</div>
+<div class="section" id="getfilters">
+<h3>getFilters<a class="headerlink" href="#getfilters" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.event.getFilters">
+<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">getFilters</tt><big>(</big><em>cls</em><big>)</big><a class="headerlink" href="#ambrosia_web.event.getFilters" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>cls</strong> (<em>class</em>) &#8211; the event class</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns Array:</th><td class="field-body"><p class="first last">the filter</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Returns all filter for a class. If null is passed, returns the general filters.</p>
+</div>
+<div class="section" id="removefilter">
+<h3>removeFilter<a class="headerlink" href="#removefilter" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.event.removeFilter">
+<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">removeFilter</tt><big>(</big><em>filter</em><big>)</big><a class="headerlink" href="#ambrosia_web.event.removeFilter" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filter</strong> (<a class="reference internal" href="ambrosia_web.filter.Filter.html#ambrosia_web.filter.Filter" title="ambrosia_web.filter.Filter"><em>ambrosia_web.filter.Filter</em></a>) &#8211; the filter to remove</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Removes a filter</p>
+</div>
+<div class="section" id="reset">
+<h3>reset<a class="headerlink" href="#reset" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.event.reset">
+<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">reset</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Resets the default <tt class="xref js js-class docutils literal"><span class="pre">A.layout.BlockLayoutManager()</span></tt></p>
+</div>
+</div>
+<div class="section" id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="addfilterhandler">
+<h3>addFilterHandler<a class="headerlink" href="#addfilterhandler" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="addFilterHandler">
+<tt class="descname">addFilterHandler</tt><a class="headerlink" href="#addFilterHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>contains all handlers for adding filters to an  event class. Any part of the application may listen to those
+events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.</p>
+</div>
+<div class="section" id="block-margin-x">
+<h3>BLOCK_MARGIN_X<a class="headerlink" href="#block-margin-x" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="BLOCK_MARGIN_X">
+<tt class="descname">BLOCK_MARGIN_X</tt><a class="headerlink" href="#BLOCK_MARGIN_X" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The horizontal space Ambrosia should keep between two adjacent event</p>
+</div>
+<div class="section" id="block-margin-y">
+<h3>BLOCK_MARGIN_Y<a class="headerlink" href="#block-margin-y" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="BLOCK_MARGIN_Y">
+<tt class="descname">BLOCK_MARGIN_Y</tt><a class="headerlink" href="#BLOCK_MARGIN_Y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The vertical space Ambrosia should keep between two adjacent event</p>
+</div>
+<div class="section" id="block-padding">
+<h3>BLOCK_PADDING<a class="headerlink" href="#block-padding" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="BLOCK_PADDING">
+<tt class="descname">BLOCK_PADDING</tt><a class="headerlink" href="#BLOCK_PADDING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The horizontal space Ambrosia should keep between the borders of a child event and its parent (in pixel)</p>
+</div>
+<div class="section" id="block-width">
+<h3>BLOCK_WIDTH<a class="headerlink" href="#block-width" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="BLOCK_WIDTH">
+<tt class="descname">BLOCK_WIDTH</tt><a class="headerlink" href="#BLOCK_WIDTH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The minimum width of a block (in pixel)</p>
+</div>
+<div class="section" id="default-block-height">
+<h3>DEFAULT_BLOCK_HEIGHT<a class="headerlink" href="#default-block-height" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="DEFAULT_BLOCK_HEIGHT">
+<tt class="descname">DEFAULT_BLOCK_HEIGHT</tt><a class="headerlink" href="#DEFAULT_BLOCK_HEIGHT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The default height in seconds for an event</p>
+</div>
+<div class="section" id="default-block-layout-manager">
+<h3>DEFAULT_BLOCK_LAYOUT_MANAGER<a class="headerlink" href="#default-block-layout-manager" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="DEFAULT_BLOCK_LAYOUT_MANAGER">
+<tt class="descname">DEFAULT_BLOCK_LAYOUT_MANAGER</tt><a class="headerlink" href="#DEFAULT_BLOCK_LAYOUT_MANAGER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The default <a class="reference internal" href="ambrosia_web.layout.BlockLayoutManager.html#ambrosia_web.layout.BlockLayoutManager" title="ambrosia_web.layout.BlockLayoutManager"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.layout.BlockLayoutManager()</span></tt></a> that is used on the top level</p>
+</div>
+<div class="section" id="onselecthandler">
+<h3>onSelectHandler<a class="headerlink" href="#onselecthandler" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="onSelectHandler">
+<tt class="descname">onSelectHandler</tt><a class="headerlink" href="#onSelectHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>contains all handlers for selecting events. Any part of the application may listen to those events (i.e. add a
+function to this array). If the user select an entity the interface can adapt to this (e.g. the
+<a class="reference internal" href="ambrosia_web.view.detailsview.DetailsView.html#ambrosia_web.view.detailsview.DetailsView" title="ambrosia_web.view.detailsview.DetailsView"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.view.detailsview.DetailsView()</span></tt></a> shows details about this event).</p>
+</div>
+<div class="section" id="onunselecthandler">
+<h3>onUnSelectHandler<a class="headerlink" href="#onunselecthandler" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="onUnSelectHandler">
+<tt class="descname">onUnSelectHandler</tt><a class="headerlink" href="#onUnSelectHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>contains all handlers for unselecting events. Any part of the application may listen to those events (i.e. add a
+function to this array). If the user unselect an entity the interface can adapt to this (e.g. the
+<a class="reference internal" href="ambrosia_web.view.detailsview.DetailsView.html#ambrosia_web.view.detailsview.DetailsView" title="ambrosia_web.view.detailsview.DetailsView"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.view.detailsview.DetailsView()</span></tt></a> shows details about this event).</p>
+</div>
+<div class="section" id="removefilterhandler">
+<h3>removeFilterHandler<a class="headerlink" href="#removefilterhandler" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="removeFilterHandler">
+<tt class="descname">removeFilterHandler</tt><a class="headerlink" href="#removeFilterHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>contains all handlers for removing filters from an  event class. Any part of the application may listen to those
+events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Namespace ambrosia_web.event</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#addfilter">addFilter</a></li>
+<li><a class="reference internal" href="#clearselect">clearSelect</a></li>
+<li><a class="reference internal" href="#enrich">enrich</a></li>
+<li><a class="reference internal" href="#geteffectivefilters">getEffectiveFilters</a></li>
+<li><a class="reference internal" href="#getfilters">getFilters</a></li>
+<li><a class="reference internal" href="#removefilter">removeFilter</a></li>
+<li><a class="reference internal" href="#reset">reset</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#attributes">Attributes</a><ul>
+<li><a class="reference internal" href="#addfilterhandler">addFilterHandler</a></li>
+<li><a class="reference internal" href="#block-margin-x">BLOCK_MARGIN_X</a></li>
+<li><a class="reference internal" href="#block-margin-y">BLOCK_MARGIN_Y</a></li>
+<li><a class="reference internal" href="#block-padding">BLOCK_PADDING</a></li>
+<li><a class="reference internal" href="#block-width">BLOCK_WIDTH</a></li>
+<li><a class="reference internal" href="#default-block-height">DEFAULT_BLOCK_HEIGHT</a></li>
+<li><a class="reference internal" href="#default-block-layout-manager">DEFAULT_BLOCK_LAYOUT_MANAGER</a></li>
+<li><a class="reference internal" href="#onselecthandler">onSelectHandler</a></li>
+<li><a class="reference internal" href="#onunselecthandler">onUnSelectHandler</a></li>
+<li><a class="reference internal" href="#removefilterhandler">removeFilterHandler</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ambrosia_web.entity.entities-Task.html"
+                        title="previous chapter">Class ambrosia_web.entity.entities-Task</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ambrosia_web.event.BlockEvent.html"
+                        title="next chapter">Class ambrosia_web.event.BlockEvent</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia_web.event.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.event.BlockEvent.html" title="Class ambrosia_web.event.BlockEvent"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.entity.entities-Task.html" title="Class ambrosia_web.entity.entities-Task"
+             >previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="client.html" >Ambrosia Client Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

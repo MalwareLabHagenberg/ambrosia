@@ -72,8 +72,8 @@
 <span class="sd">    * plugins (dict): the plugins (key) and wheter they were active during ANANAS analysis (value, bool)</span>
 <span class="sd">    * hashes (dict): the hashes of the APK in the form {type: hash}</span>
 
-<span class="sd">    Analysis also manages all (top-level) Events and Entities (see :class:`ambrosia.model.Event`,</span>
-<span class="sd">    :class:`ambrosia.model.Entity`) and tries to optimize for searching performance.</span>
+<span class="sd">    Analysis also manages all (top-level) Events and Entities (see :class:`ambrosia_web.model.Event`,</span>
+<span class="sd">    :class:`ambrosia_web.model.Entity`) and tries to optimize for searching performance.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="bp">None</span>
@@ -118,7 +118,7 @@
         <span class="sd">&quot;&quot;&quot;iterate all known entities of a specific class.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">            context (ambrosia_web.context.AmbrosiaContext): the current context</span>
 <span class="sd">            cls (class): the class of the entity we are looking for</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
@@ -134,7 +134,7 @@
         <span class="sd">&quot;&quot;&quot;Search for a specific entity, if it does not exist, create a new one</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">            context (ambrosia_web.context.AmbrosiaContext): the current context</span>
 <span class="sd">            cls (class): the class of the entity we are looking for</span>
 <span class="sd">            *args: the arguments that would construct an entity</span>
 
@@ -177,7 +177,7 @@
         <span class="sd">&quot;&quot;&quot;Iterates over all events matching specific conditions in an efficient manner.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">            context (ambrosia_web.context.AmbrosiaContext): the current context</span>
 <span class="sd">            cls (class): the class of the events we are looking for</span>
 <span class="sd">            key: the key we are searching for</span>
 <span class="sd">            min_value: the minimum value</span>
@@ -446,7 +446,7 @@
         <span class="sd">&quot;&quot;&quot;Adjust times (e.g. emulator time -&gt; system time)</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            context (ambrosia.context.AmbrosiaContext): the current context</span>
+<span class="sd">            context (ambrosia_web.context.AmbrosiaContext): the current context</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">ambrosia</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">AmbrosiaContext</span><span class="p">)</span>
 
@@ -454,7 +454,11 @@
             <span class="n">c</span><span class="o">.</span><span class="n">adjust_times</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="Event.to_serializeable"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Event.to_serializeable">[docs]</a>    <span class="k">def</span> <span class="nf">to_serializeable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns a dict that can be used for serialization</span>
+        <span class="sd">&quot;&quot;&quot;Returns a dict that can be used for serialization.</span>
+
+<span class="sd">        The primary keys of entities this entity refers to (e.g. parent process) are stored in the attribute</span>
+<span class="sd">        &quot;references&quot;. This way any entity only has to be transmitted once, when the entity is referenced only the</span>
+<span class="sd">        primary key is used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
         <span class="n">refs</span><span class="p">,</span> <span class="n">props</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>

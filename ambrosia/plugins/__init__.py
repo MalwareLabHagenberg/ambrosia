@@ -75,12 +75,12 @@ class PluginInfoTop(object):
 
     @staticmethod
     def correlators():
-        """Should return a list with tuples containing a :class:`ambrosia.Correlator` and the priority (int)
+        """Should return a list with tuples containing a :class:`ambrosia_web.Correlator` and the priority (int)
         """
         return []
 
     @staticmethod
     def parsers():
-        """Should return a list with all defined :class:`ambrosia.ResultParser` classes.
+        """Should return a list with all defined :class:`ambrosia_web.ResultParser` classes.
         """
         return []

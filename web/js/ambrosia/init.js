@@ -1,6 +1,9 @@
 "use strict";
 
-var ambrosia = {
+/**
+ * @namespace the top namespace containing all other namespaces
+ */
+var ambrosia_web = {
     mainView: null,
     detailsView: null,
     filterView: null,
@@ -8,6 +11,9 @@ var ambrosia = {
     ts_offset: 0,
     result: {},
 
+    /**
+     * Redraws all views of the application
+     */
     redraw: function() {
         // TODO listener
         var drawing = busy('Drawing');
@@ -16,10 +22,13 @@ var ambrosia = {
         $(".filterinput").removeClass('filterchanged');
     },
 
+    /**
+     * initialize Ambrosia
+     */
     init: function () {
         var loading = busy('loading JSON data');
 
-        $.extend(ambrosia, {
+        $.extend(ambrosia_web, {
             mainView: new A.view.mainview.MainView(),
             detailsView: new A.view.detailsview.DetailsView(),
             filterView: new A.view.filterview.FilterView(),
@@ -55,6 +64,6 @@ var ambrosia = {
 };
 
 /* create shortcut */
-var A = ambrosia;
+var A = ambrosia_web;
 
 $(document).ready(A.init);

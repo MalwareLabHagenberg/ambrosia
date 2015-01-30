@@ -1,0 +1,59 @@
+﻿
+
+
+
+
+
+..
+    Classes and methods
+
+Class ambrosia_web.layout.Dimensions
+================================================================================
+
+..
+   class-title
+
+
+Helper class that represents the dimensions of a block
+
+
+
+
+
+
+
+
+    
+
+
+Constructor
+-----------
+
+.. js:class:: ambrosia_web.layout.Dimensions(x, y, width, height)
+
+
+
+    
+    :param  x: 
+        the x position 
+    
+    :param  y: 
+        the y position 
+    
+    :param  width: 
+        the width 
+    
+    :param  height: 
+        the height 
+    
+
+
+
+
+
+
+
+    
+
+
+

@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Class ambrosia_web.event.BlockEvent &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" />
+    <link rel="up" title="Ambrosia Client Documentation" href="client.html" />
+    <link rel="next" title="Class ambrosia_web.event.Event" href="ambrosia_web.event.Event.html" />
+    <link rel="prev" title="Namespace ambrosia_web.event" href="ambrosia_web.event.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.event.Event.html" title="Class ambrosia_web.event.Event"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.event.html" title="Namespace ambrosia_web.event"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="client.html" accesskey="U">Ambrosia Client Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="class-ambrosia-web-event-blockevent">
+<h1>Class ambrosia_web.event.BlockEvent<a class="headerlink" href="#class-ambrosia-web-event-blockevent" title="Permalink to this headline">¶</a></h1>
+<p>Base class for all events that are drawn as a block.</p>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia_web.event.BlockEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">BlockEvent</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.BlockEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="calcdimensions">
+<h3>calcDimensions<a class="headerlink" href="#calcdimensions" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.event.BlockEvent#calcDimensions">
+<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">BlockEvent#calcDimensions</tt><big>(</big><em>blockLayoutManager</em><big>)</big><a class="headerlink" href="#ambrosia_web.event.BlockEvent#calcDimensions" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>blockLayoutManager</strong> (<a class="reference internal" href="ambrosia_web.layout.BlockLayoutManager.html#ambrosia_web.layout.BlockLayoutManager" title="ambrosia_web.layout.BlockLayoutManager"><em>ambrosia_web.layout.BlockLayoutManager</em></a>) &#8211; the block layout manager to use</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Calculates the dimensions of the visualisation (for block events). The top level events are drawn using the
+default block layout manager. Each event that has visible children creates a new block layout manager that
+is used to position the children (the children&#8217;s calcDimensions method is called). The block layout manager
+that was used to position the children holds the width and height that is required to draw all children.
+Afterwards (using this width/height) the parent event is drawn.</p>
+</div>
+<div class="section" id="draw">
+<h3>draw<a class="headerlink" href="#draw" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.event.BlockEvent#draw">
+<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">BlockEvent#draw</tt><big>(</big><em>xOffset</em><big>)</big><a class="headerlink" href="#ambrosia_web.event.BlockEvent#draw" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xOffset</strong> (<em>int</em>) &#8211; (optional) if this is a child object, the x position of the parent</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>draws the event</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Class ambrosia_web.event.BlockEvent</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#calcdimensions">calcDimensions</a></li>
+<li><a class="reference internal" href="#draw">draw</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ambrosia_web.event.html"
+                        title="previous chapter">Namespace ambrosia_web.event</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ambrosia_web.event.Event.html"
+                        title="next chapter">Class ambrosia_web.event.Event</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia_web.event.BlockEvent.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.event.Event.html" title="Class ambrosia_web.event.Event"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.event.html" title="Namespace ambrosia_web.event"
+             >previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="client.html" >Ambrosia Client Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

@@ -72,7 +72,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</li>
 <li><strong>abspath</strong> (<em>str</em>) &#8211; the absolute path of the file</li>
 </ul>
 </td>
@@ -102,7 +102,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</td>
 </tr>
 </tbody>
 </table>
@@ -120,7 +120,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</li>
 <li><strong>protocol</strong> (<em>str</em>) &#8211; the network protocol used (e.g. TCP)</li>
 </ul>
 </td>
@@ -149,7 +149,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</li>
 <li><strong>pid</strong> (<em>int</em>) &#8211; the PID/TID of the task</li>
 <li><strong>start_ts</strong> (<em>datetime.datetime</em>) &#8211; the timestamp the task started or <cite>None</cite> if unknown</li>
 <li><strong>end_ts</strong> (<em>datetime.datetime</em>) &#8211; the timestamp the task ended or <cite>None</cite> if unknown</li>
@@ -184,8 +184,8 @@
 <em class="property">class </em><tt class="descclassname">ambrosia.model.</tt><tt class="descname">Analysis</tt><a class="reference internal" href="_modules/ambrosia/model.html#Analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">persistent.Persistent</span></tt></p>
 <p>An Analysis object (and the referenced objects) stores all information the Ambrosia analysis found out.</p>
-<p>Analysis also manages all (top-level) Events and Entities (see <a class="reference internal" href="#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a>,
-<a class="reference internal" href="#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a>) and tries to optimize for searching performance.</p>
+<p>Analysis also manages all (top-level) Events and Entities (see <tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.model.Event</span></tt>,
+<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.model.Entity</span></tt>) and tries to optimize for searching performance.</p>
 <dl class="method">
 <dt id="ambrosia.model.Analysis.add_entity">
 <tt class="descname">add_entity</tt><big>(</big><em>context</em>, <em>cls</em>, <em>*args</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.add_entity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.add_entity" title="Permalink to this definition">¶</a></dt>
@@ -240,7 +240,7 @@ are out of date). This means that only static values may be indexed.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</li>
 <li><strong>cls</strong> (<em>class</em>) &#8211; the class of the entity we are looking for</li>
 <li><strong>*args</strong> &#8211; the arguments that would construct an entity</li>
 </ul>
@@ -268,7 +268,7 @@ entity in memory.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</li>
 <li><strong>cls</strong> (<em>class</em>) &#8211; the class of the entity we are looking for</li>
 </ul>
 </td>
@@ -286,7 +286,7 @@ entity in memory.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</li>
+<li><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</li>
 <li><strong>cls</strong> (<em>class</em>) &#8211; the class of the events we are looking for</li>
 <li><strong>key</strong> &#8211; the key we are searching for</li>
 <li><strong>min_value</strong> &#8211; the minimum value</li>
@@ -408,7 +408,7 @@ structure) and updates timestamps.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference internal" href="ambrosia.context.html#ambrosia.context.AmbrosiaContext" title="ambrosia.context.AmbrosiaContext"><em>ambrosia.context.AmbrosiaContext</em></a>) &#8211; the current context</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</td>
 </tr>
 </tbody>
 </table>
@@ -486,7 +486,10 @@ been added</div></blockquote>
 <dl class="method">
 <dt id="ambrosia.model.Event.to_serializeable">
 <tt class="descname">to_serializeable</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Event.to_serializeable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Event.to_serializeable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a dict that can be used for serialization</p>
+<dd><p>Returns a dict that can be used for serialization.</p>
+<p>The primary keys of entities this entity refers to (e.g. parent process) are stored in the attribute
+&#8220;references&#8221;. This way any entity only has to be transmitted once, when the entity is referenced only the
+primary key is used.</p>
 </dd></dl>
 
 </dd></dl>

@@ -23,7 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" /> 
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" />
+    <link rel="up" title="ambrosia package" href="ambrosia.html" />
+    <link rel="next" title="ambrosia.db package" href="ambrosia.db.html" />
+    <link rel="prev" title="ambrosia.config package" href="ambrosia.config.html" /> 
   </head>
   <body>
     <div class="related">
@@ -35,7 +38,15 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="ambrosia.db.html" title="ambrosia.db package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia.config.html" title="ambrosia.config package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >&lt;no title&gt;</a> &raquo;</li>
+          <li><a href="ambrosia.html" accesskey="U">ambrosia package</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -54,11 +65,11 @@
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Objects of this class hold all relevant information for <strong>one</strong> run of Ambrosia:</p>
 <ul class="simple">
-<li><em>config</em> (<a class="reference internal" href="ambrosia.config.html#ambrosia.config.Config" title="ambrosia.config.Config"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.config.Config</span></tt></a>): the configuration</li>
-<li><em>db</em> (<a class="reference internal" href="ambrosia.db.html#ambrosia.db.AmbrosiaDb" title="ambrosia.db.AmbrosiaDb"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.db.AmbrosiaDb</span></tt></a>): the database (currently not used)</li>
-<li><em>analysis</em> (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.Analysis" title="ambrosia.model.Analysis"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Analysis</span></tt></a>): the object containing the Analysis results.</li>
-<li><em>clock_syncer</em> (<a class="reference internal" href="ambrosia.clocks.html#ambrosia.clocks.ClockSyncer" title="ambrosia.clocks.ClockSyncer"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.clocks.ClockSyncer</span></tt></a>): used to syncronize clocks (emulator &lt;-&gt; host)</li>
-<li><em>plugin_manager</em> (<a class="reference internal" href="ambrosia.plugins.html#ambrosia.plugins.PluginManager" title="ambrosia.plugins.PluginManager"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.plugins.PluginManager</span></tt></a>): the object holding information about the Ambrosia
+<li><em>config</em> (<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.config.Config</span></tt>): the configuration</li>
+<li><em>db</em> (<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.db.AmbrosiaDb</span></tt>): the database (currently not used)</li>
+<li><em>analysis</em> (<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.model.Analysis</span></tt>): the object containing the Analysis results.</li>
+<li><em>clock_syncer</em> (<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.clocks.ClockSyncer</span></tt>): used to syncronize clocks (emulator &lt;-&gt; host)</li>
+<li><em>plugin_manager</em> (<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.plugins.PluginManager</span></tt>): the object holding information about the Ambrosia
 plugins</li>
 </ul>
 <table class="docutils field-list" frame="void" rules="none">
@@ -88,6 +99,12 @@ plugins</li>
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ambrosia.config.html"
+                        title="previous chapter">ambrosia.config package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ambrosia.db.html"
+                        title="next chapter">ambrosia.db package</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/ambrosia.context.txt"
@@ -119,7 +136,15 @@ plugins</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="ambrosia.db.html" title="ambrosia.db package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia.config.html" title="ambrosia.config package"
+             >previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >&lt;no title&gt;</a> &raquo;</li>
+          <li><a href="ambrosia.html" >ambrosia package</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

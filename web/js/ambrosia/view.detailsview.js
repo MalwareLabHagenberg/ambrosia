@@ -1,9 +1,17 @@
 "use strict";
 
-ambrosia.view = ambrosia.view || {};
-
-ambrosia.view.detailsview = {
+/**
+ * @namespace contains the details view
+ */
+ambrosia_web.view.detailsview = {
+    /**
+     * Implements a simple view that shows details about the last event that has been selected
+     * @constructor
+     */
     DetailsView: function(){
+        /**
+         * set up the details view
+         */
         this.setup = function(){
             $('#detailsview').text('No Event selected');
         }

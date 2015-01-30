@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Class ambrosia_web.layout.BlockLayoutManager &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" />
+    <link rel="up" title="Ambrosia Client Documentation" href="client.html" />
+    <link rel="next" title="Class ambrosia_web.layout.Dimensions" href="ambrosia_web.layout.Dimensions.html" />
+    <link rel="prev" title="Namespace ambrosia_web.layout" href="ambrosia_web.layout.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.layout.Dimensions.html" title="Class ambrosia_web.layout.Dimensions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.layout.html" title="Namespace ambrosia_web.layout"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="client.html" accesskey="U">Ambrosia Client Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="class-ambrosia-web-layout-blocklayoutmanager">
+<h1>Class ambrosia_web.layout.BlockLayoutManager<a class="headerlink" href="#class-ambrosia-web-layout-blocklayoutmanager" title="Permalink to this headline">¶</a></h1>
+<p>The block layout manager is used to position event block in the main view.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.layout.BlockLayoutManager.fitBlock()</span></tt> for details.</p>
+</div>
+<p>Note: in order for the block layout manager to properly work, the events have to be fitted in ascending order (x
+position)</p>
+<div class="section" id="constructor">
+<h2>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ambrosia_web.layout.BlockLayoutManager">
+<em class="property">class </em><tt class="descclassname">ambrosia_web.layout.</tt><tt class="descname">BlockLayoutManager</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.layout.BlockLayoutManager" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fitblock">
+<h3>fitBlock<a class="headerlink" href="#fitblock" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.layout.BlockLayoutManager#fitBlock">
+<tt class="descclassname">ambrosia_web.layout.</tt><tt class="descname">BlockLayoutManager#fitBlock</tt><big>(</big><em>dim</em>, <em>margin_x</em>, <em>margin_y</em><big>)</big><a class="headerlink" href="#ambrosia_web.layout.BlockLayoutManager#fitBlock" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>dim</strong> (<a class="reference internal" href="ambrosia_web.layout.Dimensions.html#ambrosia_web.layout.Dimensions" title="ambrosia_web.layout.Dimensions"><em>ambrosia_web.layout.Dimensions</em></a>) &#8211; the dimensions of the block (may overlap other events)</li>
+<li><strong>margin_x</strong> (<em>int</em>) &#8211; the horizontal margin that should be left</li>
+<li><strong>margin_y</strong> (<em>int</em>) &#8211; the vertical margin that should be left</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns ambrosia_web.layout.Dimensions:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">the new dimensions of the non-overlapping block</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Takes a <a class="reference internal" href="ambrosia_web.layout.Dimensions.html#ambrosia_web.layout.Dimensions" title="ambrosia_web.layout.Dimensions"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.layout.Dimensions()</span></tt></a> object and tries to fit it considering the previously
+fitted blocks.</p>
+</div>
+<div class="section" id="getendy">
+<h3>getEndY<a class="headerlink" href="#getendy" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.layout.BlockLayoutManager#getEndY">
+<tt class="descclassname">ambrosia_web.layout.</tt><tt class="descname">BlockLayoutManager#getEndY</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.layout.BlockLayoutManager#getEndY" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns number:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>position bottom border of the block layout manager (considering all fitted events)</p>
+</div>
+<div class="section" id="getwidth">
+<h3>getWidth<a class="headerlink" href="#getwidth" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.layout.BlockLayoutManager#getWidth">
+<tt class="descclassname">ambrosia_web.layout.</tt><tt class="descname">BlockLayoutManager#getWidth</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.layout.BlockLayoutManager#getWidth" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns number:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>get the width of the whole block layout manager (considering all fitted events)</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Class ambrosia_web.layout.BlockLayoutManager</a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#fitblock">fitBlock</a></li>
+<li><a class="reference internal" href="#getendy">getEndY</a></li>
+<li><a class="reference internal" href="#getwidth">getWidth</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ambrosia_web.layout.html"
+                        title="previous chapter">Namespace ambrosia_web.layout</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ambrosia_web.layout.Dimensions.html"
+                        title="next chapter">Class ambrosia_web.layout.Dimensions</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ambrosia_web.layout.BlockLayoutManager.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.layout.Dimensions.html" title="Class ambrosia_web.layout.Dimensions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ambrosia_web.layout.html" title="Namespace ambrosia_web.layout"
+             >previous</a> |</li>
+        <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="client.html" >Ambrosia Client Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

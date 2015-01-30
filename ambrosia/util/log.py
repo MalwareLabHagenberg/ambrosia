@@ -48,7 +48,7 @@ def init_logging(log_level):
     Args:
         log_level (str): the minimum log level
     """
-    main_logger = logging.getLogger("ambrosia")
+    main_logger = logging.getLogger("ambrosia_web")
     main_logger.setLevel(log_level)
 
     plugin_logger = logging.getLogger("ambrosia_plugins")

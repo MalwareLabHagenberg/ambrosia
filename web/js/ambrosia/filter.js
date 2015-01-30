@@ -1,9 +1,41 @@
 "use strict";
 
-ambrosia.filter = {
+/**
+ * @namespace used for filtering events
+ */
+ambrosia_web.filter = {
+    /***
+     * A Filter represents a single condition (either entered by the user or a default condition).
+     *
+     * The following shows example for the filter syntax:
+     *
+     * @example
+     * !(test == 1.2 || (test > 2 && foo.bar != "foobar") || true ) && !false
+     *
+     * The logical operations "&&" and '!!' as well as the unary logical operation "!" are allowed. Parentheses may be
+     * used to change the default precedence of the operations.
+     *
+     * These logical operations manage "comparisons". A "comparison" may compare two values using the operators "==",
+     * "!=", ">=", "<=", "<", "~" (the first value matches a regex defined by the second value), ":" (the second value
+     * is an array and the first element is contained in the second one) and "!:" (the first value is not contained
+     * in the second value).
+     *
+     * A value may be a string in the form of "string", a number in the form of 1.0 or 1, true or false or a property.
+     * A property is a string describing an attribute of an event (e.g. abspath, successful). Moreover a property may
+     * also match a specific reference (e.g. process.pid, file.abspath). The reference defined in a property may be a
+     * specific reference (like file or process) or the string "references". This special reference matches all
+     * references in an event. Therefore, the value of any property using "references" (e.g. references.id) must be
+     * treated as an array (Array operations ":" and "!:" must be used). A filter general filter (that is applied to all
+     * events regardless of their type) can therefore be used to find all events related to a certain entity (e.g.
+     * "someidofanentity" : references.id).
+     *
+     * @param {String} str the condition for the filter
+     * @param forceShowParents TODO
+     * @constructor
+     */
     Filter: function(str, forceShowParents){
         if(!str){
-            str = '1==1';
+            str = 'true';
         }
     
         if(!forceShowParents){
@@ -23,9 +55,14 @@ ambrosia.filter = {
         var error = false;
         var filter = null;
 
+        /**
+         * replaces the current rule with a new one
+         * @function
+         * @param r {String} the new rule in filter syntax
+         */
         this.setRule = function(r){
             try{
-                var f = ambrosia.filter.parser.parse(r);
+                var f = ambrosia_web.filter.parser.parse(r);
                 err.text('');
                 input.removeClass('errorinput');
                 error = false;
@@ -45,7 +82,7 @@ ambrosia.filter = {
             input.addClass('filterchanged');
             ths.setRule(input.val());
         });
-        
+
         del.click(function(){
             A.event.removeFilter(ths);
         });
@@ -54,15 +91,29 @@ ambrosia.filter = {
             return force_show_parents;
         };
 
+        /**
+         * Evaluate if an avent matches this filter
+         * @returns {bool} true if the event matches
+         */
         this.evaluate = function(evt){
             return filter.evaluate(evt);
         };
 
+        /**
+         * Get a jQuery Element that can be used as an graphical representation of the filter (a textbox)
+         * @returns {jQuery}
+         */
         this.getInput = function(){
             return this._div;
         };
     },
 
+    /**
+     * A property used in a filter. Used by the parser.
+     * @param prop the string before the dot
+     * @param prop2 the string after the dot or empty
+     * @constructor
+     */
     Property: function(prop, prop2){
         this.evaluate = function(evt){
             assert(evt instanceof A.event.Event);
@@ -104,6 +155,12 @@ ambrosia.filter = {
         };
     },
 
+    /**
+     * Unary operators. Used by the parser
+     * @param op the operation e.g. NOT
+     * @param expression the expression the operator is applied to
+     * @constructor
+     */
     UnaryOperator: function(op, expression){
         this.op = op;
         this.expression = expression;
@@ -120,6 +177,13 @@ ambrosia.filter = {
         };
     },
 
+    /**
+     * A comparison. Used by the parser.
+     * @param p1 the first value that is compared
+     * @param op the compare operation
+     * @param p2 the sencond value
+     * @constructor
+     */
     Comparison: function(p1, op, p2){
         this.p1 = p1;
         this.op = op;
@@ -181,7 +245,14 @@ ambrosia.filter = {
         };
     },
 
-    Statement: function(p1, op, p2){
+    /**
+     * Logical operations like "&&" and "!!". Used by the parser
+     * @param p1 the first expression
+     * @param op the operation
+     * @param p2 the second expression
+     * @constructor
+     */
+    LogicalOperation: function(p1, op, p2){
         this.p1 = p1;
         this.op = op;
         this.p2 = p2;
@@ -201,7 +272,22 @@ ambrosia.filter = {
                 break;
             }
         }
+    },
+
+    /**
+     * Helper function for the parser.
+     * @param ex1 an expression
+     * @param rest an array containing a logical operation and a second expression or undefined
+     * @returns {*}
+     */
+    handleLogicalOperation: function(ex1, rest){
+        if(rest){
+            return new A.filter.LogicalOperation(ex1, rest[0], rest[1]);
+        }else{
+            return ex1;
+        }
     }
+
 };
 
 

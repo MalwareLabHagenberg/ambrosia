@@ -36,7 +36,7 @@ class ClockSyncer(object):
         This class assumes that all timestamps have the same time zone (local time).
 
     Args:
-        context (ambrosia.context.AmbrosiaContext): The current context.
+        context (ambrosia_web.context.AmbrosiaContext): The current context.
     """
     def __init__(self, context):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
