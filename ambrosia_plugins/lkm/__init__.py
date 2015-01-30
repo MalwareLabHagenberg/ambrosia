@@ -44,7 +44,7 @@ class LkmPluginParser(ambrosia.ResultParser):
         """Does the acutual parsing.
 
         * *process* elment: All processes reported by the LKM/ANANAS are parsed and
-          :class:`ambrosia_web.model.entities.Process` entities are created. Moreover, the attributes
+          :class:`ambrosia_web.model.entities.Task` entities are created. Moreover, the attributes
           * *ananas_id* (id in the ANANAS db)
           * *parent_id* (the ANANAS db id of the parent task)
           * *comm* (description of the process in thekernel)

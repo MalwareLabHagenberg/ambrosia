@@ -87,7 +87,7 @@ class Task(Entity):
                 return el
 
     def __str__(self):
-        return '[Process: "{}" ({}) Path: {}]'.format(self.comm, self.pid, self.path)
+        return '[Task: "{}" ({}) Path: {}]'.format(self.comm, self.pid, self.path)
 
     @property
     def is_process(self):

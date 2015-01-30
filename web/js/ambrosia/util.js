@@ -15,6 +15,9 @@ ambrosia_web.util = {
          * @param {String} level the level: DEBUG, INFO, WARN, ERROR
          */
         this.log = function (str, level){
+            if(level == "ERROR"){
+                window.alert("ERROR: "+str);
+            }
             console.log(level+": "+str);
         };
 

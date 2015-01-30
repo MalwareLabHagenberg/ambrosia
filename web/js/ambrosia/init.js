@@ -10,6 +10,7 @@ var ambrosia_web = {
     entityView: null,
     ts_offset: 0,
     result: {},
+    log: null,
 
     /**
      * Redraws all views of the application
@@ -26,6 +27,8 @@ var ambrosia_web = {
      * initialize Ambrosia
      */
     init: function () {
+        A.log = new A.util.Log();
+
         var loading = busy('loading JSON data');
 
         $.extend(ambrosia_web, {
@@ -35,7 +38,14 @@ var ambrosia_web = {
             entityView: new A.view.entityview.EntityView()
         });
 
-        $.ajax('test.json', {
+        var result_file = location.hash.substr(1);
+
+        if(result_file == ''){
+            A.log.E("no file give, please load Ambrosia with an input file");
+            return;
+        }
+
+        $.ajax(result_file, {
             success: function (r) {
                 A.result = A.util.deserialize(r[0], r[1]);
 

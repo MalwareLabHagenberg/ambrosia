@@ -13,7 +13,7 @@ ambrosia_web.event.events = function(){
 
     }
     SyscallEvent.prototype = new A.event.BlockEvent();
-    SyscallEvent.filters = [new A.filter.Filter('0==1')];
+    SyscallEvent.filters = [new A.filter.Filter('false')];
 
 
     /**
@@ -121,7 +121,7 @@ ambrosia_web.event.events = function(){
         this.getColor = function(){ return '#1dff00'; };
     }
     UnknownFdEvent.prototype = new A.event.BlockEvent();
-    UnknownFdEvent.filters = [new A.filter.Filter('0==1')];
+    UnknownFdEvent.filters = [new A.filter.Filter('false')];
 
 
     /**
@@ -165,7 +165,7 @@ ambrosia_web.event.events = function(){
         this.getColor = function(){ return '#a9cccc'; };
     }
     AndroidApicall.filters = [
-        new A.filter.Filter('1==0')
+        new A.filter.Filter('false')
     ];
     AndroidApicall.prototype = new A.event.BlockEvent();
 
@@ -236,7 +236,21 @@ ambrosia_web.event.events = function(){
     function ANANASAdbShellExec(){
         this.getColor = function(){ return '#000000'; };
     }
-    ANANASAdbShellExec.prototype = new A.event.BlockEvent()
+    ANANASAdbShellExec.prototype = new A.event.BlockEvent();
+
+
+    /**
+     * Represents :class:`ambrosia_plugins.lkm.events.LibraryLoad`
+     * @constructor
+     */
+    function LibraryLoad(){
+        this.getColor = function(){ return '#000000'; };
+    }
+    LibraryLoad.filters = [
+        new A.filter.Filter("false")
+    ];
+    LibraryLoad.prototype = new A.event.BlockEvent();
+
 
     var evt_registry = {
         'ambrosia_plugins.events.ANANASEvent':              ANANASEvent,
@@ -259,7 +273,8 @@ ambrosia_web.event.events = function(){
         'ambrosia_plugins.apimonitor.ContactsAccess':       ContactsAccess,
         'ambrosia_plugins.apimonitor.PhoneCall':            PhoneCall,
         'ambrosia_plugins.apimonitor.SMSAccess':            SMSAccess,
-        'ambrosia_plugins.lkm.events.AnonymousFileEvent':   AnonymousFileEvent
+        'ambrosia_plugins.lkm.events.AnonymousFileEvent':   AnonymousFileEvent,
+        'ambrosia_plugins.lkm.events.LibraryLoad':          LibraryLoad
     };
 
     var ret = {
