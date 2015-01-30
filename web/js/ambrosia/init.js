@@ -16,7 +16,6 @@ var ambrosia_web = {
      * Redraws all views of the application
      */
     redraw: function() {
-        // TODO listener
         var drawing = busy('Drawing');
         A.mainView.redraw();
         drawing.finish();

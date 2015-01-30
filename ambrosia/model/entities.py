@@ -32,7 +32,7 @@ class Task(Entity):
         self.uid = None
         self.parent = None
         self.fds = []
-        self.start_captured = start_ts is not None  # TODO ugly
+        self.start_captured = start_ts is not None  # TODO write this information to the report
 
         start_ts, end_ts = self._normalize_times(context, start_ts, end_ts)
 

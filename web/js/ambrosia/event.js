@@ -412,8 +412,12 @@ ambrosia_web.event = {
             }
 
 
-            $(this.svgElement).click(function(){
-                ths.select();
+            $(this.svgElement).click(function(event){
+                if(event.ctrlKey){
+                    ths.selectAdd();
+                }else {
+                    ths.select();
+                }
             });
         }
     },
