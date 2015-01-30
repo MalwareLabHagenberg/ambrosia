@@ -315,8 +315,8 @@ ambrosia_web.event = {
      * unselect all events
      */
     clearSelect: function(){
-        for(var i in A.event._selected){
-            A.event._selected[i].unselect();
+        while(A.event._selected.length > 0){
+            A.event._selected[0].unselect();
         }
     },
 
