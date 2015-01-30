@@ -45,13 +45,12 @@ ambrosia_web.view.mainview = {
                 }, settings: {height: $('#mainview').height() - 20}
             });
 
-            A.event.onSelectHandler.push(function () {
-                $(this.svgElement).addClass('mainview_selected');
+            A.event.onSelectHandler.push(function (evt) {
+                $(evt.svgElement).addClass('mainview_selected');
             });
 
-            A.event.onUnSelectHandler.push(function () {
-                // TODO this
-                $(this.svgElement).removeClass('mainview_selected');
+            A.event.onUnSelectHandler.push(function (evt) {
+                $(evt.svgElement).removeClass('mainview_selected');
             });
         };
 

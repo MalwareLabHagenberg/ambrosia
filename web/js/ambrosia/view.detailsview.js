@@ -18,25 +18,25 @@ ambrosia_web.view.detailsview = {
     }
 };
 
-A.event.onSelectHandler.push(function(){
+A.event.onSelectHandler.push(function(evt){
     var props = {};
     
-    props['Description'] = this.description;
-    props['Type'] = this.type;
-    props['Parent'] = (this.parent == null) ? ('no parent') : (this.parent.getLink());
-    props['Start'] = this.startTS - ts_offset;
-    props['End'] = this.endTS - ts_offset;
+    props['Description'] = evt.description;
+    props['Type'] = evt.type;
+    props['Parent'] = (evt.parent == null) ? ('no parent') : (evt.parent.getLink());
+    props['Start'] = evt.startTS - ts_offset;
+    props['End'] = evt.endTS - ts_offset;
     
-    for(var k in this.properties){
-        props['Property "'+k+'"'] = this.properties[k] + '';
+    for(var k in evt.properties){
+        props['Property "'+k+'"'] = evt.properties[k] + '';
     }
     
-    for(var k in this.references){
-        props['Reference "'+k+'"'] = this.references[k].getLink();
+    for(var k in evt.references){
+        props['Reference "'+k+'"'] = evt.references[k].getLink();
     }
     
-    for(var k in this.children){
-        props['Child '+((k*1)+1)] = this.children[k].getLink();
+    for(var k in evt.children){
+        props['Child '+((k*1)+1)] = evt.children[k].getLink();
     }
     
     var table = $('<table>');

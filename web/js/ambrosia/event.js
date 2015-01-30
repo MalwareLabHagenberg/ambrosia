@@ -156,7 +156,7 @@ ambrosia_web.event = {
          */
         this.selectAdd = function(){
             for(var i in A.event.onSelectHandler){
-                A.event.onSelectHandler[i].apply(this);
+                A.event.onSelectHandler[i](this);
             }
 
             A.event._selected.push(this);
@@ -174,7 +174,7 @@ ambrosia_web.event = {
             }
 
             for(var i in A.event.onUnSelectHandler){
-                A.event.onUnSelectHandler[i].apply(this);
+                A.event.onUnSelectHandler[i](this);
             }
 
             A.event._selected.splice(idx, 1);
