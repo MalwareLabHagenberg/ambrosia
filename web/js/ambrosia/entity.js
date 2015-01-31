@@ -30,6 +30,8 @@ ambrosia_web.entity = {
 
         /**
          * This method should be called when the user selects an entity.
+         * @methodOf ambrosia_web.entity.Entity
+         * @name select
          */
         select: function () {
             for (var i in A.entity.onSelectHandler) {
@@ -42,6 +44,8 @@ ambrosia_web.entity = {
         /**
          * resolves all references
          * @see :func:`ambrosia.model.Event.to_serializeable`
+         * @methodOf ambrosia_web.entity.Entity
+         * @name resolveReference
          */
         resolveReferences: function () {
             for (var i in this.references) {
@@ -52,6 +56,8 @@ ambrosia_web.entity = {
         /**
          * Returns a jQuery element containing a link that, when clicked, selects the entity.
          * @returns {jQuery} the link
+         * @methodOf ambrosia_web.entity.Entity
+         * @name getLink
          */
         getLink: function () {
             var a = $('<a href="javascript:void(0)">');

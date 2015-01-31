@@ -49,7 +49,7 @@ Methods
 draw
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.LineEvent#draw()
+.. js:function:: ambrosia_web.event.LineEvent.draw()
 
 
 

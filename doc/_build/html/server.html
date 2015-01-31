@@ -85,6 +85,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ambrosia.util.html">ambrosia.util package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="ambrosia.util.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ambrosia.util.html#module-ambrosia.util.log">ambrosia.util.log module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ambrosia.util.html#module-ambrosia.util">Module contents</a></li>
 </ul>
 </li>
@@ -121,6 +123,75 @@
 <li class="toctree-l1"><a class="reference internal" href="processor.html">processor module</a></li>
 </ul>
 </div>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This section gives a short overview of the internal workings of Ambrosia. For a detailed description please see the
+documentation for the modules.</p>
+<p>The main function for the Ambrosia server side part is located in <a class="reference internal" href="processor.html#module-processor" title="processor"><tt class="xref py py-mod docutils literal"><span class="pre">processor</span></tt></a>. The following shows the usage
+of the processor:</p>
+<div class="highlight-none"><div class="highlight"><pre>usage: processor.py [-h] [--config CONFIG]
+                    [--loglevel {FATAL,ERROR,WARN,INFO,DEBUG}]
+                    [--output OUTPUT]
+                    [--output-type {serialized,none,tree,interactive}]
+                    report
+
+process ANANAS report for Ambrosia
+
+positional arguments:
+  report                the XML report input
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --config CONFIG       the config file
+  --loglevel {FATAL,ERROR,WARN,INFO,DEBUG}
+                        the log level for stderr
+  --output OUTPUT       the output file, default is stdout
+  --output-type {serialized,none,tree,interactive}
+                        define what should be printed
+</pre></div>
+</div>
+<p>The processor initializes logging (see <a class="reference internal" href="ambrosia.util.html#ambrosia.util.log.init_logging" title="ambrosia.util.log.init_logging"><tt class="xref py py-func docutils literal"><span class="pre">ambrosia.util.log.init_logging()</span></tt></a>), reads the XML report and creates an
+<a class="reference internal" href="ambrosia.html#ambrosia.Ambrosia" title="ambrosia.Ambrosia"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Ambrosia</span></tt></a> instance. It adjusts the timestamps of events coming from the emulator (see
+<a class="reference internal" href="ambrosia.html#ambrosia.Ambrosia.adjust_times" title="ambrosia.Ambrosia.adjust_times"><tt class="xref py py-func docutils literal"><span class="pre">ambrosia.Ambrosia.adjust_times()</span></tt></a>), correlates the events (<a class="reference internal" href="ambrosia.html#ambrosia.Ambrosia.correlate" title="ambrosia.Ambrosia.correlate"><tt class="xref py py-func docutils literal"><span class="pre">ambrosia.Ambrosia.correlate()</span></tt></a>) and serializes
+them (<a class="reference internal" href="ambrosia.html#ambrosia.Ambrosia.serialize" title="ambrosia.Ambrosia.serialize"><tt class="xref py py-func docutils literal"><span class="pre">ambrosia.Ambrosia.serialize()</span></tt></a>).</p>
+<p>All the results are stored in an <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Analysis" title="ambrosia.model.Analysis"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Analysis</span></tt></a> instance. The main two types of entries in the result
+are events (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a>) and entities (<a class="reference internal" href="ambrosia.model.html#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a>). All events and entities
+are managed by the <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Analysis" title="ambrosia.model.Analysis"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Analysis</span></tt></a> class. All entities are defined in <a class="reference internal" href="ambrosia.model.html#module-ambrosia.model.entities" title="ambrosia.model.entities"><tt class="xref py py-mod docutils literal"><span class="pre">ambrosia.model.entities</span></tt></a>.
+The events are defined by each plugin.</p>
+<div class="section" id="plugins">
+<h3>Plugins<a class="headerlink" href="#plugins" title="Permalink to this headline">¶</a></h3>
+<p>All plugins are defined in the <a class="reference internal" href="ambrosia_plugins.html#module-ambrosia_plugins" title="ambrosia_plugins"><tt class="xref py py-mod docutils literal"><span class="pre">ambrosia_plugins</span></tt></a> module. A plugin has to specify a
+<a class="reference internal" href="ambrosia.plugins.html#ambrosia.plugins.PluginInfoTop" title="ambrosia.plugins.PluginInfoTop"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.plugins.PluginInfoTop</span></tt></a> class called &#8220;PluginInfo&#8221;. This class should return all
+<a class="reference internal" href="ambrosia.html#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Correlator</span></tt></a> and <a class="reference internal" href="ambrosia.html#ambrosia.ResultParser" title="ambrosia.ResultParser"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.ResultParser</span></tt></a> classes defined by the plugin.</p>
+<p>A <a class="reference internal" href="ambrosia.html#ambrosia.ResultParser" title="ambrosia.ResultParser"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.ResultParser</span></tt></a> is used to extract events from the report. A <a class="reference internal" href="ambrosia.html#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Correlator</span></tt></a> can be used
+to correlate and consolidate events.</p>
+<div class="section" id="ambrosia-plugins-apimonitor">
+<h4><a class="reference internal" href="ambrosia_plugins.apimonitor.html#module-ambrosia_plugins.apimonitor" title="ambrosia_plugins.apimonitor"><tt class="xref py py-mod docutils literal"><span class="pre">ambrosia_plugins.apimonitor</span></tt></a><a class="headerlink" href="#ambrosia-plugins-apimonitor" title="Permalink to this headline">¶</a></h4>
+<p>The <a class="reference internal" href="ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ApimonitorPluginParser" title="ambrosia_plugins.apimonitor.ApimonitorPluginParser"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.apimonitor.ApimonitorPluginParser</span></tt></a> generates events from the report. The
+<a class="reference internal" href="ambrosia_plugins.apimonitor.html#ambrosia_plugins.apimonitor.ApiCallCorrelator" title="ambrosia_plugins.apimonitor.ApiCallCorrelator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.apimonitor.ApiCallCorrelator</span></tt></a> is used to then find known API calls and wrap them into
+higher-level events.</p>
+</div>
+<div class="section" id="ambrosia-plugins-events">
+<h4><a class="reference internal" href="ambrosia_plugins.events.html#module-ambrosia_plugins.events" title="ambrosia_plugins.events"><tt class="xref py py-mod docutils literal"><span class="pre">ambrosia_plugins.events</span></tt></a><a class="headerlink" href="#ambrosia-plugins-events" title="Permalink to this headline">¶</a></h4>
+<p>This simple plugin parses all events created by ANANAS itself.</p>
+</div>
+<div class="section" id="ambrosia-plugins-lkm">
+<h4><a class="reference internal" href="ambrosia_plugins.lkm.html#module-ambrosia_plugins.lkm" title="ambrosia_plugins.lkm"><tt class="xref py py-mod docutils literal"><span class="pre">ambrosia_plugins.lkm</span></tt></a><a class="headerlink" href="#ambrosia-plugins-lkm" title="Permalink to this headline">¶</a></h4>
+<p>The lkm plugin handles events originating from the lkm. After the ambrosia_plugins.lkm.LkmPluginParser has parsed all
+the lkm related information from the report, the <a class="reference internal" href="ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.SyscallCorrelator" title="ambrosia_plugins.lkm.SyscallCorrelator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.SyscallCorrelator</span></tt></a> wraps primitive syscall
+events into higher-level event (like <a class="reference internal" href="ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SendSignal" title="ambrosia_plugins.lkm.events.SendSignal"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.SendSignal</span></tt></a> or
+<a class="reference internal" href="ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.CreateDir" title="ambrosia_plugins.lkm.events.CreateDir"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.CreateDir</span></tt></a>). The <a class="reference internal" href="ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.FileEventCorrelator" title="ambrosia_plugins.lkm.FileEventCorrelator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.FileEventCorrelator</span></tt></a> is used to
+classify file events (to <a class="reference internal" href="ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.LibraryLoad" title="ambrosia_plugins.lkm.events.LibraryLoad"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.LibraryLoad</span></tt></a>). The
+<a class="reference internal" href="ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.CommandExecuteCorrelator" title="ambrosia_plugins.lkm.CommandExecuteCorrelator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.CommandExecuteCorrelator</span></tt></a> then finds command executions. The
+<a class="reference internal" href="ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.AdbCommandCorrelator" title="ambrosia_plugins.lkm.AdbCommandCorrelator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.AdbCommandCorrelator</span></tt></a> is then used to find command executions that have been caused by
+ANANAS itself.</p>
+</div>
+<div class="section" id="ambrosia-plugins-network">
+<h4><a class="reference internal" href="ambrosia_plugins.network.html#module-ambrosia_plugins.network" title="ambrosia_plugins.network"><tt class="xref py py-mod docutils literal"><span class="pre">ambrosia_plugins.network</span></tt></a><a class="headerlink" href="#ambrosia-plugins-network" title="Permalink to this headline">¶</a></h4>
+<p>This plugin is currently not implemented.</p>
+</div>
+</div>
+</div>
 </div>
 
 
@@ -129,6 +200,23 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Ambrosia Server Documentation</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+<li><a class="reference internal" href="#plugins">Plugins</a><ul>
+<li><a class="reference internal" href="#ambrosia-plugins-apimonitor"><tt class="docutils literal"><span class="pre">ambrosia_plugins.apimonitor</span></tt></a></li>
+<li><a class="reference internal" href="#ambrosia-plugins-events"><tt class="docutils literal"><span class="pre">ambrosia_plugins.events</span></tt></a></li>
+<li><a class="reference internal" href="#ambrosia-plugins-lkm"><tt class="docutils literal"><span class="pre">ambrosia_plugins.lkm</span></tt></a></li>
+<li><a class="reference internal" href="#ambrosia-plugins-network"><tt class="docutils literal"><span class="pre">ambrosia_plugins.network</span></tt></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="ambrosia_web.view.mainview.MainView.html"
                         title="previous chapter">Class ambrosia_web.view.mainview.MainView</a></p>

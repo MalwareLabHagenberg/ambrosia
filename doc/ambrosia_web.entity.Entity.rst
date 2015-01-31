@@ -53,7 +53,7 @@ Methods
 getLink
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.entity.Entity#getLink()
+.. js:function:: ambrosia_web.entity.Entity.getLink()
 
 
 
@@ -78,10 +78,10 @@ Returns a jQuery element containing a link that, when clicked, selects the entit
 
 
 
-resolveReferences
+resolveReference
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.entity.Entity#resolveReferences()
+.. js:function:: ambrosia_web.entity.Entity.resolveReference()
 
 
 
@@ -108,7 +108,7 @@ resolves all references
 select
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.entity.Entity#select()
+.. js:function:: ambrosia_web.entity.Entity.select()
 
 
 

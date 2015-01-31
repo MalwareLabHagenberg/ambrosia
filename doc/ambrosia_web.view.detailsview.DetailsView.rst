@@ -49,7 +49,7 @@ Methods
 setup
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.view.detailsview.DetailsView#setup()
+.. js:function:: ambrosia_web.view.detailsview.DetailsView.setup()
 
 
 

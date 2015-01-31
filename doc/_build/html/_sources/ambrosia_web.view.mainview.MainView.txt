@@ -49,7 +49,7 @@ Methods
 getHeight
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.view.mainview.MainView#getHeight()
+.. js:function:: ambrosia_web.view.mainview.MainView.getHeight()
 
 
 
@@ -77,7 +77,7 @@ get the height of the main view
 getWidth
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.view.mainview.MainView#getWidth()
+.. js:function:: ambrosia_web.view.mainview.MainView.getWidth()
 
 
 
@@ -105,7 +105,7 @@ get the width of the main view
 redraw
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.view.mainview.MainView#redraw()
+.. js:function:: ambrosia_web.view.mainview.MainView.redraw()
 
 
 
@@ -128,7 +128,7 @@ redraw the main view
 setup
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.view.mainview.MainView#setup()
+.. js:function:: ambrosia_web.view.mainview.MainView.setup()
 
 
 
@@ -151,7 +151,7 @@ set up the main view
 setWidth
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.view.mainview.MainView#setWidth(val)
+.. js:function:: ambrosia_web.view.mainview.MainView.setWidth(val)
 
 
     

@@ -14,6 +14,8 @@ ambrosia_web.util = {
          * log an event
          * @param {String} str the message to log
          * @param {String} level the level: DEBUG, INFO, WARN, ERROR
+         * @methodOf ambrosia_web.util.Log
+         * @name log
          */
         log: function (str, level){
             if(level == "ERROR"){
@@ -25,6 +27,8 @@ ambrosia_web.util = {
         /**
          * shortcut for debug logging
          * @param {String} str the message to log
+         * @methodOf ambrosia_web.util.Log
+         * @name D
          */
         D: function(str) {
             this.log(str, "DEBUG");
@@ -33,6 +37,8 @@ ambrosia_web.util = {
         /**
          * shortcut for info logging
          * @param {String} str the message to log
+         * @methodOf ambrosia_web.util.Log
+         * @name I
          */
         I: function(str) {
             this.log(str, "INFO");
@@ -41,6 +47,8 @@ ambrosia_web.util = {
         /**
          * shortcut for warn logging
          * @param {String} str the message to log
+         * @methodOf ambrosia_web.util.Log
+         * @name W
          */
         W: function(str) {
             this.log(str, "WARN");
@@ -49,6 +57,8 @@ ambrosia_web.util = {
         /**
          * shortcut for error logging
          * @param {String} str the message to log
+         * @methodOf ambrosia_web.util.Log
+         * @name E
          */
         E: function(str){
             this.log(str, "ERROR");

@@ -49,7 +49,7 @@ Methods
 redraw
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.view.filterview.FilterView#redraw()
+.. js:function:: ambrosia_web.view.filterview.FilterView.redraw()
 
 
 
@@ -72,7 +72,7 @@ redraws the filter view
 setup
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.view.filterview.FilterView#setup()
+.. js:function:: ambrosia_web.view.filterview.FilterView.setup()
 
 
 

@@ -85,6 +85,8 @@ ambrosia_web.event = {
 
         /**
          * Draw the event. Should be called third when drawing. Must be implemented by subclass.
+         * @methodOf ambrosia_web.event.Event
+         * @name draw
          */
         draw: function(){ assert(false); },
 
@@ -92,12 +94,16 @@ ambrosia_web.event = {
          * Calculates the dimensions of the visualisation (for block events). Should be called second when drawing.
          * events.
          * @param {ambrosia_web.layout.BlockLayoutManager} blockLayoutManager the block layout manager to use
+         * @methodOf ambrosia_web.event.Event
+         * @name calcDimensions
          */
         calcDimensions: function(blockLayoutManager){ },
 
         /**
          * This is the first method called when drawing events. It calculates if an element should be shown and also
          * considers the visibility of the child elements (a child can force it's parent to show)
+         * @methodOf ambrosia_web.event.Event
+         * @name calcVisible
          */
         calcVisible: function(){
             this.visible = true;
@@ -132,6 +138,8 @@ ambrosia_web.event = {
         /**
          * Returns a jQuery element containing a link that, when clicked, selects the event.
          * @returns {jQuery} the link
+         * @methodOf ambrosia_web.event.Event
+         * @name getLink
          */
         getLink: function(){
             var a = $('<a href="javascript:void(0)">');
@@ -149,6 +157,8 @@ ambrosia_web.event = {
 
         /**
          * This method should be called when the user selects one event.
+         * @methodOf ambrosia_web.event.Event
+         * @name select
          */
         select: function(){
             A.event.clearSelect();
@@ -157,6 +167,8 @@ ambrosia_web.event = {
 
         /**
          * This method should be called when the user adds an event to a selection.
+         * @methodOf ambrosia_web.event.Event
+         * @name selectAdd
          */
         selectAdd: function(){
             for(var i in A.event.onSelectHandler){
@@ -168,6 +180,8 @@ ambrosia_web.event = {
 
         /**
          * This method should be called when the user unselects one event.
+         * @methodOf ambrosia_web.event.Event
+         * @name unselect
          */
         unselect: function(){
             var idx = A.event._selected.indexOf(this);
@@ -343,6 +357,8 @@ ambrosia_web.event = {
          * Afterwards (using this width/height) the parent event is drawn.
          *
          * @param {ambrosia_web.layout.BlockLayoutManager} blockLayoutManager the block layout manager to use
+         * @methodOf ambrosia_web.event.BlockEvent
+         * @name calcDimensions
          */
         calcDimensions: function(blockLayoutManager) {
             assert(blockLayoutManager instanceof A.layout.BlockLayoutManager);
@@ -397,6 +413,8 @@ ambrosia_web.event = {
         /**
          * draws the event
          * @param {int} xOffset (optional) if this is a child object, the x position of the parent
+         * @methodOf ambrosia_web.event.BlockEvent
+         * @name draw
          */
         draw: function(xOffset){
             if(!this.visible){
@@ -445,6 +463,8 @@ ambrosia_web.event = {
 
         /**
          * draws the line
+         * @methodOf ambrosia_web.event.LineEvent
+         * @name draw
          */
         draw: function(){
             if(!this.visible)

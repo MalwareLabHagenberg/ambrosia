@@ -53,7 +53,7 @@ Methods
 calcDimensions
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.Event#calcDimensions(blockLayoutManager)
+.. js:function:: ambrosia_web.event.Event.calcDimensions(blockLayoutManager)
 
 
     
@@ -82,18 +82,14 @@ events.
 calcVisible
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.Event#calcVisible()
+.. js:function:: ambrosia_web.event.Event.calcVisible()
 
 
 
 
-    
-    :returns boolean:
-        TODO 
-    
 
-
-This is the first method called when drawing events. It calculates if an element should be shown.
+This is the first method called when drawing events. It calculates if an element should be shown and also
+considers the visibility of the child elements (a child can force it's parent to show)
 
 
 
@@ -110,7 +106,7 @@ This is the first method called when drawing events. It calculates if an element
 draw
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.Event#draw()
+.. js:function:: ambrosia_web.event.Event.draw()
 
 
 
@@ -133,7 +129,7 @@ Draw the event. Should be called third when drawing. Must be implemented by subc
 getLink
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.Event#getLink()
+.. js:function:: ambrosia_web.event.Event.getLink()
 
 
 
@@ -161,7 +157,7 @@ Returns a jQuery element containing a link that, when clicked, selects the event
 select
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.Event#select()
+.. js:function:: ambrosia_web.event.Event.select()
 
 
 
@@ -184,7 +180,7 @@ This method should be called when the user selects one event.
 selectAdd
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.Event#selectAdd()
+.. js:function:: ambrosia_web.event.Event.selectAdd()
 
 
 
@@ -207,7 +203,7 @@ This method should be called when the user adds an event to a selection.
 unselect
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.Event#unselect()
+.. js:function:: ambrosia_web.event.Event.unselect()
 
 
 

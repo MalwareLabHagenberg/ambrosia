@@ -32,6 +32,8 @@ ambrosia_web.view.mainview = {
 
         /**
          * set up the main view
+         * @methodOf ambrosia_web.view.mainview.MainView
+         * @name setup
          */
         setup: function () {
             this._setupEventHandler();
@@ -58,6 +60,8 @@ ambrosia_web.view.mainview = {
 
         /**
          * redraw the main view
+         * @methodOf ambrosia_web.view.mainview.MainView
+         * @name redraw
          */
         redraw: function () {
             var lastTS = 0;
@@ -96,6 +100,8 @@ ambrosia_web.view.mainview = {
         /**
          * sets up the event handlers for mouse and mouse wheel input
          * @private
+         * @methodOf ambrosia_web.view.mainview.MainView
+         * @name _setupEventHandler
          */
         _setupEventHandler: function () {
             var zoom_redraw_measure_timeout = 0;
@@ -137,6 +143,8 @@ ambrosia_web.view.mainview = {
         /**
          * get the width of the main view
          * @returns {number} the width
+         * @methodOf ambrosia_web.view.mainview.MainView
+         * @name getWidth
          */
         getWidth: function () {
             return this._width;
@@ -145,6 +153,8 @@ ambrosia_web.view.mainview = {
         /**
          * set the width of the main view
          * @param {number} val the width
+         * @methodOf ambrosia_web.view.mainview.MainView
+         * @name setWidth
          */
         setWidth: function (val) {
             this._width = val;
@@ -155,6 +165,8 @@ ambrosia_web.view.mainview = {
         /**
          * get the height of the main view
          * @returns {number} the height
+         * @methodOf ambrosia_web.view.mainview.MainView
+         * @name getHeight
          */
         getHeight: function () {
             return this.svg.height();
@@ -164,6 +176,8 @@ ambrosia_web.view.mainview = {
          * Updates the zoom and translation of the SVG. The measurement lines are hidden. This allows faster zooming
          * and paning without having to draw the measure lines.
          * @private
+         * @methodOf ambrosia_web.view.mainview.MainView
+         * @name _zoomAndPan
          */
         _zoomAndPan: function () {
             this._zoom_level = Math.max(1, this._zoom_level);
@@ -199,6 +213,8 @@ ambrosia_web.view.mainview = {
         /**
          * draw the measure lines
          * @private
+         * @methodOf ambrosia_web.view.mainview.MainView
+         * @name _redrawMeasure
          */
         _redrawMeasure: function () {
             /* remove all objects from measure groups */
@@ -250,6 +266,8 @@ ambrosia_web.view.mainview = {
          * @param {number} strokeWidth the stroke width in pt
          * @param {String} text the caption
          * @private
+         * @methodOf ambrosia_web.view.mainview.MainView
+         * @name _drawMeasureLine
          */
         _drawMeasureLine: function (offset, fontSize, strokeWidth, text) {
             var zoomfactor = (this.getHeight() / this._zoom_level);

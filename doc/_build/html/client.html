@@ -80,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.event.events-DeleteFileEvent.html">Class ambrosia_web.event.events-DeleteFileEvent</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.event.events-ExecEvent.html">Class ambrosia_web.event.events-ExecEvent</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.event.events-FileEvent.html">Class ambrosia_web.event.events-FileEvent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ambrosia_web.event.events-LibraryLoad.html">Class ambrosia_web.event.events-LibraryLoad</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.event.events-MemoryMapEvent.html">Class ambrosia_web.event.events-MemoryMapEvent</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.event.events-PhoneCall.html">Class ambrosia_web.event.events-PhoneCall</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.event.events-SMSAccess.html">Class ambrosia_web.event.events-SMSAccess</a></li>
@@ -91,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.event.events-SyscallEvent.html">Class ambrosia_web.event.events-SyscallEvent</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.event.events-UnknownFdEvent.html">Class ambrosia_web.event.events-UnknownFdEvent</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.filter.html">Namespace ambrosia_web.filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ambrosia_web.filter.BlacklistFilter.html">Class ambrosia_web.filter.BlacklistFilter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.filter.Comparison.html">Class ambrosia_web.filter.Comparison</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.filter.Filter.html">Class ambrosia_web.filter.Filter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.filter.LogicalOperation.html">Class ambrosia_web.filter.LogicalOperation</a></li>
@@ -112,6 +114,45 @@
 <li class="toctree-l1"><a class="reference internal" href="ambrosia_web.view.mainview.MainView.html">Class ambrosia_web.view.mainview.MainView</a></li>
 </ul>
 </div>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This section gives a short overview of the internal workings of Ambrosia Web. For a detailed description please see the
+documentation for the packages.</p>
+<p>The function <a class="reference internal" href="ambrosia_web.html#ambrosia_web.init" title="ambrosia_web.init"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.init()</span></tt></a> loads the serialized data (specified after the hash symbol in the URL),
+enriches the events and entities (<a class="reference internal" href="ambrosia_web.entity.html#ambrosia_web.entity.enrich" title="ambrosia_web.entity.enrich"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.entity.enrich()</span></tt></a> and <a class="reference internal" href="ambrosia_web.event.html#ambrosia_web.event.enrich" title="ambrosia_web.event.enrich"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.event.enrich()</span></tt></a>) and
+resolves all references of the entities (<tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.entity.Entity.resolveReferences()</span></tt>). Afterwards all views
+are set up (<a class="reference internal" href="ambrosia_web.view.mainview.MainView.html#ambrosia_web.view.mainview.MainView" title="ambrosia_web.view.mainview.MainView"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.view.mainview.MainView()</span></tt></a>, <a class="reference internal" href="ambrosia_web.view.entityview.EntityView.html#ambrosia_web.view.entityview.EntityView" title="ambrosia_web.view.entityview.EntityView"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.view.entityview.EntityView()</span></tt></a>,
+<a class="reference internal" href="ambrosia_web.view.detailsview.DetailsView.html#ambrosia_web.view.detailsview.DetailsView" title="ambrosia_web.view.detailsview.DetailsView"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.view.detailsview.DetailsView()</span></tt></a>, :js:class:<a href="#id1"><span class="problematic" id="id2">`</span></a>ambrosia_web.view.filterview.FilterView).</p>
+<p>The main view shows all events on a timeline. The method <a class="reference internal" href="ambrosia_web.view.mainview.MainView.html#ambrosia_web.view.mainview.MainView.redraw" title="ambrosia_web.view.mainview.MainView.redraw"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.view.mainview.MainView.redraw()</span></tt></a> uses the
+following methods to draw the events:</p>
+<ul class="simple">
+<li><a class="reference internal" href="ambrosia_web.event.Event.html#ambrosia_web.event.Event.calcVisible" title="ambrosia_web.event.Event.calcVisible"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.event.Event.calcVisible()</span></tt></a>: calculates if the event should be drawn at all (i.e. whether it is
+filtered)</li>
+<li><a class="reference internal" href="ambrosia_web.event.Event.html#ambrosia_web.event.Event.calcDimensions" title="ambrosia_web.event.Event.calcDimensions"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.event.Event.calcDimensions()</span></tt></a>: calculates where the event should be drawn and how big it should
+be</li>
+<li><a class="reference internal" href="ambrosia_web.event.Event.html#ambrosia_web.event.Event.draw" title="ambrosia_web.event.Event.draw"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.event.Event.draw()</span></tt></a>: draws the element.</li>
+</ul>
+<p>Each of theses methods may call the corresponding methods on child events (e.g. a parent event needs to know about the
+positions of the children to decide how big it should be).</p>
+<p>Ambrosia defines two types of events:</p>
+<ul class="simple">
+<li>a <a class="reference internal" href="ambrosia_web.event.BlockEvent.html#ambrosia_web.event.BlockEvent" title="ambrosia_web.event.BlockEvent"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.event.BlockEvent()</span></tt></a> is drawn as a block in the main view</li>
+<li>a <a class="reference internal" href="ambrosia_web.event.LineEvent.html#ambrosia_web.event.LineEvent" title="ambrosia_web.event.LineEvent"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.event.LineEvent()</span></tt></a> is drawn as a line across the main view (children are not drawn)</li>
+</ul>
+<p>In order for a block event to decide where it should be drawn the <a class="reference internal" href="ambrosia_web.layout.BlockLayoutManager.html#ambrosia_web.layout.BlockLayoutManager" title="ambrosia_web.layout.BlockLayoutManager"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.layout.BlockLayoutManager()</span></tt></a> is
+used. This class remembers the relevant block events that have already been drawn and allows an event to find a position
+where enough free space is available. the block layout manager is used on the top level and to position children of an
+event. Each event with children creates a new block layout manager.</p>
+<p>Events and entities can be selected (see <a class="reference internal" href="ambrosia_web.event.Event.html#ambrosia_web.event.Event.select" title="ambrosia_web.event.Event.select"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.event.Event.select()</span></tt></a>
+<a class="reference internal" href="ambrosia_web.event.Event.html#ambrosia_web.event.Event.selectAdd" title="ambrosia_web.event.Event.selectAdd"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.event.Event.selectAdd()</span></tt></a>, <a class="reference internal" href="ambrosia_web.event.Event.html#ambrosia_web.event.Event.unselect" title="ambrosia_web.event.Event.unselect"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.event.Event.unselect()</span></tt></a>.
+<a class="reference internal" href="ambrosia_web.event.html#ambrosia_web.event.clearSelect" title="ambrosia_web.event.clearSelect"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.event.clearSelect()</span></tt></a>, <a class="reference internal" href="ambrosia_web.entity.Entity.html#ambrosia_web.entity.Entity.select" title="ambrosia_web.entity.Entity.select"><tt class="xref js js-func docutils literal"><span class="pre">ambrosia_web.entity.Entity.select()</span></tt></a>). Any part of the application
+may select an entity or an event and all parts of the application may register to select and unselect events (see
+<tt class="xref js js-attr docutils literal"><span class="pre">ambrosia_web.event.onSelectHandler</span></tt>, <tt class="xref js js-attr docutils literal"><span class="pre">ambrosia_web.event.onUnSelectHandler</span></tt>,
+<tt class="xref js js-attr docutils literal"><span class="pre">ambrosia_web.entity.onSelectHandler</span></tt>). Multiple events may be selected but only one entity can be selected.</p>
+<p>Each event class specifies filters. For an event all filters have to match for the event to be shown. General filters
+are applied to all events (see <a class="reference internal" href="ambrosia_web.event.Event.html#ambrosia_web.event.Event" title="ambrosia_web.event.Event"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.event.Event()</span></tt></a>). Those the rules for these filters follow a
+specific syntax (see <a class="reference internal" href="ambrosia_web.filter.Filter.html#ambrosia_web.filter.Filter" title="ambrosia_web.filter.Filter"><tt class="xref js js-class docutils literal"><span class="pre">ambrosia_web.filter.Filter()</span></tt></a>).</p>
+</div>
 </div>
 
 
@@ -120,6 +161,14 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Ambrosia Client Documentation</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Ambrosia Documentation</a></p>

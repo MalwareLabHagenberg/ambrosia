@@ -12,6 +12,8 @@ ambrosia_web.view.detailsview = {
         {
         /**
          * set up the details view
+         * @methodOf ambrosia_web.view.detailsview.DetailsView
+         * @name setup
          */
         setup: function(){
             $('#detailsview').text('No Event selected');

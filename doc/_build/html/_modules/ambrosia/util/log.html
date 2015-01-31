@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ambrosia.util.log &mdash; Ambrosia 0.9.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Ambrosia 0.9.0 documentation" href="../../../index.html" />
+    <link rel="up" title="ambrosia.util" href="../util.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../ambrosia.html" >ambrosia</a> &raquo;</li>
+          <li><a href="../util.html" accesskey="U">ambrosia.util</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for ambrosia.util.log</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Wolfgang Ettlinger&#39;</span>
+
+
+<div class="viewcode-block" id="AmbrosiaFormater"><a class="viewcode-back" href="../../../ambrosia.util.html#ambrosia.util.log.AmbrosiaFormater">[docs]</a><span class="k">class</span> <span class="nc">AmbrosiaFormater</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A custom log formatter that can use colors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">color_mapping</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&quot;DEBUG&quot;</span><span class="p">:</span> <span class="s">&quot;1;32&quot;</span><span class="p">,</span>
+        <span class="s">&quot;WARNING&quot;</span><span class="p">:</span> <span class="s">&quot;1;33&quot;</span><span class="p">,</span>
+        <span class="s">&quot;WARN&quot;</span><span class="p">:</span> <span class="s">&quot;1;33&quot;</span><span class="p">,</span>
+        <span class="s">&quot;INFO&quot;</span><span class="p">:</span> <span class="s">&quot;1;35&quot;</span><span class="p">,</span>
+        <span class="s">&quot;CRITICAL&quot;</span><span class="p">:</span> <span class="s">&quot;1;31&quot;</span><span class="p">,</span>
+        <span class="s">&quot;ERROR&quot;</span><span class="p">:</span> <span class="s">&quot;1;31&quot;</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_colors</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AmbrosiaFormater</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">datefmt</span><span class="o">=</span><span class="s">&quot;%Y-%m-</span><span class="si">%d</span><span class="s">_%H:%M:%S&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_colors</span> <span class="o">=</span> <span class="n">use_colors</span>
+
+    <span class="k">def</span> <span class="nf">_color</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_colors</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;</span><span class="se">\x1b</span><span class="s">[{}m{}</span><span class="se">\x1b</span><span class="s">[0m&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">s</span>
+
+<div class="viewcode-block" id="AmbrosiaFormater.format"><a class="viewcode-back" href="../../../ambrosia.util.html#ambrosia.util.log.AmbrosiaFormater.format">[docs]</a>    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fmt</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_color</span><span class="p">(</span><span class="s">&quot;1;30&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%(asctime)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="s">&quot;: &quot;</span> <span class="o">+</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">_color</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">color_mapping</span><span class="p">[</span><span class="n">record</span><span class="o">.</span><span class="n">levelname</span><span class="p">],</span> <span class="s">&quot;</span><span class="si">%(levelname)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="s">&quot; &quot;</span> <span class="o">+</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">_color</span><span class="p">(</span><span class="s">&quot;1;30&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%(message)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="s">&quot; (&quot;</span> <span class="o">+</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">_color</span><span class="p">(</span><span class="s">&quot;4;30&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%(name)s</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="bp">self</span><span class="o">.</span><span class="n">_color</span><span class="p">(</span><span class="s">&quot;30&quot;</span><span class="p">,</span> <span class="s">&quot;:</span><span class="si">%(lineno)d</span><span class="s">&quot;</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="s">&quot;)&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">AmbrosiaFormater</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="init_logging"><a class="viewcode-back" href="../../../ambrosia.util.html#ambrosia.util.log.init_logging">[docs]</a><span class="k">def</span> <span class="nf">init_logging</span><span class="p">(</span><span class="n">log_level</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initialize logging to stderr</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        log_level (str): the minimum log level</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">main_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;ambrosia_web&quot;</span><span class="p">)</span>
+    <span class="n">main_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
+
+    <span class="n">plugin_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;ambrosia_plugins&quot;</span><span class="p">)</span>
+    <span class="n">plugin_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
+
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">AmbrosiaFormater</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">isatty</span><span class="p">())</span>
+
+    <span class="n">ch</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+    <span class="n">main_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+    <span class="n">plugin_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../../ambrosia.html" >ambrosia</a> &raquo;</li>
+          <li><a href="../util.html" >ambrosia.util</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Wolfgang Ettlinger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>

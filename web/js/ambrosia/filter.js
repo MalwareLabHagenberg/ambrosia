@@ -65,6 +65,8 @@ ambrosia_web.filter = {
         /**
          * A subclass may return custom jQuery elements
          * @returns {Array}
+         * @methodOf ambrosia_web.filter.Filter
+         * @name getSubClassElements
          */
         getSubClassElements: function(){ return [];},
 
@@ -73,6 +75,8 @@ ambrosia_web.filter = {
          * @function
          * @param {String} r the new rule in filter syntax
          * @param {bool} no_input_update used internally, disables update of the text field
+         * @methodOf ambrosia_web.filter.Filter
+         * @name setRule
          */
         setRule: function(r, no_input_update){
             try{
@@ -94,6 +98,8 @@ ambrosia_web.filter = {
         /**
          * set the description
          * @param {String} d the description
+         * @methodOf ambrosia_web.filter.Filter
+         * @name setDescription
          */
         setDescription: function(d){
             this._description_input.val(d);
@@ -102,6 +108,8 @@ ambrosia_web.filter = {
         /**
          * enable or disable the filter
          * @param {bool} b whether the filter should be enabled
+         * @methodOf ambrosia_web.filter.Filter
+         * @name setEnabled
          */
         setEnabled: function (b) {
             this._enable_checkbox.prop('checked', b);
@@ -114,6 +122,8 @@ ambrosia_web.filter = {
         /**
          * Checks whether this filter is enabled
          * @returns {bool} true if enabled
+         * @methodOf ambrosia_web.filter.Filter
+         * @name isEnabled
          */
         isEnabled: function (){
             return this._enable_checkbox.is(':checked');
@@ -122,6 +132,8 @@ ambrosia_web.filter = {
         /**
          * Evaluate if an an event matches this filter
          * @returns {bool} true if the event matches
+         * @methodOf ambrosia_web.filter.Filter
+         * @name evaluate
          */
         evaluate: function(evt){
             return this._filter.evaluate(evt);
@@ -130,6 +142,8 @@ ambrosia_web.filter = {
         /**
          * Get a jQuery Element that can be used as an graphical representation of the filter (a textbox)
          * @returns {jQuery}
+         * @methodOf ambrosia_web.filter.Filter
+         * @name getInput
          */
         getInput: function(){
             if(!this._div){
@@ -321,7 +335,7 @@ ambrosia_web.filter = {
      *
      * @param {String} rule the condition for the filter
      * @param {String} description a string describing the filter
-     * @param enabled whether the filter is effective
+     * @param {bool} enabled (optional) whether the filter is effective
      * @constructor
      */
     BlacklistFilter: Class(

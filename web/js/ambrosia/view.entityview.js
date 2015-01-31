@@ -38,12 +38,12 @@ A.entity.onSelectHandler.push(function(entity){
 
     var fths = $('<button type="button"/>').text('this');
     fths.click(function(){
-        A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" : r.*.id', true));
+        A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" : r.*.id', 'show entity filter'));
     });
     
     var fnths = $('<button type="button"/>').text('not this');
     fnths.click(function(){
-        A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" !: r.*.id', true));
+        A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" !: r.*.id', 'hide entity filter'));
     });
 
     add('filter', $('<span/>').append(fths).append(fnths));

@@ -7,14 +7,14 @@
 ..
     Classes and methods
 
-Class ambrosia_web.util.Log#D
+Class ambrosia_web.event.events-LibraryLoad
 ================================================================================
 
 ..
    class-title
 
 
-shortcut for debug logging
+Represents :class:`ambrosia_plugins.lkm.events.LibraryLoad`
 
 
 
@@ -29,14 +29,9 @@ shortcut for debug logging
 Constructor
 -----------
 
-.. js:class:: ambrosia_web.util.Log#D(str)
+.. js:class:: ambrosia_web.event.events-LibraryLoad()
 
 
-
-    
-    :param String str: 
-        the message to log 
-    
 
 
 

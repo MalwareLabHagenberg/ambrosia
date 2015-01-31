@@ -8,7 +8,7 @@ ambrosia_web.view.filterview = {
      * Implements a view that allows to view and modify filters
      * @constructor
      */
-    FilterView: Class('ambrosia_web.view.filterview.FilerView',
+    FilterView: Class('ambrosia_web.view.filterview.FilterView',
         {
         __init__: function () {
             this._tab_registry = [];
@@ -16,6 +16,8 @@ ambrosia_web.view.filterview = {
 
         /**
          * sets up the filterview
+         * @methodOf ambrosia_web.view.filterview.FilterView
+         * @name setup
          */
         setup: function () {
             this.redraw();
@@ -69,6 +71,8 @@ ambrosia_web.view.filterview = {
 
         /**
          * redraws the filter view
+         * @methodOf ambrosia_web.view.filterview.FilterView
+         * @name redraw
          */
         redraw: function () {
             for (var e in A.event.events.event_registry) {

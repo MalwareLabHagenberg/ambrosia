@@ -53,6 +53,8 @@ ambrosia_web.layout = {
          * @param {int} margin_x the horizontal margin that should be left
          * @param {int} margin_y the vertical margin that should be left
          * @returns {ambrosia_web.layout.Dimensions} the new dimensions of the non-overlapping block
+         * @methodOf ambrosia_web.layout.BlockLayoutManager
+         * @name fitBlock
          */
         fitBlock: function(dim, margin_x, margin_y){
             assert(dim instanceof A.layout.Dimensions);
@@ -90,6 +92,8 @@ ambrosia_web.layout = {
         /**
          * get the width of the whole block layout manager (considering all fitted events)
          * @returns {number}
+         * @methodOf ambrosia_web.layout.BlockLayoutManager
+         * @name getWidth
          */
         getWidth: function(){
             assert(isFinite(this._width));
@@ -99,6 +103,8 @@ ambrosia_web.layout = {
         /**
          * position bottom border of the block layout manager (considering all fitted events)
          * @returns {number}
+         * @methodOf ambrosia_web.layout.BlockLayoutManager
+         * @name getEndY
          */
         getEndY: function(){
             assert(isFinite(this._end_y));

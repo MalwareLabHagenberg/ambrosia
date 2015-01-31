@@ -74,8 +74,8 @@
 <div class="section" id="calcdimensions">
 <h3>calcDimensions<a class="headerlink" href="#calcdimensions" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt id="ambrosia_web.event.Event#calcDimensions">
-<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">Event#calcDimensions</tt><big>(</big><em>blockLayoutManager</em><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event#calcDimensions" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_web.event.Event.calcDimensions">
+<tt class="descclassname">ambrosia_web.event.Event.</tt><tt class="descname">calcDimensions</tt><big>(</big><em>blockLayoutManager</em><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event.calcDimensions" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -95,26 +95,18 @@ events.</p>
 <div class="section" id="calcvisible">
 <h3>calcVisible<a class="headerlink" href="#calcvisible" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt id="ambrosia_web.event.Event#calcVisible">
-<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">Event#calcVisible</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event#calcVisible" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Returns boolean:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">TODO</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
+<dt id="ambrosia_web.event.Event.calcVisible">
+<tt class="descclassname">ambrosia_web.event.Event.</tt><tt class="descname">calcVisible</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event.calcVisible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
-<p>This is the first method called when drawing events. It calculates if an element should be shown.</p>
+<p>This is the first method called when drawing events. It calculates if an element should be shown and also
+considers the visibility of the child elements (a child can force it&#8217;s parent to show)</p>
 </div>
 <div class="section" id="draw">
 <h3>draw<a class="headerlink" href="#draw" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt id="ambrosia_web.event.Event#draw">
-<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">Event#draw</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event#draw" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_web.event.Event.draw">
+<tt class="descclassname">ambrosia_web.event.Event.</tt><tt class="descname">draw</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event.draw" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p>Draw the event. Should be called third when drawing. Must be implemented by subclass.</p>
@@ -122,8 +114,8 @@ events.</p>
 <div class="section" id="getlink">
 <h3>getLink<a class="headerlink" href="#getlink" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt id="ambrosia_web.event.Event#getLink">
-<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">Event#getLink</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event#getLink" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_web.event.Event.getLink">
+<tt class="descclassname">ambrosia_web.event.Event.</tt><tt class="descname">getLink</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event.getLink" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -139,8 +131,8 @@ events.</p>
 <div class="section" id="select">
 <h3>select<a class="headerlink" href="#select" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt id="ambrosia_web.event.Event#select">
-<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">Event#select</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event#select" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_web.event.Event.select">
+<tt class="descclassname">ambrosia_web.event.Event.</tt><tt class="descname">select</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event.select" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p>This method should be called when the user selects one event.</p>
@@ -148,8 +140,8 @@ events.</p>
 <div class="section" id="selectadd">
 <h3>selectAdd<a class="headerlink" href="#selectadd" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt id="ambrosia_web.event.Event#selectAdd">
-<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">Event#selectAdd</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event#selectAdd" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_web.event.Event.selectAdd">
+<tt class="descclassname">ambrosia_web.event.Event.</tt><tt class="descname">selectAdd</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event.selectAdd" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p>This method should be called when the user adds an event to a selection.</p>
@@ -157,8 +149,8 @@ events.</p>
 <div class="section" id="unselect">
 <h3>unselect<a class="headerlink" href="#unselect" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt id="ambrosia_web.event.Event#unselect">
-<tt class="descclassname">ambrosia_web.event.</tt><tt class="descname">Event#unselect</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event#unselect" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_web.event.Event.unselect">
+<tt class="descclassname">ambrosia_web.event.Event.</tt><tt class="descname">unselect</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.event.Event.unselect" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p>This method should be called when the user unselects one event.</p>

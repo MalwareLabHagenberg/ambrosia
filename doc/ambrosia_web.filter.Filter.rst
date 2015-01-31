@@ -33,7 +33,7 @@ Examples
 
 .. code-block:: javascript
 
-    !(test == 1.2 || (test > 2 && foo.bar != "foobar") || true ) && !false
+    !(test == 1.2 || (test > 2 && p.bar != "foobar") || true ) && !false
 
 The logical operations "&&" and '!!' as well as the unary logical operation "!" are allowed. Parentheses may be
 used to change the default precedence of the operations.
@@ -45,29 +45,20 @@ in the second value).
 
 A value may be a string in the form of "string", a number in the form of 1.0 or 1, true or false or a property.
 A property is a string describing an attribute of an event (e.g. abspath, successful). Moreover a property may
-also match a specific reference (e.g. process.pid, file.abspath). The reference defined in a property may be a
-specific reference (like file or process) or the string "references". This special reference matches all
-references in an event. Therefore, the value of any property using "references" (e.g. references.id) must be
-treated as an array (Array operations ":" and "!:" must be used). A filter general filter (that is applied to all
-events regardless of their type) can therefore be used to find all events related to a certain entity (e.g.
-"someidofanentity" : references.id).
+also match a specific reference (e.g. r.process.pid, r.file.abspath). The reference defined in a property may be
+a specific reference (like r.file or r.process). Moreover the string "*" may be used to get all values
+(e.g. r.*.id). Since multiple values are returned, the value  must be treated as an array (Array operations ":"
+and "!:" must be used). A general filter (that is applied to all events regardless of their type) can therefore
+be used to find all events related to a certain entity (e.g. "someidofanentity" : r.*.id).
 
 
 
 Constructor
 -----------
 
-.. js:class:: ambrosia_web.filter.Filter(str, forceShowParents)
+.. js:class:: ambrosia_web.filter.Filter()
 
 
-
-    
-    :param String str: 
-        the condition for the filter 
-    
-    :param  forceShowParents: 
-        TODO 
-    
 
 
 
@@ -85,13 +76,8 @@ Methods
 evaluate
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.filter.Filter#evaluate(evt)
+.. js:function:: ambrosia_web.filter.Filter.evaluate()
 
-
-    
-    :param  evt: 
-         
-    
 
 
 
@@ -101,7 +87,7 @@ evaluate
     
 
 
-Evaluate if an avent matches this filter
+Evaluate if an an event matches this filter
 
 
 
@@ -118,7 +104,7 @@ Evaluate if an avent matches this filter
 getInput
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.filter.Filter#getInput()
+.. js:function:: ambrosia_web.filter.Filter.getInput()
 
 
 
@@ -143,15 +129,130 @@ Get a jQuery Element that can be used as an graphical representation of the filt
 
 
 
-setRule
+getSubClassElements
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.filter.Filter#setRule(r)
+.. js:function:: ambrosia_web.filter.Filter.getSubClassElements()
+
+
 
 
     
-    :param  r: 
-        {String} the new rule in filter syntax 
+    :returns Array:
+         
+    
+
+
+A subclass may return custom jQuery elements
+
+
+
+
+
+
+
+
+
+    
+
+
+
+isEnabled
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.filter.Filter.isEnabled()
+
+
+
+
+    
+    :returns bool:
+        true if enabled 
+    
+
+
+Checks whether this filter is enabled
+
+
+
+
+
+
+
+
+
+    
+
+
+
+setDescription
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.filter.Filter.setDescription(d)
+
+
+    
+    :param String d: 
+        the description 
+    
+
+
+
+
+set the description
+
+
+
+
+
+
+
+
+
+    
+
+
+
+setEnabled
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.filter.Filter.setEnabled(b)
+
+
+    
+    :param bool b: 
+        whether the filter should be enabled 
+    
+
+
+
+
+enable or disable the filter
+
+
+
+
+
+
+
+
+
+    
+
+
+
+setRule
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.filter.Filter.setRule(r, no_input_update)
+
+
+    
+    :param String r: 
+        the new rule in filter syntax 
+    
+    :param bool no_input_update: 
+        used internally, disables update of the text field 
     
 
 

@@ -49,7 +49,7 @@ Methods
 calcDimensions
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.BlockEvent#calcDimensions(blockLayoutManager)
+.. js:function:: ambrosia_web.event.BlockEvent.calcDimensions(blockLayoutManager)
 
 
     
@@ -81,7 +81,7 @@ Afterwards (using this width/height) the parent event is drawn.
 draw
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.event.BlockEvent#draw(xOffset)
+.. js:function:: ambrosia_web.event.BlockEvent.draw(xOffset)
 
 
     

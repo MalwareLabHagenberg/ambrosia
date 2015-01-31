@@ -56,7 +56,7 @@ Methods
 fitBlock
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.layout.BlockLayoutManager#fitBlock(dim, margin_x, margin_y)
+.. js:function:: ambrosia_web.layout.BlockLayoutManager.fitBlock(dim, margin_x, margin_y)
 
 
     
@@ -96,7 +96,7 @@ fitted blocks.
 getEndY
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.layout.BlockLayoutManager#getEndY()
+.. js:function:: ambrosia_web.layout.BlockLayoutManager.getEndY()
 
 
 
@@ -124,7 +124,7 @@ position bottom border of the block layout manager (considering all fitted event
 getWidth
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.layout.BlockLayoutManager#getWidth()
+.. js:function:: ambrosia_web.layout.BlockLayoutManager.getWidth()
 
 
 

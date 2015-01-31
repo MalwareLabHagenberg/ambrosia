@@ -49,7 +49,7 @@ Methods
 D
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.util.Log#D(str)
+.. js:function:: ambrosia_web.util.Log.D(str)
 
 
     
@@ -77,7 +77,7 @@ shortcut for debug logging
 E
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.util.Log#E(str)
+.. js:function:: ambrosia_web.util.Log.E(str)
 
 
     
@@ -105,7 +105,7 @@ shortcut for error logging
 I
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.util.Log#I(str)
+.. js:function:: ambrosia_web.util.Log.I(str)
 
 
     
@@ -133,7 +133,7 @@ shortcut for info logging
 log
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.util.Log#log(str, level)
+.. js:function:: ambrosia_web.util.Log.log(str, level)
 
 
     
@@ -164,7 +164,7 @@ log an event
 W
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.util.Log#W(str)
+.. js:function:: ambrosia_web.util.Log.W(str)
 
 
     
