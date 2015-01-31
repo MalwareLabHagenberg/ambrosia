@@ -8,251 +8,280 @@ ambrosia_web.event.events = function(){
      * Represents :class:`ambrosia_plugins.lkm.events.SyscallEvent`
      * @constructor
      */
-    function SyscallEvent(){
-        this.getColor = function(){ return '#cc9595'; };
-
-    }
-    SyscallEvent.prototype = new A.event.BlockEvent();
-    SyscallEvent.filters = [new A.filter.Filter('false', 'disable all syscall events')];
+    var SyscallEvent = Class('ambrosia_web.event.events.SyscallEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#cc9595'; },
+        filters: [
+            new A.filter.BlacklistFilter('false', 'disable all syscall events')
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.StartTaskEvent`
      * @constructor
      */
-    function StartTaskEvent(){
-        this.getColor = function(){ return '#ff008a'; };
-    }
-    StartTaskEvent.filters = [
-        new A.filter.Filter('is_process==false', 'hide forks that spawn a thread')
-    ];
-    StartTaskEvent.prototype = new A.event.BlockEvent();
+    var StartTaskEvent = Class('ambrosia_web.event.events.StartTaskEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#ff008a'; },
+        filters: [
+            new A.filter.BlacklistFilter('p.is_process==false', 'hide forks that spawn a thread')
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.MemoryMapEvent`
      * @constructor
      */
-    function MemoryMapEvent(){
-        this.getColor = function(){ return '#eb00ff'; };
-    }
-    MemoryMapEvent.prototype = new A.event.BlockEvent();
-    MemoryMapEvent.filters = [new A.filter.Filter('anonymous==false', 'hide mmaps that do not operate on a file')];
+    var MemoryMapEvent = Class('ambrosia_web.event.events.MemoryMapEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#eb00ff'; },
+        filters: [
+            new A.filter.BlacklistFilter('p.anonymous==false', 'hide mmaps that do not operate on a file')
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.DeleteFileEvent`
      * @constructor
      */
-    function DeleteFileEvent(){
-        this.getColor = function(){ return '#c6005d'; };
-    }
-    DeleteFileEvent.filters = [
-        new A.filter.Filter('file.abspath != "/data/ananaslkm.ko"', 'hide the removal of the lkm file (done by ANANAS)')
-    ];
-    DeleteFileEvent.prototype = new A.event.BlockEvent();
-
+    var DeleteFileEvent = Class('ambrosia_web.event.events.DeleteFileEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#c6005d'; },
+        filters: [
+            new A.filter.BlacklistFilter('r.file.abspath != "/data/ananaslkm.ko"',
+                'hide the removal of the lkm file (done by ANANAS)')
+        ]
+    });
+    
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.SendSignal`
      * @constructor
      */
-    function SendSignal(){
-        this.getColor = function(){ return '#ff9e9e'; };
-    }
-    SendSignal.prototype = new A.event.BlockEvent();
+    var SendSignal = Class('ambrosia_web.event.events.SendSignal',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#ff9e9e'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.CreateDir`
      * @constructor
      */
-    function CreateDir(){
-        this.getColor = function(){ return '#f19eff'; };
-    }
-    CreateDir.prototype = new A.event.BlockEvent();
+    var CreateDir = Class('ambrosia_web.event.events.CreateDir',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#f19eff'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.SocketAccept`
      * @constructor
      */
-    function SocketAccept(){
-        this.getColor = function(){ return '#bb5cff'; };
-    }
-    SocketAccept.prototype = new A.event.BlockEvent();
+    var SocketAccept = Class('ambrosia_web.event.events.SocketAccept',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#bb5cff'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.FileEvent`
      * @constructor
      */
-    function FileEvent(){
-        this.getColor = function(){ return '#a6ff00'; };
-    }
-    FileEvent.prototype = new A.event.BlockEvent();
-    FileEvent.filters = [
-        new A.filter.Filter('parent.visible != false', 'hide all file events where the parent would not be visible'),
-        new A.filter.Filter('!(abspath~"/proc/\\d+/oom_adj" && mode==131073)', ''),
-        new A.filter.Filter('!(abspath~"/proc/\\d+/stat" && mode==131072)', ''),
-        new A.filter.Filter('!(abspath~"/proc/\\d+/task" && mode==147456)', ''),
-        new A.filter.Filter('!(abspath=="/proc/net/xt_qtaguid/iface_stat_fmt" && mode==131072)', ''),
-        new A.filter.Filter('!(abspath=="/dev/binder" && mode==131074)', ''),
-        new A.filter.Filter('!(abspath=="/dev/__properties__" && mode==688128)', ''),
-        new A.filter.Filter('!(abspath=="/dev/ashmem" && mode==131074)', ''),
-        new A.filter.Filter('!(abspath ~ "/system/framework/.*\\.jar" && mode==131072 && process.type=="ADBD_CHILD")',
-            '')
-    ];
+    var FileEvent = Class('ambrosia_web.event.events.FileEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#a6ff00'; },
+        filters: [
+            new A.filter.BlacklistFilter('!(p.abspath~"^/proc/\\d+/oom_adj$" && p.mode==131073)', ''),
+            new A.filter.BlacklistFilter('!(p.abspath~"^/proc/\\d+/stat$" && p.mode==131072)', ''),
+            new A.filter.BlacklistFilter('!(p.abspath~"^/proc/\\d+/task$" && p.mode==147456)', ''),
+            new A.filter.BlacklistFilter('!(p.abspath=="/proc/net/xt_qtaguid/iface_stat_fmt" && p.mode==131072)', ''),
+            new A.filter.BlacklistFilter('!(p.abspath=="/dev/binder" && p.mode==131074)', ''),
+            new A.filter.BlacklistFilter('!(p.abspath=="/dev/__properties__" && p.mode==688128)', ''),
+            new A.filter.BlacklistFilter('!(p.abspath=="/dev/ashmem" && p.mode==131074)', ''),
+            new A.filter.BlacklistFilter(
+                '!(p.abspath ~ "/system/framework/.*\\.jar" && p.mode==131072 && r.process.p.type=="ADBD_CHILD")',
+                '')
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.AnonymousFileEvent`
      * @constructor
      */
-    function AnonymousFileEvent(){
-        this.getColor = function(){ return '#a6ff00'; };
-    }
-    AnonymousFileEvent.prototype = new A.event.BlockEvent();
+    var AnonymousFileEvent = Class('ambrosia_web.event.events.AnonymousFileEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#a6ff00'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.UnknownFdEvent`
      * @constructor
      */
-    function UnknownFdEvent(){
-        this.getColor = function(){ return '#1dff00'; };
-    }
-    UnknownFdEvent.prototype = new A.event.BlockEvent();
-    UnknownFdEvent.filters = [new A.filter.Filter('false', 'hide all unknown fd events')];
+    var UnknownFdEvent = Class('ambrosia_web.event.events.UnknownFdEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#1dff00'; },
+        filters: [
+            new A.filter.BlacklistFilter('false', 'hide all unknown fd events')
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.SocketEvent`
      * @constructor
      */
-    function SocketEvent(){
-        this.getColor = function(){ return '#00ff6d'; };
-    }
-    SocketEvent.filters = [
-        new A.filter.Filter('process.type != "ADBD"', 'hide the socket created by ADBD')
-    ];
-    SocketEvent.prototype = new A.event.BlockEvent();
+    var SocketEvent = Class('ambrosia_web.event.events.SocketEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#00ff6d'; },
+        filters: [
+            new A.filter.BlacklistFilter('r.process.p.type != "ADBD"', 'hide the socket created by ADBD')
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.CommandExecuteEvent`
      * @constructor
      */
-    function CommandExecuteEvent(){
-        this.getColor = function(){ return '#ff5600'; };
-    }
-    CommandExecuteEvent.prototype = new A.event.BlockEvent();
+    var CommandExecuteEvent = Class('ambrosia_web.event.events.CommandExecuteEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#ff5600'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.SuperUserRequest`
      * @constructor
      */
-    function SuperUserRequest(){
-        this.getColor = function(){ return '#ff9b00'; };
-    }
-    SuperUserRequest.prototype = new A.event.BlockEvent();
+    var SuperUserRequest = Class('ambrosia_web.event.events.SuperUserRequest',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#ff9b00'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.apimonitor.AndroidApicall`
      * @constructor
      */
-    function AndroidApicall(){
-        this.getColor = function(){ return '#a9cccc'; };
-    }
-    AndroidApicall.filters = [
-        new A.filter.Filter('false', 'hide all low-level API call events')
-    ];
-    AndroidApicall.prototype = new A.event.BlockEvent();
+    var AndroidApicall = Class('ambrosia_web.event.events.AndroidApicall',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#a9cccc'; },
+        filters: [
+            new A.filter.BlacklistFilter('false', 'hide all low-level API call events')
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.apimonitor.CallLogAccess`
      * @constructor
      */
-    function CallLogAccess(){
-        this.getColor = function(){ return '#ffce00'; };
-    }
-    CallLogAccess.prototype = new A.event.BlockEvent();
+    var CallLogAccess = Class('ambrosia_web.event.events.CallLogAccess',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#ffce00'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.apimonitor.ContactsAccess`
      * @constructor
      */
-    function ContactsAccess(){
-        this.getColor = function(){ return '#ebff00'; };
-    }
-    ContactsAccess.prototype = new A.event.BlockEvent();
+    var ContactsAccess = Class('ambrosia_web.event.events.ContactsAccess',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#ebff00'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.apimonitor.PhoneCall`
      * @constructor
      */
-    function PhoneCall(){
-        this.getColor = function(){ return '#b7ff00'; };
-    }
-    PhoneCall.prototype = new A.event.BlockEvent();
+    var PhoneCall = Class('ambrosia_web.event.events.PhoneCall',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#b7ff00'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.apimonitor.SMSAccess`
      * @constructor
      */
-    function SMSAccess(){
-        this.getColor = function(){ return '#84ff00'; };
-    }
-    SMSAccess.prototype = new A.event.BlockEvent();
+    var SMSAccess = Class('ambrosia_web.event.events.SMSAccess',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#84ff00'; },
+        filters: [
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.events.ANANASEvent`
      * @constructor
      */
-    function ANANASEvent(){
-    }
-    ANANASEvent.prototype = new A.event.LineEvent();
+    var ANANASEvent = Class('ambrosia_web.event.events.ANANASEvent',
+        A.event.LineEvent, {});
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.ExecEvent`
      * @constructor
      */
-    function ExecEvent(){
-        this.getColor = function(){ return '#000000'; };
-    }
-    ExecEvent.prototype = new A.event.BlockEvent();
+    var ExecEvent = Class('ambrosia_web.event.events.ExecEvent',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#000000'; },
+        filters: [
+        ]
+    });
     
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.ANANASAdbShellExec`
      * @constructor
      */
-    function ANANASAdbShellExec(){
-        this.getColor = function(){ return '#000000'; };
-    }
-    ANANASAdbShellExec.prototype = new A.event.BlockEvent();
+    var ANANASAdbShellExec = Class('ambrosia_web.event.events.ANANASAdbShellExec',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#000000'; },
+        filters: [
+            new A.filter.BlacklistFilter('false', 'hide command executes initiated by ANANAS')
+        ]
+    });
 
 
     /**
      * Represents :class:`ambrosia_plugins.lkm.events.LibraryLoad`
      * @constructor
      */
-    function LibraryLoad(){
-        this.getColor = function(){ return '#000000'; };
-    }
-    LibraryLoad.filters = [
-        new A.filter.Filter("false", 'hide all library loads')
-    ];
-    LibraryLoad.prototype = new A.event.BlockEvent();
-
+    var LibraryLoad = Class('ambrosia_web.event.events.LibraryLoad',
+        A.event.BlockEvent, {
+        getColor: function(){ return '#000000'; },
+        filters: [
+            new A.filter.BlacklistFilter("false", 'hide all library loads')
+        ]
+    });
 
     var evt_registry = {
         'ambrosia_plugins.events.ANANASEvent':              ANANASEvent,

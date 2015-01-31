@@ -78,8 +78,8 @@ logical_operator
   / op:'||' { return 'OR' }
 
 property
-  = p1:[a-zA-Z_]+ "."? p2:[a-zA-Z_]* 
-    { return new A.filter.Property(p1.join(""), p2.join("")) }
+  = p:[a-zA-Z_\*\.]+
+    { return new A.filter.Property(p.join("")) }
 
 string
   = '"' str:[^\"]* '"' 

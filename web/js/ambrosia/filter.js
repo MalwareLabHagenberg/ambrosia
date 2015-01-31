@@ -10,7 +10,7 @@ ambrosia_web.filter = {
      * The following shows example for the filter syntax:
      *
      * @example
-     * !(test == 1.2 || (test > 2 && foo.bar != "foobar") || true ) && !false
+     * !(test == 1.2 || (test > 2 && p.bar != "foobar") || true ) && !false
      *
      * The logical operations "&&" and '!!' as well as the unary logical operation "!" are allowed. Parentheses may be
      * used to change the default precedence of the operations.
@@ -22,168 +22,172 @@ ambrosia_web.filter = {
      *
      * A value may be a string in the form of "string", a number in the form of 1.0 or 1, true or false or a property.
      * A property is a string describing an attribute of an event (e.g. abspath, successful). Moreover a property may
-     * also match a specific reference (e.g. process.pid, file.abspath). The reference defined in a property may be a
-     * specific reference (like file or process) or the string "references". This special reference matches all
-     * references in an event. Therefore, the value of any property using "references" (e.g. references.id) must be
-     * treated as an array (Array operations ":" and "!:" must be used). A general filter (that is applied to all
-     * events regardless of their type) can therefore be used to find all events related to a certain entity (e.g.
-     * "someidofanentity" : references.id).
+     * also match a specific reference (e.g. r.process.pid, r.file.abspath). The reference defined in a property may be
+     * a specific reference (like r.file or r.process). Moreover the string "*" may be used to get all values
+     * (e.g. r.*.id). Since multiple values are returned, the value  must be treated as an array (Array operations ":"
+     * and "!:" must be used). A general filter (that is applied to all events regardless of their type) can therefore
+     * be used to find all events related to a certain entity (e.g. "someidofanentity" : r.*.id).
      *
-     * @param {String} str the condition for the filter
-     * @param {String} description a string describing the filter
-     * @param enabled whether the filter is effective
      * @constructor
      */
-    Filter: function(str, description, enabled){
-        if(!str){
-            str = 'true';
-        }
+    Filter: Class('ambrosia_web.filter.Filter',
+        {
+        __init__: function() {
+            this._rule_input = $('<input class="filterinput"/>').val('true');
+            this._description_input = $('<input class="filterdescription"/>');
+            this._error_label = $('<div class="filtererror"/>');
+            this._delete_button = $('<button type="button"/>').text('del');
+            this._enable_checkbox = $('<input type="checkbox"/>').prop('checked', true);
+            this._div = undefined;
+            this._error = false;
+            this._filter = null;
 
-        if(enabled == undefined){
-            enabled = true;
-        }
+            var ths = this;
 
-        var rule_input = $('<input class="filterinput"/>').val(str);
-        var description_input = $('<input class="filterdescription"/>').val(description);
-        var error_label = $('<div class="filtererror"/>');
-        var delete_button = $('<button type="button"/>').text('del');
-        var enable_checkbox = $('<input type="checkbox"/>').prop('checked', enabled);
-        this._div = ($('<div/>')
-            .append(description_input)
-            .append(rule_input)
-            .append(enable_checkbox)
-            .append(delete_button)
-            .append(error_label));
-        var error = false;
-        var filter = null;
+            this._rule_input.keyup(function(){
+                ths._rule_input.addClass('filterchanged');
+                ths.setRule(ths._rule_input.val(), true);
+            });
+
+            this._rule_input.change(function(){
+                A.redraw();
+            });
+
+            this._delete_button.click(function(){
+                A.event.removeFilter(ths);
+            });
+
+            this._enable_checkbox.click(function(){
+                A.redraw();
+            });
+        },
+
+        /**
+         * A subclass may return custom jQuery elements
+         * @returns {Array}
+         */
+        getSubClassElements: function(){ return [];},
 
         /**
          * replaces the current rule with a new one
          * @function
-         * @param r {String} the new rule in filter syntax
+         * @param {String} r the new rule in filter syntax
+         * @param {bool} no_input_update used internally, disables update of the text field
          */
-        this.setRule = function(r){
+        setRule: function(r, no_input_update){
             try{
                 var f = ambrosia_web.filter.parser.parse(r);
-                error_label.text('');
-                rule_input.removeClass('errorinput');
-                error = false;
-                filter = f;
+                if(!no_input_update){
+                    this._rule_input.val(r);
+                }
+                this._error_label.text('');
+                this._rule_input.removeClass('errorinput');
+                this._error = false;
+                this._filter = f;f
             }catch(ex){
-                error_label.text(ex);
-                rule_input.addClass('errorinput');
-                error = true;
+                this._error_label.text(ex);
+                this._rule_input.addClass('errorinput');
+                this._error = true;
             }
-        };
+        },
 
-        this.setRule(str);
-        
-        var ths = this;
-        
-        rule_input.keyup(function(){
-            rule_input.addClass('filterchanged');
-            ths.setRule(rule_input.val());
-        });
+        /**
+         * set the description
+         * @param {String} d the description
+         */
+        setDescription: function(d){
+            this._description_input.val(d);
+        },
 
-        delete_button.click(function(){
-            A.event.removeFilter(ths);
-        });
+        /**
+         * enable or disable the filter
+         * @param {bool} b whether the filter should be enabled
+         */
+        setEnabled: function (b) {
+            this._enable_checkbox.prop('checked', b);
+        },
 
-        enable_checkbox.click(function(){
-            enabled = enable_checkbox.is(':checked');
-            A.redraw();
-        });
+        toString: function () {
+            return 'Filter: '+this._rule_input.val();
+        },
 
         /**
          * Checks whether this filter is enabled
          * @returns {bool} true if enabled
          */
-        this.isEnabled = function (){
-            return enabled;
-        };
+        isEnabled: function (){
+            return this._enable_checkbox.is(':checked');
+        },
 
         /**
          * Evaluate if an an event matches this filter
          * @returns {bool} true if the event matches
          */
-        this.evaluate = function(evt){
-            return filter.evaluate(evt);
-        };
+        evaluate: function(evt){
+            return this._filter.evaluate(evt);
+        },
 
         /**
          * Get a jQuery Element that can be used as an graphical representation of the filter (a textbox)
          * @returns {jQuery}
          */
-        this.getInput = function(){
+        getInput: function(){
+            if(!this._div){
+                this._div = ($('<div/>')
+                    .append(this._description_input)
+                    .append(this._rule_input)
+                    .append(this._enable_checkbox));
+                this._div.append(this.getSubClassElements());
+                this._div.append(this._delete_button)
+                         .append(this._error_label);
+            }
             return this._div;
-        };
-    },
+        }
+    }),
 
     /**
      * A property used in a filter. Used by the parser.
-     * @param prop1 the string before the dot
-     * @param prop2 the string after the dot or empty
+     * @param s the property string
      * @constructor
      */
-    Property: function(prop1, prop2){
-        this.evaluate = function(evt){
+    Property: function(s){
+        this.evaluate = function(evt) {
             assert(evt instanceof A.event.Event);
 
-            var res_prop1;
-
-            if(prop1 == 'references'){
-                res_prop1 = [];
-                for(var ref in evt.references){
-                    if(evt.references[ref] == undefined) {
-                        continue;
-                    }
-
-                    if(evt.references[ref].properties[prop2] !== undefined){
-                        res_prop1.push(evt.references[ref].properties[prop2]);
-                    }else{
-                        res_prop1.push(evt.references[ref][prop2]);
-                    }
-                }
-            }else if(prop1 == 'true'){
-                res_prop1 = true;
-            }else if(prop1 == 'false'){
-                res_prop1 = false;
-            }else if(prop1 == 'null'){
-                res_prop1 = null;
-            }else if(prop1 == 'undefined'){
-                res_prop1 = undefined;
-            }else if(evt.properties[prop1]){
-                res_prop1 = evt.properties[prop1];
-            }else if(evt[prop1]){
-                res_prop1 = evt[prop1];
-            }else {
-                res_prop1 = evt.references[prop1];
+            if(s == 'true'){
+                return [true];
+            }else if(s == 'false'){
+                return [false];
+            }else if(s == 'null'){
+                return  [null];
+            }else if(s == 'undefined') {
+                return  [undefined];
             }
 
-            if(!prop2) {
-                /* there is nothing after the dot, return what we have */
-                return res_prop1;
+            var props = s.split('.');
+            var val = [evt];
+
+            for (var i in props) {
+                val = this._get_value(val, props[i]);
             }
 
-            if($.isArray(res_prop1)) {
-                /* if the first property is an array, return an array containing all properties from each element */
+            return val;
+        };
 
-                var res = [];
-
-                for(var i in res_prop1) {
-                    if(res_prop1[i] == undefined) {
-                        res.push(undefined);
-                    }else {
-                        res.push(res_prop1[i][prop2]);
+        this._get_value = function(oldval, property){
+            var new_val =[];
+            for(var i in oldval){
+                if(oldval[i] == undefined) {
+                    new_val.push(undefined);
+                }else if(property == '*'){
+                    for(var j in oldval[i]){
+                        new_val.push(oldval[i][j]);
                     }
-                }
-            }else {
-                if(res_prop1 == undefined) {
-                    return undefined;
-                }else {
-                    return res_prop1[prop2];
+                }else{
+                    new_val.push(oldval[i][property]);
                 }
             }
+            return new_val;
         };
     },
 
@@ -216,20 +220,23 @@ ambrosia_web.filter = {
      * @param p2 the sencond value
      * @constructor
      */
-    Comparison: function(p1, op, p2){
-        this.p1 = p1;
-        this.op = op;
-        this.p2 = p2;
+    Comparison: Class('ambrosia_web.filter.Comparison',
+        {
+        __init__: function(p1, op, p2) {
+            this.p1 = p1;
+            this.op = op;
+            this.p2 = p2;
+        },
 
-        this._get_val = function(val, evt){
+        _get_val: function(val, evt){
             if(val instanceof A.filter.Property){
                 return val.evaluate(evt)
             }
 
-            return val;
-        };
+            return [val];
+        },
 
-        this.evaluate = function(evt){
+        evaluate: function(evt){
             assert(evt instanceof A.event.Event);
 
             var p1 = this._get_val(this.p1, evt);
@@ -239,32 +246,32 @@ ambrosia_web.filter = {
 
             switch(this.op){
             case 'EQ':
-                return p1 == p2;
+                return p1[0] == p2[0];
                 break;
             case 'NEQ':
-                return p1 != p2;
+                return p1[0] != p2[0];
                 break;
             case 'G':
-                return p1 > p2;
+                return p1[0] > p2[0];
                 break;
             case 'GE':
-                return p1 >= p2;
+                return p1[0] >= p2[0];
                 break;
             case 'L':
-                return p1 < p2;
+                return p1[0] < p2[0];
                 break;
             case 'LE':
-                return p1 <= p2;
+                return p1[0] <= p2[0];
                 break;
             case 'REGEX':
-                return new RegExp(p2).test(p1);
+                return new RegExp(p2[0]).test(p1[0]);
                 break;
             case 'NIN':
                 reverseIn = true;
                 /* no break */
             case 'IN':
                 for(var i in p2){
-                    if(p2[i] == p1){
+                    if(p2[i] == p1[0]){
                         return !reverseIn;
                     }
                 }
@@ -274,8 +281,8 @@ ambrosia_web.filter = {
                 throw "Unknown operation";
                 break;
             }
-        };
-    },
+        }
+    }),
 
     /**
      * Logical operations like "&&" and "!!". Used by the parser
@@ -284,12 +291,15 @@ ambrosia_web.filter = {
      * @param p2 the second expression
      * @constructor
      */
-    LogicalOperation: function(p1, op, p2){
-        this.p1 = p1;
-        this.op = op;
-        this.p2 = p2;
+    LogicalOperation: Class('ambrosia_web.filter.LogicalOperation',
+        {
+        __init__: function(p1, op, p2) {
+            this.p1 = p1;
+            this.op = op;
+            this.p2 = p2;
+        },
 
-        this.evaluate = function(evt){
+        evaluate: function(evt){
             assert(evt instanceof A.event.Event);
 
             switch(this.op){
@@ -304,7 +314,31 @@ ambrosia_web.filter = {
                 break;
             }
         }
-    },
+    }),
+
+    /**
+     * A blacklisting filter
+     *
+     * @param {String} rule the condition for the filter
+     * @param {String} description a string describing the filter
+     * @param enabled whether the filter is effective
+     * @constructor
+     */
+    BlacklistFilter: Class(
+            'ambrosia_web.filter.BlacklistFilter',
+            'ambrosia_web.filter.Filter',
+        {
+        __init__: function(rule, description, enabled) {
+            this.super();
+
+            if (enabled != undefined) {
+                this.setEnabled(enabled);
+            }
+
+            this.setDescription(description);
+            this.setRule(rule);
+        }
+    }),
 
     /**
      * Helper function for the parser.
@@ -321,6 +355,3 @@ ambrosia_web.filter = {
     }
 
 };
-
-
-

@@ -74,45 +74,33 @@ ambrosia_web.event = {
      * @see :class:`ambrosia.model.Event`
      * @constructor
      */
-    Event: function(){
-        this.references = {};
-        this.properties = {};
-        this.startTS = 0;
-        this.endTS = 0;
-        this.children = [];
+    Event: Class('ambrosia_web.event.Event', {
+        __init__: function() {
+            this.references = {};
+            this.properties = {};
+            this.startTS = 0;
+            this.endTS = 0;
+            this.children = [];
+        },
 
         /**
          * Draw the event. Should be called third when drawing. Must be implemented by subclass.
          */
-        this.draw = function(){ assert(false); };
+        draw: function(){ assert(false); },
 
         /**
          * Calculates the dimensions of the visualisation (for block events). Should be called second when drawing.
          * events.
          * @param {ambrosia_web.layout.BlockLayoutManager} blockLayoutManager the block layout manager to use
          */
-        this.calcDimensions = function(blockLayoutManager){ };
+        calcDimensions: function(blockLayoutManager){ },
 
         /**
          * This is the first method called when drawing events. It calculates if an element should be shown and also
-         * considers the visibility of the child elements (if a child event is shown show this event)
+         * considers the visibility of the child elements (a child can force it's parent to show)
          */
-        this.calcVisible = function(){
+        calcVisible: function(){
             this.visible = true;
-
-            var filters = A.event.getEffectiveFilters(A.event.events.event_registry[this.type]);
-
-            for (var i in filters) {
-                if (!filters[i].isEnabled()) {
-                    continue;
-                }
-
-                if (filters[i].evaluate(this) == false) {
-                    /* filter explicitly says hide */
-                    this.visible = false;
-                    break;
-                }
-            }
 
             var child_forces_visible = false;
             for(var i in this.children) {
@@ -122,14 +110,30 @@ ambrosia_web.event = {
 
             this.visible = this.visible || child_forces_visible;
 
-            return this.visible;
-        };
+            if(!child_forces_visible) {
+                var filters = A.event.getEffectiveFilters(A.event.events.event_registry[this.type]);
+
+                for (var i in filters) {
+                    if (!filters[i].isEnabled()) {
+                        continue;
+                    }
+
+                    if (filters[i].evaluate(this) == false) {
+                        /* filter explicitly says hide */
+                        this.visible = false;
+                        break;
+                    }
+                }
+            }
+
+            return false;
+        },
 
         /**
          * Returns a jQuery element containing a link that, when clicked, selects the event.
          * @returns {jQuery} the link
          */
-        this.getLink = function(){
+        getLink: function(){
             var a = $('<a href="javascript:void(0)">');
             var ths = this;
 
@@ -141,31 +145,31 @@ ambrosia_web.event = {
             a.addClass('event_link');
 
             return a;
-        };
+        },
 
         /**
          * This method should be called when the user selects one event.
          */
-        this.select = function(){
+        select: function(){
             A.event.clearSelect();
             this.selectAdd();
-        };
+        },
 
         /**
          * This method should be called when the user adds an event to a selection.
          */
-        this.selectAdd = function(){
+        selectAdd: function(){
             for(var i in A.event.onSelectHandler){
                 A.event.onSelectHandler[i](this);
             }
 
             A.event._selected.push(this);
-        };
+        },
 
         /**
          * This method should be called when the user unselects one event.
          */
-        this.unselect = function(){
+        unselect: function(){
             var idx = A.event._selected.indexOf(this);
 
             if(idx == -1){
@@ -178,13 +182,12 @@ ambrosia_web.event = {
             }
 
             A.event._selected.splice(idx, 1);
-        };
+        },
 
-        this.toString = function(){
+        toString: function(){
             return this.description;
-        };
-
-    },
+        }
+    }),
 
     /**
      * Receives an object containing the deserialized data from the server and returns an instance of the class
@@ -210,6 +213,10 @@ ambrosia_web.event = {
             new_el.references[i] = A.result.entities[new_el.references[i]];
         }
 
+        /* create shortcuts */
+        new_el.r = new_el.references;
+        new_el.p = new_el.properties;
+
         return new_el;
     },
 
@@ -221,9 +228,9 @@ ambrosia_web.event = {
     getEffectiveFilters: function(cls){
         var res = [];
 
-        if(cls.filters){
-            for(var i in cls.filters){
-                res.push(cls.filters[i]);
+        if(cls.prototype.filters){
+            for(var i in cls.prototype.filters){
+                res.push(cls.prototype.filters[i]);
             }
         }
 
@@ -243,11 +250,11 @@ ambrosia_web.event = {
         if(!cls){
             return A.event._generalFilters;
         }else{
-            if(!cls.filters){
-                cls.filters = [];
+            if(!cls.prototype.filters){
+                cls.prototype.filters = [];
             }
 
-            return cls.filters;
+            return cls.prototype.filters;
         }
     },
 
@@ -260,11 +267,11 @@ ambrosia_web.event = {
         var filters = A.event._generalFilters;
 
         if(cls){
-            if(!cls.filters){
-                cls.filters = [];
+            if(!cls.prototype.filters){
+                cls.prototype.filters = [];
             }
 
-            filters = cls.filters;
+            filters = cls.prototype.filters;
         }
 
         filters.push(filter);
@@ -324,7 +331,10 @@ ambrosia_web.event = {
      * Base class for all events that are drawn as a block.
      * @constructor
      */
-    BlockEvent: function(){
+    BlockEvent: Class(
+            'ambrosia_web.event.BlockEvent',
+            'ambrosia_web.event.Event',
+        {
         /**
          * Calculates the dimensions of the visualisation (for block events). The top level events are drawn using the
          * default block layout manager. Each event that has visible children creates a new block layout manager that
@@ -334,10 +344,10 @@ ambrosia_web.event = {
          *
          * @param {ambrosia_web.layout.BlockLayoutManager} blockLayoutManager the block layout manager to use
          */
-        this.calcDimensions = function(blockLayoutManager){
+        calcDimensions: function(blockLayoutManager) {
             assert(blockLayoutManager instanceof A.layout.BlockLayoutManager);
 
-            if(!this.visible){
+            if (!this.visible) {
                 return;
             }
 
@@ -347,21 +357,21 @@ ambrosia_web.event = {
             var begin = null;
             var end = null;
 
-            if(startTS != null){
+            if (startTS != null) {
                 begin = startTS - ts_offset;
             }
 
-            if(endTS != null){
+            if (endTS != null) {
                 end = endTS - ts_offset;
             }
 
-            if(begin == null){
+            if (begin == null) {
                 begin = end - A.event.DEFAULT_BLOCK_HEIGHT;
-            }else if(end == null){
+            } else if (end == null) {
                 end = begin + A.event.DEFAULT_BLOCK_HEIGHT;
             }
 
-            if((end - begin) < A.event.DEFAULT_BLOCK_HEIGHT){
+            if ((end - begin) < A.event.DEFAULT_BLOCK_HEIGHT) {
                 end = begin + A.event.DEFAULT_BLOCK_HEIGHT;
             }
 
@@ -369,7 +379,7 @@ ambrosia_web.event = {
 
             var childBlockLayoutManager = new ambrosia_web.layout.BlockLayoutManager();
 
-            for(var i in this.children){
+            for (var i in this.children) {
                 this.children[i].calcDimensions(childBlockLayoutManager);
             }
 
@@ -382,13 +392,13 @@ ambrosia_web.event = {
                 this.dimensions.getHeight()));
 
             this.dimensions = blockLayoutManager.fitBlock(this.dimensions, A.event.BLOCK_MARGIN_X, A.event.BLOCK_MARGIN_Y);
-        };
+        },
 
         /**
          * draws the event
          * @param {int} xOffset (optional) if this is a child object, the x position of the parent
          */
-        this.draw = function(xOffset){
+        draw: function(xOffset){
             if(!this.visible){
                 return;
             }
@@ -420,19 +430,23 @@ ambrosia_web.event = {
                 }
             });
         }
-    },
+    }),
 
     /**
      * Base class for all events that are drawn as a horizontal line across the main view.
      * @constructor
      */
-    LineEvent: function(){
-        this.calcDimensions = function(blockLayoutManager){};
+    LineEvent: Class(
+            'ambrosia_web.event.LineEvent',
+            'ambrosia_web.event.Event',
+        {
+
+        calcDimensions: function(blockLayoutManager){},
 
         /**
          * draws the line
          */
-        this.draw = function(){
+        draw: function(){
             if(!this.visible)
                 return;
 
@@ -449,9 +463,5 @@ ambrosia_web.event = {
                  fill: 'none',
                  strokeWidth: width});
         }
-    }
+    })
 };
-
-/* set inheritance relationships */
-A.event.BlockEvent.prototype = new A.event.Event();
-A.event.LineEvent.prototype = new A.event.Event();

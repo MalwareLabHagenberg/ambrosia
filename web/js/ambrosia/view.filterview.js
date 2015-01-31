@@ -8,29 +8,32 @@ ambrosia_web.view.filterview = {
      * Implements a view that allows to view and modify filters
      * @constructor
      */
-    FilterView: function() {
-        var tab_registry = [];
+    FilterView: Class('ambrosia_web.view.filterview.FilerView',
+        {
+        __init__: function () {
+            this._tab_registry = [];
+        },
 
         /**
          * sets up the filterview
          */
-        this.setup = function () {
+        setup: function () {
             this.redraw();
-        };
+        },
 
-        this._addFilterLine = function (filter, tab) {
-            var tdf = $('<tr/>').append(filter.getInput());
+        _addFilterLine: function (filter, tab) {
+            var tdf = $('<td/>').append(filter.getInput());
             var trf = $('<tr/>').append(tdf);
 
             tab.append(trf);
-        };
+        },
 
-        this._removeFilterLine = function (filter) {
+        _removeFilterLine: function (filter) {
             filter.getInput().remove();
-        };
+        },
 
 
-        this._addFilters = function (evt_cls, text, filters) {
+        _addFilters: function (evt_cls, text, filters) {
             var tab = $('<table/>');
 
             var add_link = $('<a href="javascript:void(0)">add</a>');
@@ -44,30 +47,30 @@ ambrosia_web.view.filterview = {
             }
 
             add_link.click(function () {
-                var filter = new A.filter.Filter();
+                var filter = new A.filter.BlacklistFilter('true', '', true);
 
                 A.event.addFilter(evt_cls, filter);
             });
 
-            tab_registry.push([evt_cls, tab]);
+            this._tab_registry.push([evt_cls, tab]);
 
             $('#filterview').append(tab);
-        };
+        },
 
-        this._getTab = function (evt_cls) {
-            for (var i in tab_registry) {
-                var t = tab_registry[i];
+        _getTab: function (evt_cls) {
+            for (var i in this._tab_registry) {
+                var t = this._tab_registry[i];
 
                 if (t[0] == evt_cls) {
                     return t[1];
                 }
             }
-        };
+        },
 
         /**
          * redraws the filter view
          */
-        this.redraw = function () {
+        redraw: function () {
             for (var e in A.event.events.event_registry) {
                 var evt_cls = A.event.events.event_registry[e];
                 var filters = A.event.getFilters(evt_cls);
@@ -82,8 +85,8 @@ ambrosia_web.view.filterview = {
             });
 
             $('#filterview').append(applyButton);
-        };
-    }
+        }
+    })
 };
 
 A.event.addFilterHandler.push(function (evt_cls, filter) {

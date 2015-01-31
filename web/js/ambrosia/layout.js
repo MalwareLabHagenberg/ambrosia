@@ -13,26 +13,29 @@ ambrosia_web.layout = {
      * position)
      * @constructor
      */
-    BlockLayoutManager: function(){
-        var blocks = [];
-        var yPosition = 0;
-        var width = 0;
-        var end_y = 0;
+    BlockLayoutManager: Class('ambrosia_web.layout.BlockLayoutManager',
+        {
+        __init__: function() {
+            this._blocks = [];
+            this._yPosition = 0;
+            this._width = 0;
+            this._end_y = 0;
+        },
 
-        this.cleanBlocks = function(){
-            for(var i in blocks){
-                var blk = blocks[i];
-                if((blk.getEndY()) < yPosition){
-                    delete blocks[i];
+        cleanBlocks: function(){
+            for(var i in this._blocks){
+                var blk = this._blocks[i];
+                if((blk.getEndY()) < this._yPosition){
+                    delete this._blocks[i];
                 }
             }
-        };
+        },
 
-        this.isOccupied = function(dim){
+        isOccupied: function(dim){
             assert(dim instanceof A.layout.Dimensions);
 
-            for(var i in blocks){
-                var blk = blocks[i];
+            for(var i in this._blocks){
+                var blk = this._blocks[i];
 
                 if(blk.getX() < dim.getEndX() && blk.getEndX() > dim.getX() &&
                    blk.getY() < dim.getEndY() && blk.getEndY() > dim.getY()){
@@ -41,7 +44,7 @@ ambrosia_web.layout = {
             }
 
             return false;
-        };
+        },
 
         /**
          * Takes a :js:class:`ambrosia_web.layout.Dimensions` object and tries to fit it considering the previously
@@ -51,10 +54,10 @@ ambrosia_web.layout = {
          * @param {int} margin_y the vertical margin that should be left
          * @returns {ambrosia_web.layout.Dimensions} the new dimensions of the non-overlapping block
          */
-        this.fitBlock = function(dim, margin_x, margin_y){
+        fitBlock: function(dim, margin_x, margin_y){
             assert(dim instanceof A.layout.Dimensions);
 
-            yPosition = dim.getY();
+            this._yPosition = dim.getY();
             this.cleanBlocks();
 
             // add margin for block
@@ -73,35 +76,35 @@ ambrosia_web.layout = {
                 fitBlock.setX(res);
             }
 
-            blocks.push(fitBlock);
+            this._blocks.push(fitBlock);
 
             // apply result to dim
             dim.setX(fitBlock.getX());
 
-            width = Math.max(width, dim.getEndX());
-            end_y = Math.max(end_y, dim.getEndY());
+            this._width = Math.max(this._width, dim.getEndX());
+            this._end_y = Math.max(this._end_y, dim.getEndY());
 
             return dim;
-        };
+        },
 
         /**
          * get the width of the whole block layout manager (considering all fitted events)
          * @returns {number}
          */
-        this.getWidth = function(){
-            assert(isFinite(width));
-            return width;
-        };
+        getWidth: function(){
+            assert(isFinite(this._width));
+            return this._width;
+        },
 
         /**
          * position bottom border of the block layout manager (considering all fitted events)
          * @returns {number}
          */
-        this.getEndY = function(){
-            assert(isFinite(end_y));
-            return end_y;
+        getEndY: function(){
+            assert(isFinite(this._end_y));
+            return this._end_y;
         }
-    },
+    }),
 
     /**
      * Helper class that represents the dimensions of a block
@@ -111,22 +114,30 @@ ambrosia_web.layout = {
      * @param height the height
      * @constructor
      */
-    Dimensions: function (x, y, width, height){
-        assert(isFinite(x));
-        assert(isFinite(y));
-        assert(isFinite(width));
-        assert(isFinite(height));
+    Dimensions: Class('ambrosia_web.layout.Dimensions',
+        {
+        __init__: function (x, y, width, height) {
+            assert(isFinite(x));
+            assert(isFinite(y));
+            assert(isFinite(width));
+            assert(isFinite(height));
 
-        this.getX = function(){ return x; };
-        this.getY = function(){ return y; };
-        this.getWidth = function(){ return width; };
-        this.getHeight = function(){ return height; };
-        this.getEndX = function(){ return x + width; };
-        this.getEndY = function(){ return y + height; };
+            this._x = x;
+            this._y = y;
+            this._width = width;
+            this._height = height;
+        },
 
-        this.setX = function(v){ assert(isFinite(v)); x = v; };
-        this.setY = function(v){ assert(isFinite(v)); y = v; };
-        this.setHeight = function(v){ assert(isFinite(v)); height = v; };
-        this.setWidth = function(v){ assert(isFinite(v)); width = v; };
-    }
+        getX: function(){ return this._x; },
+        getY: function(){ return this._y; },
+        getWidth: function(){ return this._width; },
+        getHeight: function(){ return this._height; },
+        getEndX: function(){ return this._x + this._width; },
+        getEndY: function(){ return this._y + this._height; },
+
+        setX: function(v){ assert(isFinite(v)); this._x = v; },
+        setY: function(v){ assert(isFinite(v)); this._y = v; },
+        setWidth: function(v){ assert(isFinite(v)); this._width = v; },
+        setHeight: function(v){ assert(isFinite(v)); this._height = v; }
+    })
 };

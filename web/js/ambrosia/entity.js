@@ -17,45 +17,47 @@ ambrosia_web.entity = {
      * @see :class:`ambrosia.model.Entity`
      * @constructor
      */
-    Entity: function(){
-        this.description = null;
-        this.id = null;
-        this.references = [];
+    Entity: Class('ambrosia_web.entity.Entity', {
+        __init__: function () {
+            this.description = null;
+            this.id = null;
+            this.references = [];
+        },
 
-        this.toString = function(){
+        toString: function () {
             return this.description;
-        };
+        },
 
         /**
          * This method should be called when the user selects an entity.
          */
-        this.select = function(){
-            for(var i in A.entity.onSelectHandler){
+        select: function () {
+            for (var i in A.entity.onSelectHandler) {
                 A.entity.onSelectHandler[i](this);
             }
 
             A.entity._selected = this;
-        };
+        },
 
         /**
          * resolves all references
          * @see :func:`ambrosia.model.Event.to_serializeable`
          */
-        this.resolveReferences = function(){
-            for(var i in this.references){
+        resolveReferences: function () {
+            for (var i in this.references) {
                 this.references[i] = A.result.entities[this.references[i]];
             }
-        };
+        },
 
         /**
          * Returns a jQuery element containing a link that, when clicked, selects the entity.
          * @returns {jQuery} the link
          */
-        this.getLink = function(){
+        getLink: function () {
             var a = $('<a href="javascript:void(0)">');
             var ths = this;
 
-            a.click(function(){
+            a.click(function () {
                 ths.select();
             });
 
@@ -64,8 +66,7 @@ ambrosia_web.entity = {
 
             return a;
         }
-
-    },
+    }),
 
     /**
      * Receives an object containing the deserialized data from the server and returns an instance of the class
@@ -78,6 +79,9 @@ ambrosia_web.entity = {
         for(var i in el){
             new_el[i] = el[i];
         }
+
+        new_el.r = new_el.references;
+        new_el.p = new_el.properties;
 
         return new_el;
     }

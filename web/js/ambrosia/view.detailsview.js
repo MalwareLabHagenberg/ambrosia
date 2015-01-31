@@ -8,50 +8,55 @@ ambrosia_web.view.detailsview = {
      * Implements a simple view that shows details about the last event that has been selected
      * @constructor
      */
-    DetailsView: function(){
+    DetailsView: Class('ambrosia_web.view.detailsview.DetailsView',
+        {
         /**
          * set up the details view
          */
-        this.setup = function(){
+        setup: function(){
             $('#detailsview').text('No Event selected');
         }
-    }
+    })
 };
 
 A.event.onSelectHandler.push(function(evt){
     var props = {};
-    
-    props['Description'] = evt.description;
-    props['Type'] = evt.type;
-    props['Parent'] = (evt.parent == null) ? ('no parent') : (evt.parent.getLink());
-    props['Start'] = evt.startTS - ts_offset;
-    props['End'] = evt.endTS - ts_offset;
-    
-    for(var k in evt.properties){
-        props['Property "'+k+'"'] = evt.properties[k] + '';
-    }
-    
-    for(var k in evt.references){
-        props['Reference "'+k+'"'] = evt.references[k].getLink();
-    }
-    
-    for(var k in evt.children){
-        props['Child '+((k*1)+1)] = evt.children[k].getLink();
-    }
-    
+
     var table = $('<table>');
-    for(var k in props){
+
+    function add(k, v){
         var tr = $('<tr>');
         var th = $('<th>');
         var td = $('<td>');
         tr.append(th);
         tr.append(td);
         th.text(k);
-        td.append(props[k]);
+        if(v instanceof A.event.Event || v instanceof A.entity.Entity) {
+            td.append(v.getLink());
+        }else{
+            td.text(v);
+        }
         table.append(tr);
     }
+
+    for(var i in evt){
+        if($.inArray(i, ['startTS', 'endTS', 'type', 'parent', 'description', 'visible']) != -1) {
+            add(i, evt[i]);
+        }
+    }
+
+    for(var i in evt.properties){
+        add('p.'+i, evt.properties[i]);
+    }
+
+    for(var i in evt.references){
+        add('r.'+i, evt.references[i]);
+    }
     
-    $('#detailsview').empty();
-    $('#detailsview').append(table);
+    for(var i in evt.children){
+        add('children[]', evt.children[i]);
+    }
+
+    $('#detailsview').empty().append(table);
 });
 

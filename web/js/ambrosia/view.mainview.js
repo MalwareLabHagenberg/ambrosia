@@ -21,21 +21,23 @@ ambrosia_web.view.mainview = {
      * the main view showing all events in a timeline
      * @constructor
      */
-    MainView: function () {
-        var width = 1000;
-        var view_offset = 0;
-        var zoom_level = 500000.0;
-        var drawn_zoom_level = 0;
-        var main_view_element = $('#mainview');
+    MainView: Class('ambrosia_web.view.mainview.MainView', {
+        __init__: function () {
+            this._width = 1000;
+            this._view_offset = 0;
+            this._zoom_level = 500000.0;
+            this._drawn_zoom_level = 0;
+            this._main_view_element = $('#mainview');
+        },
 
         /**
          * set up the main view
          */
-        this.setup = function () {
+        setup: function () {
             this._setupEventHandler();
             var ths = this;
 
-            main_view_element.svg({
+            this._main_view_element.svg({
                 onLoad: function (svg) {
                     window.setTimeout(function () {
                         ths.svg = svg;
@@ -52,12 +54,12 @@ ambrosia_web.view.mainview = {
             A.event.onUnSelectHandler.push(function (evt) {
                 $(evt.svgElement).removeClass('mainview_selected');
             });
-        };
+        },
 
         /**
          * redraw the main view
          */
-        this.redraw = function () {
+        redraw: function () {
             var lastTS = 0;
 
             A.event.reset();
@@ -86,21 +88,21 @@ ambrosia_web.view.mainview = {
             }
 
 
-            drawn_zoom_level = 0;
+            this._drawn_zoom_level = 0;
             this._zoomAndPan();
             this._redrawMeasure();
-        };
+        },
 
         /**
          * sets up the event handlers for mouse and mouse wheel input
          * @private
          */
-        this._setupEventHandler = function () {
+        _setupEventHandler: function () {
             var zoom_redraw_measure_timeout = 0;
             var ths = this;
 
-            main_view_element.mousewheel(function (event) {
-                zoom_level *= (-event.deltaY * 0.05) + 1;
+            this._main_view_element.mousewheel(function (event) {
+                ths._zoom_level *= (-event.deltaY * 0.05) + 1;
                 ths._zoomAndPan();
                 window.clearTimeout(zoom_redraw_measure_timeout);
                 zoom_redraw_measure_timeout = window.setTimeout(function () {
@@ -112,7 +114,7 @@ ambrosia_web.view.mainview = {
 
             var lastPos = 0;
             var dragHandler = function (event) {
-                view_offset += -(event.pageY - lastPos) * (zoom_level / ths.getHeight());
+                ths._view_offset += -(event.pageY - lastPos) * (ths._zoom_level / ths.getHeight());
                 lastPos = event.pageY;
                 ths._zoomAndPan();
                 return false;
@@ -125,62 +127,62 @@ ambrosia_web.view.mainview = {
                 ths._redrawMeasure();
             };
 
-            main_view_element.mousedown(function (event) {
+            this._main_view_element.mousedown(function (event) {
                 lastPos = event.pageY;
                 $(document).mousemove(dragHandler);
                 $(document).mouseup(upHandler);
             });
-        };
+        },
 
         /**
          * get the width of the main view
          * @returns {number} the width
          */
-        this.getWidth = function () {
-            return width;
-        };
+        getWidth: function () {
+            return this._width;
+        },
 
         /**
          * set the width of the main view
          * @param {number} val the width
          */
-        this.setWidth = function (val) {
-            width = val;
-            this.svg.configure({width: width});
+        setWidth: function (val) {
+            this._width = val;
+            this.svg.configure({width: this._width});
             this._redrawMeasure();
-        };
+        },
 
         /**
          * get the height of the main view
          * @returns {number} the height
          */
-        this.getHeight = function () {
+        getHeight: function () {
             return this.svg.height();
-        };
+        },
 
         /**
          * Updates the zoom and translation of the SVG. The measurement lines are hidden. This allows faster zooming
          * and paning without having to draw the measure lines.
          * @private
          */
-        this._zoomAndPan = function () {
-            zoom_level = Math.max(1, zoom_level);
-            zoom_level = Math.min(500000, zoom_level);
+        _zoomAndPan: function () {
+            this._zoom_level = Math.max(1, this._zoom_level);
+            this._zoom_level = Math.min(500000, this._zoom_level);
 
-            view_offset = Math.max(-1000, view_offset);
+            this._view_offset = Math.max(-1000, this._view_offset);
 
-            if (drawn_zoom_level == zoom_level &&
-                this._drawn_view_offset == view_offset) {
+            if (this._drawn_zoom_level == this._zoom_level &&
+                this._drawn_view_offset == this._view_offset) {
                 return;
             }
 
             var zooming = busy('zooming');
 
-            drawn_zoom_level = zoom_level;
-            this._drawn_view_offset = view_offset;
+            this._drawn_zoom_level = this._zoom_level;
+            this._drawn_view_offset = this._view_offset;
 
-            var scale = this.getHeight() / zoom_level;
-            var translate = -view_offset;
+            var scale = this.getHeight() / this._zoom_level;
+            var translate = -this._view_offset;
 
             this.svg.configure(
                 this.g_zoomed,
@@ -192,13 +194,13 @@ ambrosia_web.view.mainview = {
                 {display: 'none'});
 
             zooming.finish();
-        };
+        },
 
         /**
          * draw the measure lines
          * @private
          */
-        this._redrawMeasure = function () {
+        _redrawMeasure: function () {
             /* remove all objects from measure groups */
             while (this.g_measure.firstChild) {
                 this.svg.remove(this.g_measure.firstChild);
@@ -208,20 +210,20 @@ ambrosia_web.view.mainview = {
             }
 
             /* scale for stroke widths and text sizes */
-            var sw = 2 + (zoom_level / 10000);
+            var sw = 2 + (this._zoom_level / 10000);
 
             /* the scale for the lines to draw */
             var mindraw = 20000;
 
             /* depending on the zoom level draw exacter measure lines */
-            if (zoom_level < 400000) mindraw = 10000;
-            if (zoom_level < 40000) mindraw = 1000;
-            if (zoom_level < 4000) mindraw = 100;
-            if (zoom_level < 400) mindraw = 10;
-            if (zoom_level < 40) mindraw = 1;
+            if (this._zoom_level < 400000) mindraw = 10000;
+            if (this._zoom_level < 40000) mindraw = 1000;
+            if (this._zoom_level < 4000) mindraw = 100;
+            if (this._zoom_level < 400) mindraw = 10;
+            if (this._zoom_level < 40) mindraw = 1;
 
-            var draw_start = Math.ceil(view_offset / mindraw) * mindraw;
-            var draw_end = draw_start + zoom_level;
+            var draw_start = Math.ceil(this._view_offset / mindraw) * mindraw;
+            var draw_end = draw_start + this._zoom_level;
 
             for (var i = draw_start; i < draw_end; i += mindraw) {
                 if (i % 1000 == 0) {
@@ -239,7 +241,7 @@ ambrosia_web.view.mainview = {
             this.svg.configure(
                 this.g_measure_text,
                 {display: ''});
-        };
+        },
 
         /**
          * Helper method to draw a single measure line
@@ -249,8 +251,8 @@ ambrosia_web.view.mainview = {
          * @param {String} text the caption
          * @private
          */
-        this._drawMeasureLine = function (offset, fontSize, strokeWidth, text) {
-            var zoomfactor = (this.getHeight() / zoom_level);
+        _drawMeasureLine: function (offset, fontSize, strokeWidth, text) {
+            var zoomfactor = (this.getHeight() / this._zoom_level);
 
             this.svg.line(
                 this.g_measure,
@@ -260,10 +262,9 @@ ambrosia_web.view.mainview = {
 
             this.svg.text(
                 this.g_measure_text,
-                5, (offset - view_offset) * zoomfactor, // x, y
+                5, (offset - this._view_offset) * zoomfactor, // x, y
                 text,
                 {fontSize: fontSize, fill: 'grey'});
         }
-
-    }
+    })
 };
