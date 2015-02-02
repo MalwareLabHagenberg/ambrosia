@@ -17,9 +17,36 @@ var ambrosia_web = {
      */
     redraw: function() {
         var drawing = busy('Drawing');
-        A.mainView.redraw();
-        drawing.finish();
-        $(".filterinput").removeClass('filterchanged');
+
+        /* avoid browser freeze before "Drawing" is shown */
+        window.setTimeout(function(){
+            A.mainView.redraw();
+            $(".filterinput").removeClass('filterchanged');
+            drawing.finish();
+        }, 10);
+    },
+
+    _createView: function (name, element) {
+        var content = $('<div class="viewcontent"/>');
+
+        var v = ($('<div class="viewcontainer"/>')
+            .append(
+                $('<div class="viewheader"/>')
+                    .text(name)
+                    .click(function(){
+                        var was_shown = v.hasClass('viewshown');
+                        $('.viewcontainer').removeClass('viewshown');
+                        if(!was_shown){
+                            v.addClass('viewshown');
+                        }
+                    })
+            )
+            .append(content)
+        );
+
+        element.append(v);
+
+        return content;
     },
 
     /**
@@ -64,9 +91,9 @@ var ambrosia_web = {
                 loading.finish();
 
                 A.mainView.setup();
-                A.detailsView.setup();
-                A.filterView.setup();
-                A.entityView.setup();
+                A.detailsView.setup(A._createView('Event', $('#detailsview')));
+                A.filterView.setup(A._createView('Filter', $('#filterview')));
+                A.entityView.setup(A._createView('Entity', $('#entityview')));
             }
         })
     }

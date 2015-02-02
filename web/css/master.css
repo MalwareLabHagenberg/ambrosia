@@ -1,19 +1,177 @@
-body {
-    background: #DDDDDD;
+html {
+    height: 100%;
     margin: 0;
-    width: 100%;
+    padding: 0;
+    font-size: 10pt;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+a {
+    color: #000;
+    text-decoration: none
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#head {
+    height: 50px;
+    background-color: #b0b0b0;
+    color: #222325;
+    border-bottom: 2px #222325 solid;
+}
+
+#title {
+    padding: 15px;
+    font-size: 14px;
+    line-height: 20px;
+    font-size: 18px;
+    display: inline-block;
+}
+
+#busyindicator {
+    position: absolute;
+    bottom: 30px;
+    left: 10px;
+}
+
+.busybox {
+    border: 3px #fff solid;
+    background-color: #222325;
+    min-width: 300px;
+    height: 30px;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    opacity: 0.7;
+    font-size: 13pt;
+    color: #fff;
+}
+
+.view .viewcontent{
+    background-color: #222325;
+    color: #B0B0B0;
+    border-radius: 0px 0px 0px 8px;
+    max-height: 90%;
+    min-width: 300px;
+    min-height: 50px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 3px;
+    text-align: center;
+    opacity: 0.7;
+    padding: 5px;
+}
+
+.view .viewcontent:hover{
+    opacity: 1;
+}
+
+.view .viewheader {
+    padding: 15px;
+    font-size: 14px;
+    line-height: 20px;
+    cursor: pointer;
+}
+
+input {
+    background-color: #ddd;
+    border: 1px #B0B0B0 solid;
+    margin: 1px;
+}
+
+button {
+    background-color: #B0B0B0;
+    color: #222325;
+    border: 1px #ddd solid;
+    border-radius: 4px;
+    margin: 0px 5px 0px 2px;
+}
+
+.view {
+    float: right;
+}
+
+.view .viewcontent {
+    display: none;
+}
+
+.view .viewshown .viewcontent {
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 52px;
+    padding-right: 20px;
+}
+
+.view .viewshown .viewheader {
+    color: #b0b0b0;
+    background-color: #222325;
 }
 
 #mainview {
-    height: 530px;
-    width: 99%;
+    height: calc(100% - 55px);
+    height: -moz-calc(100% - 55px);
+    height: -webkit-calc(100% - 55px);
+    width: 100%;
     overflow: auto;
     z-index: 10;
-    background-color: #FFFFFF;
+    background-color: #222325;
+}
+
+.filtercontainer {
+    border-radius: 3px;
+    margin-bottom: 3px;
+    width: 660px;
+    color: #333;
+    border: 1px solid #ddd;
+    background-color: #b0b0b0;
+}
+
+.tablehead {
+    font-size: 12pt;
+    text-align: left;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 4px;
+}
+
+.tablehead button {
+    border-width: 0;
+    font-weight: bold;
+    min-width: 30px;
+}
+
+.tableentry {
+    margin-bottom: 5px;
+    border-top: 1px solid #ddd;
+    padding: 8px;
+}
+
+.tableentry:hover {
+    background-color: #ebebeb;
 }
 
 .filterinput{
-    width: 300px;
+    width: 648px;
+    font-family: monospace;
+    font-size: 8pt;
+}
+
+.filterdescription{
+    width: 535px;
+}
+
+.filtererror {
+    width: 648px;
+    color: #ff0000;
 }
 
 .filterinput.filterchanged {
@@ -34,6 +192,123 @@ rect.mainview_block {
 rect.mainview_selected {
     stroke-opacity: 1;
     fill-opacity: 1;
-    stroke: #000000;
+    stroke: #fff;
     stroke-width: 8px;
 }
+
+.propertytable {
+    border-radius: 3px;
+    margin-bottom: 3px;
+    width: 660px;
+    color: #333;
+    border: 1px solid #ddd;
+    background-color: #b0b0b0;
+}
+
+.propertytable th {
+    text-align: right;
+    font-family: monospace;
+}
+
+.propertytable td {
+    text-align: left;
+    font-family: monospace;
+}
+
+.propertytable tr:hover th, .propertytable tr:hover td {
+    background-color: #ebebeb;
+}
+
+.event_LibraryLoad {
+    fill: #000000;
+}
+
+
+/* file events: green */
+.event_FileEvent {
+    fill: #04b200;
+}
+
+.event_AnonymousFileEvent {
+    fill: #65b200;
+}
+
+.event_UnknownFdEvent {
+    fill: #00b28e;
+}
+
+
+/* network events: blue */
+.event_SocketEvent {
+    fill: #2a00b2;
+}
+
+.event_SocketAccept {
+    fill: #0069b2;
+}
+
+/* potentially malicious behaviour: red */
+.event_SMSAccess {
+    fill: #b25000;
+}
+.event_PhoneCall {
+    fill: #b20000;
+}
+
+.event_ContactAccess {
+    fill: #b2004b;
+}
+
+.event_CallLogAccess {
+    fill: #d4001e;
+}
+.event_SuperUserRequest {
+    fill: #eb0000;
+}
+
+.event_CommandExecuteEvent {
+    fill: #d46e00;
+}
+
+
+/* low-level events: white */
+.event_ExecEvent {
+    fill: #ffd4d4;
+}
+
+.event_AndroidApiCall {
+    fill: #ffd4f3;
+}
+
+.event_CreateDir {
+    fill: #eed4ff;
+}
+
+.event_SendSignal {
+    fill: #dbd4ff;
+}
+
+.event_DeleteFileEvent {
+    fill: #d4ecff;
+}
+
+.event_MemoryMapEvent {
+    fill: #d4fff0;
+}
+
+.event_StartTaskEvent {
+    fill: #d4ffdb;
+}
+
+.event_SyscallEvent {
+    fill: #f3ffd4;
+}
+
+/* irrelevant events: grey */
+.event_ANANASAdbShellExec {
+    fill: #9d9d9d;
+}
+
+
+
+

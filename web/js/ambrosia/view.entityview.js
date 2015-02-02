@@ -10,57 +10,59 @@ ambrosia_web.view.entityview = {
      */
     EntityView: Class('ambrosia_web.view.entityview.EntityView',
         {
-        setup: function(){
-            $('#entityview').text('no entity selected');
+        setup: function(element){
+            element.text('no entity selected');
+
+            A.entity.onSelectHandler.push(function(entity){
+                var table = $('<table class="propertytable"/>');
+
+                function add(k, v){
+                    var tr = $('<tr>');
+                    var th = $('<th>');
+                    var td = $('<td>');
+                    tr.append(th);
+                    tr.append(td);
+                    th.text(k);
+                    if(v instanceof A.event.Event || v instanceof A.entity.Entity) {
+                        td.append(v.getLink());
+                    }else if(v instanceof jQuery) {
+                        td.append(v);
+                    }else{
+                        td.text(v);
+                    }
+                    table.append(tr);
+                }
+
+                var fths = $('<button type="button"/>').text('this');
+                fths.click(function(){
+                    A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" : r.*.id', 'show entity filter'));
+                });
+
+                var fnths = $('<button type="button"/>').text('not this');
+                fnths.click(function(){
+                    A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" !: r.*.id', 'hide entity filter'));
+                });
+
+                add('filter', $('<span/>').append(fths).append(fnths));
+
+                for(var i in entity){
+                    if($.inArray(i, ['id', 'type', 'description']) != -1) {
+                        add(i, entity[i]);
+                    }
+                }
+
+                for(var i in entity.properties){
+                    add('p.'+i, entity.properties[i]);
+                }
+
+                for(var i in entity.references){
+                    add('r.'+i, entity.references[i]);
+                }
+
+                element.empty().append(table);
+            });
+
         }
     })
 };
 
-A.entity.onSelectHandler.push(function(entity){
-    var table = $('<table/>');
-
-    function add(k, v){
-        var tr = $('<tr>');
-        var th = $('<th>');
-        var td = $('<td>');
-        tr.append(th);
-        tr.append(td);
-        th.text(k);
-        if(v instanceof A.event.Event || v instanceof A.entity.Entity) {
-            td.append(v.getLink());
-        }else if(v instanceof jQuery) {
-            td.append(v);
-        }else{
-            td.text(v);
-        }
-        table.append(tr);
-    }
-
-    var fths = $('<button type="button"/>').text('this');
-    fths.click(function(){
-        A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" : r.*.id', 'show entity filter'));
-    });
-    
-    var fnths = $('<button type="button"/>').text('not this');
-    fnths.click(function(){
-        A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" !: r.*.id', 'hide entity filter'));
-    });
-
-    add('filter', $('<span/>').append(fths).append(fnths));
-
-    for(var i in entity){
-        if($.inArray(i, ['id', 'type', 'description']) != -1) {
-            add(i, entity[i]);
-        }
-    }
-
-    for(var i in entity.properties){
-        add('p.'+i, entity.properties[i]);
-    }
-    
-    for(var i in entity.references){
-        add('r.'+i, entity.references[i]);
-    }
-
-    $('#entityview').empty().append(table);
-});

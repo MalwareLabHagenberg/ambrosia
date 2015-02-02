@@ -19,36 +19,56 @@ ambrosia_web.view.filterview = {
          * @methodOf ambrosia_web.view.filterview.FilterView
          * @name setup
          */
-        setup: function () {
+        setup: function (element) {
+            this.container = element;
             this.redraw();
+
+            var ths = this;
+
+            A.event.addFilterHandler.push(function (evt_cls, filter) {
+                ths._addFilterLine(filter, ths._getTab(evt_cls));
+            });
+
+            A.event.removeFilterHandler.push(function (filter) {
+                ths._removeFilterLine(filter);
+            });
         },
 
         _addFilterLine: function (filter, tab) {
-            var tdf = $('<td/>').append(filter.getInput());
-            var trf = $('<tr/>').append(tdf);
-
-            tab.append(trf);
+            tab.append(filter.getInput());
         },
 
         _removeFilterLine: function (filter) {
             filter.getInput().remove();
         },
 
-
         _addFilters: function (evt_cls, text, filters) {
-            var tab = $('<table/>');
+            var tab = $('<div class="fitlertable"/>').hide();
 
-            var add_link = $('<a href="javascript:void(0)">add</a>');
-            var th = $('<th/>').text(text).append(add_link);
-            var tr = $('<tr/>').append(th);
+            var add_btn = $('<button>add</button>');
+            var toggle_btn = $('<button>+</button>').click(function(){
+                if(toggle_btn.text() == '+'){
+                    toggle_btn.text('-');
+                }else{
+                    toggle_btn.text('+');
+                }
 
-            tab.append(tr);
+                tab.toggle();
+            });
+
+            tab.append($('<div class="tableentry"/>').append(add_btn));
+
+            var filter_container = ($('<div class="filtercontainer"/>')
+                .append($('<div class="tablehead"/>')
+                    .append(toggle_btn)
+                    .append($('<span/>').text(text)))
+                .append(tab));
 
             for (var f in filters) {
                 this._addFilterLine(filters[f], tab);
             }
 
-            add_link.click(function () {
+            add_btn.click(function () {
                 var filter = new A.filter.BlacklistFilter('true', '', true);
 
                 A.event.addFilter(evt_cls, filter);
@@ -56,7 +76,7 @@ ambrosia_web.view.filterview = {
 
             this._tab_registry.push([evt_cls, tab]);
 
-            $('#filterview').append(tab);
+            this.container.append(filter_container);
         },
 
         _getTab: function (evt_cls) {
@@ -82,21 +102,6 @@ ambrosia_web.view.filterview = {
             }
 
             this._addFilters(null, 'general', A.event.getFilters(null));
-
-            var applyButton = $('<button type="button"/>').text('Apply');
-            applyButton.click(function () {
-                A.redraw();
-            });
-
-            $('#filterview').append(applyButton);
         }
     })
 };
-
-A.event.addFilterHandler.push(function (evt_cls, filter) {
-    A.filterView._addFilterLine(filter, A.filterView._getTab(evt_cls));
-});
-
-A.event.removeFilterHandler.push(function (filter) {
-    A.filterView._removeFilterLine(filter);
-});

@@ -33,10 +33,10 @@ ambrosia_web.filter = {
     Filter: Class('ambrosia_web.filter.Filter',
         {
         __init__: function() {
-            this._rule_input = $('<input class="filterinput"/>').val('true');
-            this._description_input = $('<input class="filterdescription"/>');
+            this._rule_input = $('<input class="filterinput" placeholder="Rule"/>').val('true');
+            this._description_input = $('<input class="filterdescription" placeholder="Description"/>');
             this._error_label = $('<div class="filtererror"/>');
-            this._delete_button = $('<button type="button"/>').text('del');
+            this._delete_button = $('<button type="button"/>').text('delete filter');
             this._enable_checkbox = $('<input type="checkbox"/>').prop('checked', true);
             this._div = undefined;
             this._error = false;
@@ -47,6 +47,10 @@ ambrosia_web.filter = {
             this._rule_input.keyup(function(){
                 ths._rule_input.addClass('filterchanged');
                 ths.setRule(ths._rule_input.val(), true);
+            });
+
+            this._rule_input.change(function(){
+                A.redraw();
             });
 
             this._rule_input.change(function(){
@@ -147,13 +151,19 @@ ambrosia_web.filter = {
          */
         getInput: function(){
             if(!this._div){
-                this._div = ($('<div/>')
-                    .append(this._description_input)
-                    .append(this._rule_input)
-                    .append(this._enable_checkbox));
-                this._div.append(this.getSubClassElements());
-                this._div.append(this._delete_button)
-                         .append(this._error_label);
+                this._div = ($('<div class="tableentry"/>')
+                    .append(
+                        $('<div/>')
+                            .append(this._enable_checkbox)
+                            .append(this._description_input)
+                            .append(this._delete_button)
+                            .append(this.getSubClassElements())
+                    )
+                    .append(
+                        $('<div/>')
+                            .append(this._rule_input)
+                    )
+                    .append(this._error_label));
             }
             return this._div;
         }

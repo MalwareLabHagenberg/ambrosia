@@ -10,7 +10,6 @@ ambrosia_web.event.events = function(){
      */
     var SyscallEvent = Class('ambrosia_web.event.events.SyscallEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#cc9595'; },
         filters: [
             new A.filter.BlacklistFilter('false', 'disable all syscall events')
         ]
@@ -23,7 +22,6 @@ ambrosia_web.event.events = function(){
      */
     var StartTaskEvent = Class('ambrosia_web.event.events.StartTaskEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#ff008a'; },
         filters: [
             new A.filter.BlacklistFilter('p.is_process==false', 'hide forks that spawn a thread')
         ]
@@ -36,7 +34,6 @@ ambrosia_web.event.events = function(){
      */
     var MemoryMapEvent = Class('ambrosia_web.event.events.MemoryMapEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#eb00ff'; },
         filters: [
             new A.filter.BlacklistFilter('p.anonymous==false', 'hide mmaps that do not operate on a file')
         ]
@@ -49,7 +46,6 @@ ambrosia_web.event.events = function(){
      */
     var DeleteFileEvent = Class('ambrosia_web.event.events.DeleteFileEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#c6005d'; },
         filters: [
             new A.filter.BlacklistFilter('r.file.abspath != "/data/ananaslkm.ko"',
                 'hide the removal of the lkm file (done by ANANAS)')
@@ -63,7 +59,6 @@ ambrosia_web.event.events = function(){
      */
     var SendSignal = Class('ambrosia_web.event.events.SendSignal',
         A.event.BlockEvent, {
-        getColor: function(){ return '#ff9e9e'; },
         filters: [
         ]
     });
@@ -75,7 +70,6 @@ ambrosia_web.event.events = function(){
      */
     var CreateDir = Class('ambrosia_web.event.events.CreateDir',
         A.event.BlockEvent, {
-        getColor: function(){ return '#f19eff'; },
         filters: [
         ]
     });
@@ -87,7 +81,6 @@ ambrosia_web.event.events = function(){
      */
     var SocketAccept = Class('ambrosia_web.event.events.SocketAccept',
         A.event.BlockEvent, {
-        getColor: function(){ return '#bb5cff'; },
         filters: [
         ]
     });
@@ -99,7 +92,6 @@ ambrosia_web.event.events = function(){
      */
     var FileEvent = Class('ambrosia_web.event.events.FileEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#a6ff00'; },
         filters: [
             new A.filter.BlacklistFilter('!(p.abspath~"^/proc/\\d+/oom_adj$" && p.mode==131073)', ''),
             new A.filter.BlacklistFilter('!(p.abspath~"^/proc/\\d+/stat$" && p.mode==131072)', ''),
@@ -121,7 +113,6 @@ ambrosia_web.event.events = function(){
      */
     var AnonymousFileEvent = Class('ambrosia_web.event.events.AnonymousFileEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#a6ff00'; },
         filters: [
         ]
     });
@@ -133,7 +124,6 @@ ambrosia_web.event.events = function(){
      */
     var UnknownFdEvent = Class('ambrosia_web.event.events.UnknownFdEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#1dff00'; },
         filters: [
             new A.filter.BlacklistFilter('false', 'hide all unknown fd events')
         ]
@@ -146,7 +136,6 @@ ambrosia_web.event.events = function(){
      */
     var SocketEvent = Class('ambrosia_web.event.events.SocketEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#00ff6d'; },
         filters: [
             new A.filter.BlacklistFilter('r.process.p.type != "ADBD"', 'hide the socket created by ADBD')
         ]
@@ -159,7 +148,6 @@ ambrosia_web.event.events = function(){
      */
     var CommandExecuteEvent = Class('ambrosia_web.event.events.CommandExecuteEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#ff5600'; },
         filters: [
         ]
     });
@@ -171,7 +159,6 @@ ambrosia_web.event.events = function(){
      */
     var SuperUserRequest = Class('ambrosia_web.event.events.SuperUserRequest',
         A.event.BlockEvent, {
-        getColor: function(){ return '#ff9b00'; },
         filters: [
         ]
     });
@@ -183,7 +170,6 @@ ambrosia_web.event.events = function(){
      */
     var AndroidApicall = Class('ambrosia_web.event.events.AndroidApicall',
         A.event.BlockEvent, {
-        getColor: function(){ return '#a9cccc'; },
         filters: [
             new A.filter.BlacklistFilter('false', 'hide all low-level API call events')
         ]
@@ -196,7 +182,6 @@ ambrosia_web.event.events = function(){
      */
     var CallLogAccess = Class('ambrosia_web.event.events.CallLogAccess',
         A.event.BlockEvent, {
-        getColor: function(){ return '#ffce00'; },
         filters: [
         ]
     });
@@ -208,7 +193,6 @@ ambrosia_web.event.events = function(){
      */
     var ContactsAccess = Class('ambrosia_web.event.events.ContactsAccess',
         A.event.BlockEvent, {
-        getColor: function(){ return '#ebff00'; },
         filters: [
         ]
     });
@@ -220,7 +204,6 @@ ambrosia_web.event.events = function(){
      */
     var PhoneCall = Class('ambrosia_web.event.events.PhoneCall',
         A.event.BlockEvent, {
-        getColor: function(){ return '#b7ff00'; },
         filters: [
         ]
     });
@@ -232,7 +215,6 @@ ambrosia_web.event.events = function(){
      */
     var SMSAccess = Class('ambrosia_web.event.events.SMSAccess',
         A.event.BlockEvent, {
-        getColor: function(){ return '#84ff00'; },
         filters: [
         ]
     });
@@ -252,7 +234,6 @@ ambrosia_web.event.events = function(){
      */
     var ExecEvent = Class('ambrosia_web.event.events.ExecEvent',
         A.event.BlockEvent, {
-        getColor: function(){ return '#000000'; },
         filters: [
         ]
     });
@@ -264,7 +245,6 @@ ambrosia_web.event.events = function(){
      */
     var ANANASAdbShellExec = Class('ambrosia_web.event.events.ANANASAdbShellExec',
         A.event.BlockEvent, {
-        getColor: function(){ return '#000000'; },
         filters: [
             new A.filter.BlacklistFilter('false', 'hide command executes initiated by ANANAS')
         ]
@@ -277,7 +257,6 @@ ambrosia_web.event.events = function(){
      */
     var LibraryLoad = Class('ambrosia_web.event.events.LibraryLoad',
         A.event.BlockEvent, {
-        getColor: function(){ return '#000000'; },
         filters: [
             new A.filter.BlacklistFilter("false", 'hide all library loads')
         ]
@@ -313,7 +292,9 @@ ambrosia_web.event.events = function(){
     };
 
     for(var i in evt_registry){
-        ret[i.substr(i.lastIndexOf('.') + 1)] = evt_registry[i];
+        var cls_name = i.substr(i.lastIndexOf('.') + 1);
+        ret[cls_name] = evt_registry[i];
+        evt_registry[i].prototype.cssClass = 'event_'+cls_name;
     }
 
     return ret;

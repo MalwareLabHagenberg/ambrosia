@@ -15,7 +15,7 @@ ambrosia_web.view.mainview = {
      * the extra horizontal space that should be left after the last event
      * @constant
      */
-    EXTRA_WIDTH: 50,
+    EXTRA_WIDTH: 1200,
 
     /**
      * the main view showing all events in a timeline
@@ -108,7 +108,18 @@ ambrosia_web.view.mainview = {
             var ths = this;
 
             this._main_view_element.mousewheel(function (event) {
-                ths._zoom_level *= (-event.deltaY * 0.05) + 1;
+                var factor = (-event.deltaY * 0.05) + 1;
+
+                var height = ths._main_view_element.height();
+                var mousePosition = event.clientY - ths._main_view_element.offset().top;
+                var panfactor = (mousePosition / height);
+
+                var new_zoom_level = ths._zoom_level * factor;
+                var zoom_level_diff = ths._zoom_level - new_zoom_level;
+
+                ths._view_offset += panfactor * zoom_level_diff;
+                ths._zoom_level *= factor;
+
                 ths._zoomAndPan();
                 window.clearTimeout(zoom_redraw_measure_timeout);
                 zoom_redraw_measure_timeout = window.setTimeout(function () {
@@ -118,10 +129,15 @@ ambrosia_web.view.mainview = {
                 return false;
             });
 
-            var lastPos = 0;
+            var lastPosY = 0;
+            var lastPosX = 0;
             var dragHandler = function (event) {
-                ths._view_offset += -(event.pageY - lastPos) * (ths._zoom_level / ths.getHeight());
-                lastPos = event.pageY;
+                ths._view_offset += -(event.pageY - lastPosY) * (ths._zoom_level / ths.getHeight());
+                ths._main_view_element.scrollLeft(
+                    ths._main_view_element.scrollLeft() - (event.pageX - lastPosX)
+                );
+                lastPosY = event.pageY;
+                lastPosX = event.pageX;
                 ths._zoomAndPan();
                 return false;
             };
@@ -134,7 +150,8 @@ ambrosia_web.view.mainview = {
             };
 
             this._main_view_element.mousedown(function (event) {
-                lastPos = event.pageY;
+                lastPosY = event.pageY;
+                lastPosX = event.pageX;
                 $(document).mousemove(dragHandler);
                 $(document).mouseup(upHandler);
             });

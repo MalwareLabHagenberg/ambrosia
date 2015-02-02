@@ -344,6 +344,7 @@ ambrosia_web.event = {
     /**
      * Base class for all events that are drawn as a block.
      * @constructor
+     * @extends ambrosia_web.event.Event
      */
     BlockEvent: Class(
             'ambrosia_web.event.BlockEvent',
@@ -430,10 +431,9 @@ ambrosia_web.event = {
             this.svgElement = A.mainView.svg.rect(
                 A.mainView.g_events,
                 xOffset + this.dimensions.getX(), this.dimensions.getY(),
-                this.dimensions.getWidth(), this.dimensions.getHeight(),
-                {fill: this.getColor()});
+                this.dimensions.getWidth(), this.dimensions.getHeight());
 
-            $(this.svgElement).addClass('mainview_block');
+            $(this.svgElement).addClass('mainview_block').addClass(this.cssClass);
 
             for(var i in this.children){
                 this.children[i].draw(A.event.BLOCK_PADDING + xOffset + this.dimensions.getX());
@@ -453,6 +453,7 @@ ambrosia_web.event = {
     /**
      * Base class for all events that are drawn as a horizontal line across the main view.
      * @constructor
+     * @extends ambrosia_web.event.Event
      */
     LineEvent: Class(
             'ambrosia_web.event.LineEvent',
@@ -470,7 +471,6 @@ ambrosia_web.event = {
             if(!this.visible)
                 return;
 
-            var width = 1.0;
             var pos = (this.startTS - ts_offset) * 1000;
 
             this.svgElement = A.mainView.svg.line(
@@ -479,9 +479,7 @@ ambrosia_web.event = {
                 pos,
                 A.mainView.getWidth(),
                 pos,
-                {stroke: '#ffff00',
-                 fill: 'none',
-                 strokeWidth: width});
+                {class_: this.cssClass});
         }
     })
 };

@@ -130,7 +130,7 @@ var assert = A.util.assert;
  * creates a class
  * @param {String} name the fully qualified name of the new class
  * @param {String|Object} p1 if two parameters are passed: the object containing class members, else the superclass
- * @param {Object} p2 the obj object containing class members
+ * @param {Object} [p2] the obj object containing class members
  * @returns {class} the newly created class
  * @function
  */
