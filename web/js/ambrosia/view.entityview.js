@@ -16,22 +16,7 @@ ambrosia_web.view.entityview = {
             A.entity.onSelectHandler.push(function(entity){
                 var table = $('<table class="propertytable"/>');
 
-                function add(k, v){
-                    var tr = $('<tr>');
-                    var th = $('<th>');
-                    var td = $('<td>');
-                    tr.append(th);
-                    tr.append(td);
-                    th.text(k);
-                    if(v instanceof A.event.Event || v instanceof A.entity.Entity) {
-                        td.append(v.getLink());
-                    }else if(v instanceof jQuery) {
-                        td.append(v);
-                    }else{
-                        td.text(v);
-                    }
-                    table.append(tr);
-                }
+                var add = A.util.addToPropertyTable;
 
                 var fths = $('<button type="button"/>').text('this');
                 fths.click(function(){
@@ -43,20 +28,20 @@ ambrosia_web.view.entityview = {
                     A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" !: r.*.id', 'hide entity filter'));
                 });
 
-                add('filter', $('<span/>').append(fths).append(fnths));
+                add('filter', $('<span/>').append(fths).append(fnths), table);
 
                 for(var i in entity){
                     if($.inArray(i, ['id', 'type', 'description']) != -1) {
-                        add(i, entity[i]);
+                        add(i, entity[i], table);
                     }
                 }
 
                 for(var i in entity.properties){
-                    add('p.'+i, entity.properties[i]);
+                    add('p.'+i, entity.properties[i], table);
                 }
 
                 for(var i in entity.references){
-                    add('r.'+i, entity.references[i]);
+                    add('r.'+i, entity.references[i], table);
                 }
 
                 element.empty().append(table);

@@ -23,37 +23,24 @@ ambrosia_web.view.detailsview = {
 
                 var table = $('<table class="propertytable">');
 
-                function add(k, v){
-                    var tr = $('<tr>');
-                    var th = $('<th>');
-                    var td = $('<td>');
-                    tr.append(th);
-                    tr.append(td);
-                    th.text(k);
-                    if(v instanceof A.event.Event || v instanceof A.entity.Entity) {
-                        td.append(v.getLink());
-                    }else{
-                        td.text(v);
-                    }
-                    table.append(tr);
-                }
+                var add = A.util.addToPropertyTable;
 
                 for(var i in evt){
                     if($.inArray(i, ['startTS', 'endTS', 'type', 'parent', 'description', 'visible']) != -1) {
-                        add(i, evt[i]);
+                        add(i, evt[i], table);
                     }
                 }
 
                 for(var i in evt.properties){
-                    add('p.'+i, evt.properties[i]);
+                    add('p.'+i, evt.properties[i], table);
                 }
 
                 for(var i in evt.references){
-                    add('r.'+i, evt.references[i]);
+                    add('r.'+i, evt.references[i], table);
                 }
 
                 for(var i in evt.children){
-                    add('children[]', evt.children[i]);
+                    add('children[]', evt.children[i], table);
                 }
 
                 element.empty().append(table);

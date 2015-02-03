@@ -290,7 +290,6 @@ class Event(Persistent):
     """
 
     def __init__(self, start_ts=None, end_ts=None):
-
         assert isinstance(start_ts, datetime) or start_ts is None
         assert isinstance(end_ts, datetime) or end_ts is None
 

@@ -87,7 +87,14 @@ class Task(Entity):
                 return el
 
     def __str__(self):
-        return '[Task: "{}" ({}) Path: {}]'.format(self.comm, self.pid, self.path)
+        if len(self.comm) > 0:
+            desc = self.comm[len(self.comm) - 1]
+        elif len(self.path) > 0:
+            desc = self.path[len(self.path) - 1]
+        else:
+            desc = '??'
+
+        return '[Task: "{}" ({})]'.format(desc, self.pid)
 
     @property
     def is_process(self):

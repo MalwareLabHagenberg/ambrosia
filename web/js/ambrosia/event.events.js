@@ -93,16 +93,43 @@ ambrosia_web.event.events = function(){
     var FileEvent = Class('ambrosia_web.event.events.FileEvent',
         A.event.BlockEvent, {
         filters: [
-            new A.filter.BlacklistFilter('!(p.abspath~"^/proc/\\d+/oom_adj$" && p.mode==131073)', ''),
-            new A.filter.BlacklistFilter('!(p.abspath~"^/proc/\\d+/stat$" && p.mode==131072)', ''),
-            new A.filter.BlacklistFilter('!(p.abspath~"^/proc/\\d+/task$" && p.mode==147456)', ''),
-            new A.filter.BlacklistFilter('!(p.abspath=="/proc/net/xt_qtaguid/iface_stat_fmt" && p.mode==131072)', ''),
+            new A.filter.BlacklistFilter(
+                '!(p.abspath~"^/proc/\\d+/stat$" && p.flags == 131072 && "ActivityManager" : r.process.p.comm)',
+                'ActivityManager regularily opens /proc/*/stat'),
+            new A.filter.BlacklistFilter(
+                '!(p.abspath~"^/proc/\\d+/oom_adj$" && p.flags==131073 && r.process.p.type=="ZYGOTE_CHILD")',
+                'several zygote childs access /proc/*/oom_adj'),
+            new A.filter.BlacklistFilter(
+                '!(p.abspath~"^/proc/\\d+/task$" && p.flags==147456 && r.process.p.type=="ZYGOTE_CHILD")',
+                'several zygote childs access /proc/*/task'),
+            new A.filter.BlacklistFilter(
+                '!(p.abspath~"^/proc/\\d+/smaps$" && p.flags==131072 && r.process.p.type=="ZYGOTE_CHILD")',
+                'Several zygote childs access /proc/*/smaps'),
+            new A.filter.BlacklistFilter(
+                '!(p.abspath=="/proc/net/xt_qtaguid/iface_stat_fmt" && p.flags==131072 &&  "m.android.phone" !: p.process.comm)',
+                'android phone accesses /proc/net/xt_qtaguid/iface_stat_fmt'),
+            new A.filter.BlacklistFilter(
+                '!(p.abspath~"^/proc/" && p.flg_O_RDWR==false && p.flg_O_WRONLY==false)',
+                'hide misc read-only /proc/* access'),
+            new A.filter.BlacklistFilter(
+                '!(p.abspath=="/proc/net/xt_qtaguid/ctrl" && p.flags==131073 && "NetworkPolicy" : r.process.p.comm)',
+                'hide NetworkPolicy operations'),
+            new A.filter.BlacklistFilter(
+                '!(p.abspath=="/proc/net/xt_quota/globalAlert" && p.flags==131649 && "netd" : r.process.p.comm)',
+                'hide netd /proc/net operations'),
+
+
+            /*
+
+
+
+
             new A.filter.BlacklistFilter('!(p.abspath=="/dev/binder" && p.mode==131074)', ''),
             new A.filter.BlacklistFilter('!(p.abspath=="/dev/__properties__" && p.mode==688128)', ''),
             new A.filter.BlacklistFilter('!(p.abspath=="/dev/ashmem" && p.mode==131074)', ''),
             new A.filter.BlacklistFilter(
                 '!(p.abspath ~ "/system/framework/.*\\.jar" && p.mode==131072 && r.process.p.type=="ADBD_CHILD")',
-                '')
+                '')*/
         ]
     });
 

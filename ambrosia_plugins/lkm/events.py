@@ -9,9 +9,9 @@ __author__ = 'Wolfgang Ettlinger'
 class SyscallEvent(model.Event):
     """Represents a system call from lkm
     """
-    indices = {'name'}
+    indices = {'name', 'index'}
 
-    def __init__(self, context, props, time, monotonic_ts, process_entity, spawned_child=None):
+    def __init__(self, context, props, time, monotonic_ts, process_entity, idx, spawned_child=None):
         assert isinstance(context, AmbrosiaContext)
         assert isinstance(process_entity, Task)
         super(SyscallEvent, self).__init__(end_ts=time)
@@ -23,6 +23,7 @@ class SyscallEvent(model.Event):
         self.returnval = props['returnval']
         self.process = process_entity
         self.spawned_child = spawned_child
+        self.index = idx
 
         add_info = props['add_info']
 
@@ -42,7 +43,8 @@ class SyscallEvent(model.Event):
             'name': self.name,
             'process': self.process,
             'spawned_child': self.spawned_child,
-            'monotonic_ts': self.monotonic_ts
+            'monotonic_ts': self.monotonic_ts,
+            'syscall_index': self.index
         }
 
         if self.argv is not None:
@@ -59,10 +61,9 @@ class SyscallEvent(model.Event):
         return props
 
     def __str__(self):
-        return '[Syscall: {} {} by {} result:{}]'.format(
+        return '[Syscall: {} {} result:{}]'.format(
             self.name,
             (','.join(self.params)),
-            self.process,
             self.returnval)
 
 
@@ -135,12 +136,37 @@ class FileEvent(FileDescriptorEvent):
     """
     indices = FileDescriptorEvent.indices | {'abspath'}
 
-    def __init__(self, file_entity, mode, process, successful):
+    mode_flags = {
+        'O_WRONLY': 00000001,
+        'O_RDWR': 00000002,
+        'O_CREAT': 00000100,
+        'O_EXCL': 00000200,
+        'O_NOCTTY': 00000400,
+        'O_TRUNC': 00001000,
+        'O_APPEND': 00002000,
+        'O_NONBLOCK': 00004000,
+        'O_DSYNC': 00010000,
+        'O_DIRECT': 00040000,
+        'O_LARGEFILE': 00100000,
+        'O_DIRECTORY': 00200000,
+        'O_NOFOLLOW': 00400000,
+        'O_NOATIME': 01000000,
+        'O_CLOEXEC': 02000000,
+        'O_PATH': 010000000
+    }
+
+    def __init__(self, file_entity, flags, mode, process, successful):
         assert isinstance(file_entity, File)
         super(FileEvent, self).__init__(process, successful)
         self.abspath = file_entity.abspath
         self.file = file_entity
         self.mode = mode
+        self.flags_val = flags
+        self.flags = set()
+        if flags is not None:
+            for f, v in FileEvent.mode_flags.iteritems():
+                if (v & flags) != 0:
+                    self.flags.add(f)
 
     def get_serializeable_properties(self):
         props = super(FileEvent, self).get_serializeable_properties()
@@ -148,8 +174,12 @@ class FileEvent(FileDescriptorEvent):
         props.update({
             'mode': self.mode,
             'abspath': self.abspath,
-            'file': self.file
+            'file': self.file,
+            'flags': self.flags_val
         })
+
+        for f in FileEvent.mode_flags:
+            props['flg_'+f] = f in self.flags
 
         return props
 
@@ -164,7 +194,7 @@ class AnonymousFileEvent(FileEvent):
 
     def __init__(self, description, process, context, successful=True):
         assert isinstance(context, AmbrosiaContext)
-        super(AnonymousFileEvent, self).__init__(File.unknown(context), None, process, successful)
+        super(AnonymousFileEvent, self).__init__(File.unknown(context), None, None, process, successful)
         self.description = description
 
     def __str__(self):

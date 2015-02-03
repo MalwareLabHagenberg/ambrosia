@@ -1,3 +1,4 @@
+import json
 import re
 import datetime
 
@@ -106,8 +107,9 @@ class LkmPluginParser(ambrosia.ResultParser):
 
                 proc.ananas_id = int(props['id'])
                 proc.parent_id = int(props['parentId'])
-                proc.comm = props['comm']
-                proc.path = props['path']
+                proc.comm = json.loads(props['comm'])
+                # TODO fix double-json in ANANAS
+                proc.path = json.loads(json.loads(props['path']))
                 proc.type = props['type']
                 proc.fds = props['fds']
                 proc.tgid = int(props['tgid'])
@@ -131,6 +133,7 @@ class LkmPluginParser(ambrosia.ResultParser):
             boot_time = None
             lasterror = None
 
+            idx = 1
             for sc in el:
                 props = sc.attrib.copy().items()
                 props += sc.find('info').attrib.items()
@@ -184,7 +187,11 @@ class LkmPluginParser(ambrosia.ResultParser):
                                              adjtime,
                                              mt,
                                              self.processes[props['processid']],
+                                             idx,
                                              spawned_child)
+
+                idx += 1
+
                 analysis.add_event(syscall_event)
 
     def finish(self, context):
@@ -264,6 +271,7 @@ class SyscallCorrelator(ambrosia.Correlator):
                             self.context,
                             File,
                             path),
+                        None,
                         None,
                         proc,
                         True)
@@ -381,7 +389,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
     def correlate(self):
         self.log.info('Generating events from syscalls')
-        for evt in self.context.analysis.iter_events(self.context, cls=SyscallEvent):
+        for evt in self.context.analysis.iter_events(self.context, cls=SyscallEvent, key='index'):
             self._check_syscall(evt)
 
         self.update_tree()
@@ -415,14 +423,29 @@ class SyscallCorrelator(ambrosia.Correlator):
         proc_fds = self.fd_directory[proc]
 
         if evt.name == "open" or evt.name == "creat":
+            if evt.name == "creat":
+                flags = 0
+                mode = int(evt.params[1])
+            else:
+                flags = int(evt.params[1])
+                mode = int(evt.params[2])
+
             parent_evt = FileEvent(
                 self.context.analysis.get_entity(
                     self.context,
                     File,
                     evt.params[0]),
-                int(evt.params[1]),
+                flags,
+                mode,
                 proc,
                 evt.returnval >= 0)
+
+            if parent_evt.successful:
+                proc_fds[evt.returnval] = parent_evt
+
+            self.to_add.add(parent_evt)
+        elif evt.name == "epoll_create" or evt.name == "epoll_create1":
+            parent_evt = AnonymousFileEvent("epoll", proc, self.context, evt.returnval >= 0)
 
             if parent_evt.successful:
                 proc_fds[evt.returnval] = parent_evt

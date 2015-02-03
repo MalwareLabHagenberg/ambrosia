@@ -81,6 +81,10 @@ a:hover {
     cursor: pointer;
 }
 
+.view .viewheader:hover {
+    background-color: #ebebeb;
+}
+
 input {
     background-color: #ddd;
     border: 1px #B0B0B0 solid;

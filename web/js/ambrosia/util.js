@@ -100,9 +100,7 @@ ambrosia_web.util = {
      */
     deserialize: function(obj, objs)
     {
-        if (obj * 1 == obj) {
-            return objs[obj];
-        } else if (obj instanceof Array) {
+        if ($.isArray(obj)) {
             ret = [];
 
             for (var i in obj) {
@@ -117,8 +115,30 @@ ambrosia_web.util = {
             }
             return ret;
         } else {
-            assert(false);
+            return objs[obj];
         }
+    },
+
+    addToPropertyTable: function(k, v, table){
+        var tr = $('<tr>');
+        var th = $('<th>');
+        var td = $('<td>');
+        tr.append(th);
+        tr.append(td);
+        th.text(k);
+        if(v instanceof A.event.Event || v instanceof A.entity.Entity) {
+            td.append(v.getLink());
+        }else if(v instanceof jQuery) {
+            td.append(v);
+        }else if($.isArray(v)){
+            for(var i in v) {
+                A.util.addToPropertyTable(k + '[]', v[i], table);
+            }
+            return;
+        }else{
+            td.text(v);
+        }
+        table.append(tr);
     }
 };
 
