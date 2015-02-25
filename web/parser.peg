@@ -1,41 +1,90 @@
-/*
-{
-function Property(prop, p2){
+/*{
+A = new Object();
+A.filter = new Object();
+
+A.filter.Property = function(prop){
     this.prop = prop;
-    this.p2 = p2;
 }
 
-function Comparison(p1, op, p2){
+A.filter.Comparison = function(p1, op, p2){
     this.p1 = p1;
     this.op = op;
     this.p2 = p2;
 }
 
-function LogicalOperation(p1, op, p2){
+A.filter.Static = function(val){
+    this.val = val;
+}
+
+A.filter.optimizeLogical = function(p1, op, p2){
+    var p1_static = p1 instanceof A.filter.Static;
+    var p2_static = p2 instanceof A.filter.Static;
+
+    if(op == 'OR'){
+        if(p1_static && p1.val == false){
+            return p2;
+        }else if(p1_static && p1.val == true){
+            return new A.filter.Static(true);
+        }else if(p2_static && p2.val == false){
+            return p1;
+        }else if(p2_static && p2.val == true){
+            return new A.filter.Static(true);
+        }
+   }else{
+        if(p1_static && p1.val == true){
+            return p2;
+        }else if(p1_static && p1.val == false){
+            return new A.filter.Static(false);
+        }else if(p2_static && p2.val == true){
+            return p1;
+        }else if(p2_static && p2.val == false){
+            return new A.filter.Static(false);
+        }
+    }
+
+    return new A.filter.LogicalOperation(p1, op, p2);
+}
+
+A.filter.LogicalOperation = function(p1, op, p2){
     this.p1 = p1;
     this.op = op;
     this.p2 = p2;
 }
 
-function UnaryOperator(op, ex){
+A.filter.UnaryOperator = function(op, ex){
     this.op = op;
     this.ex = ex;
 }
 
-function handleLogicalOperation(ex1, rest){
+A.filter.handleLogicalOperation = function(ex1, rest){
     if(rest){
-        return new LogicalOperation(ex1, rest[0], rest[1]);
+        return A.filter.optimizeLogical(ex1, rest[0], rest[1]);
     }else{
         return ex1;
     }
 }
 
+A.filter.handleStatement = function(op, block, stmt2){
+    var stmt = A.filter.optimizeLogical(op, 'AND', block);
+    return new A.filter.optimizeLogical(stmt, 'OR', stmt2);
+}
 }
 */
 
-
 start
-  = ws ex1:expression ws rest:(logical_operator start)? 
+  = op:operation block:block ";"? ws stmt:start
+    { return new A.filter.handleStatement(op, block, stmt); }
+  / ws
+    { return new A.filter.Static(false); }
+
+block
+  = "{" stmt:start "}"
+    { return stmt; }
+  / ws
+    { return new A.filter.Static(true); }
+
+operation
+  = ws ex1:expression ws rest:(logical_operator operation)?
     { return A.filter.handleLogicalOperation(arguments[0], arguments[1])}
 
 expression
@@ -45,14 +94,16 @@ expression
     { return cmp; }
   / uo:unary_operator ex:start 
     { return new A.filter.UnaryOperator(uo, ex); }
+  / "#" [^\n]+ "\n"
+    { return new A.filter.Static(false); }
 
 comparison
   = p1:value ws op:operand ws p2:value
     { return new A.filter.Comparison(p1, op, p2) }
   / "true"
-    { return new A.filter.Comparison(1, "EQ", 1); }
+    { return new A.filter.Static(true); }
   / "false"
-    { return new A.filter.Comparison(1, "EQ", 0); }
+    { return new A.filter.Static(false); }
 
 value
   = property
@@ -74,8 +125,8 @@ unary_operator
   = '!' { return 'NOT' }
 
 logical_operator
-  = op:'&&' { return 'AND'}
-  / op:'||' { return 'OR' }
+  = '&&' { return 'AND'}
+  / '||' { return 'OR' }
 
 property
   = p:[a-zA-Z_\*\.]+
@@ -89,4 +140,4 @@ number
   = num:[0-9\.]+ { return parseFloat(num.join("")) }
 
 ws
-  = [ \t]*
+  = [ \t\n]*

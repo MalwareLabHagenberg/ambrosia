@@ -37,7 +37,7 @@ ambrosia_web.event = {
      * The default height in seconds for an event
      * @constant
      */
-    DEFAULT_BLOCK_HEIGHT: 0.1,
+    DEFAULT_BLOCK_HEIGHT: 1,
 
     /**
      * The minimum width of a block (in pixel)
@@ -109,9 +109,12 @@ ambrosia_web.event = {
             this.visible = true;
 
             var child_forces_visible = false;
+            var counter = 0;
             for(var i in this.children) {
                 /* a child is visible, parent needs to be visible too */
-                child_forces_visible = this.children[i].calcVisible() || child_forces_visible;
+                var rarr =this.children[i].calcVisible();
+                child_forces_visible = rarr[0] || child_forces_visible;
+                counter += rarr[1];
             }
 
             this.visible = this.visible || child_forces_visible;
@@ -127,12 +130,18 @@ ambrosia_web.event = {
                     if (filters[i].evaluate(this) == false) {
                         /* filter explicitly says hide */
                         this.visible = false;
-                        break;
+                        filters[i].counter++;
                     }
                 }
             }
 
-            return false;
+            if(this.visible){
+                counter ++;
+            }else{
+                counter = 0;
+            }
+
+            return [false, counter];
         },
 
         /**
@@ -210,7 +219,13 @@ ambrosia_web.event = {
      * @param {ambrosia_web.event.Event} parent the events parent event (if exists)
      */
     enrich: function(el, parent){
-        var new_el = new (A.event.events.event_registry[el.type]);
+        var type = A.event.events.event_registry[el.type];
+
+        if(type == undefined){
+            throw "Undefined event: " + el.type;
+        }
+
+        var new_el = new (type);
 
         for(var i in el){
             new_el[i] = el[i];
@@ -253,6 +268,47 @@ ambrosia_web.event = {
         }
 
         return res;
+    },
+
+    getAllFilters: function(){
+        var res = [];
+        var evts = A.event.events.event_registry;
+
+        for(var classname in evts){
+            var filters = A.event.getFilters(evts[classname]);
+
+            for(var filteridx in filters){
+                res.push(filters[filteridx]);
+            }
+        }
+
+        for(var i in A.event._generalFilters){
+            res.push(A.event._generalFilters[i]);
+        }
+
+        return res;
+    },
+
+    /**
+     * TODO
+     */
+    resetFilterCounters: function(){
+        var filters = A.event.getAllFilters();
+
+        for(var i in filters){
+            filters[i].counter = 0;
+        }
+    },
+
+    /**
+     * TODO
+     */
+    redrawFilters: function(){
+        var filters = A.event.getAllFilters();
+
+        for(var i in filters){
+            filters[i].redraw();
+        }
     },
 
     /**

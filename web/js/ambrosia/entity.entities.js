@@ -17,6 +17,12 @@ ambrosia_web.entity.entities = function() {
     var File = Class('ambrosia_web.entity.entities.File', A.entity.Entity, {});
 
     /**
+     * Represents :class:`ambrosia.model.entities.App`
+     * @constructor
+     */
+    var App = Class('ambrosia_web.entity.entities.App', A.entity.Entity, {});
+
+    /**
      * Represents :class:`ambrosia.model.entities.ServerEndpoint`
      * @constructor
      */
@@ -26,7 +32,8 @@ ambrosia_web.entity.entities = function() {
         entity_registry: {
             'ambrosia.model.entities.Task': Task,
             'ambrosia.model.entities.File': File,
-            'ambrosia.model.entities.ServerEndpoint': ServerEndpoint
+            'ambrosia.model.entities.ServerEndpoint': ServerEndpoint,
+            'ambrosia.model.entities.App': App
         }
     };
 }();

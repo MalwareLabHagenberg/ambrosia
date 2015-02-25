@@ -140,7 +140,6 @@ button {
 }
 
 .tablehead {
-    font-size: 12pt;
     text-align: left;
     font-weight: bold;
     font-size: 14px;
@@ -188,7 +187,7 @@ button {
 
 rect.mainview_block {
     stroke: #000000;
-    stroke-width: 0.001px;
+    stroke-width: 1px;
     fill-opacity: 0.7;
     stroke-opacity: 0.1;
 }
@@ -223,10 +222,11 @@ rect.mainview_selected {
     background-color: #ebebeb;
 }
 
-.event_LibraryLoad {
-    fill: #000000;
+#eventcount {
+    float: right;
+    margin: 20px 5px 0 0;
+    font-size: 11px;
 }
-
 
 /* file events: green */
 .event_FileEvent {
@@ -308,10 +308,19 @@ rect.mainview_selected {
     fill: #f3ffd4;
 }
 
+.event_LibraryLoad {
+    fill: #ffffcc;
+}
+
+.event_JavaLibraryLoad {
+    fill: #dfffcc;
+}
+
 /* irrelevant events: grey */
 .event_ANANASAdbShellExec {
     fill: #9d9d9d;
 }
+
 
 
 

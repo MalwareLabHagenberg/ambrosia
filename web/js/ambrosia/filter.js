@@ -38,6 +38,7 @@ ambrosia_web.filter = {
             this._error_label = $('<div class="filtererror"/>');
             this._delete_button = $('<button type="button"/>').text('delete filter');
             this._enable_checkbox = $('<input type="checkbox"/>').prop('checked', true);
+            this._counter = $('<div class="filtercounter"/>');
             this._div = undefined;
             this._error = false;
             this._filter = null;
@@ -64,6 +65,13 @@ ambrosia_web.filter = {
             this._enable_checkbox.click(function(){
                 A.redraw();
             });
+        },
+
+        /**
+         * TODO
+         */
+        redraw: function(){
+            this._counter.text(this.counter + ' events filtered');
         },
 
         /**
@@ -158,6 +166,7 @@ ambrosia_web.filter = {
                             .append(this._description_input)
                             .append(this._delete_button)
                             .append(this.getSubClassElements())
+                            .append(this._counter)
                     )
                     .append(
                         $('<div/>')

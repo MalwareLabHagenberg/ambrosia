@@ -26,29 +26,6 @@ var ambrosia_web = {
         }, 10);
     },
 
-    _createView: function (name, element) {
-        var content = $('<div class="viewcontent"/>');
-
-        var v = ($('<div class="viewcontainer"/>')
-            .append(
-                $('<div class="viewheader"/>')
-                    .text(name)
-                    .click(function(){
-                        var was_shown = v.hasClass('viewshown');
-                        $('.viewcontainer').removeClass('viewshown');
-                        if(!was_shown){
-                            v.addClass('viewshown');
-                        }
-                    })
-            )
-            .append(content)
-        );
-
-        element.append(v);
-
-        return content;
-    },
-
     /**
      * initialize Ambrosia
      */
@@ -59,9 +36,9 @@ var ambrosia_web = {
 
         $.extend(ambrosia_web, {
             mainView: new A.view.mainview.MainView(),
-            detailsView: new A.view.detailsview.DetailsView(),
-            filterView: new A.view.filterview.FilterView(),
-            entityView: new A.view.entityview.EntityView()
+            detailsView: new A.view.detailsview.DetailsView($('#detailsview')),
+            filterView: new A.view.filterview.FilterView($('#filterview')),
+            entityView: new A.view.entityview.EntityView($('#entityview'))
         });
 
         var result_file = location.hash.substr(1);
@@ -91,9 +68,9 @@ var ambrosia_web = {
                 loading.finish();
 
                 A.mainView.setup();
-                A.detailsView.setup(A._createView('Event', $('#detailsview')));
-                A.filterView.setup(A._createView('Filter', $('#filterview')));
-                A.entityView.setup(A._createView('Entity', $('#entityview')));
+                A.detailsView.setup();
+                A.filterView.setup();
+                A.entityView.setup();
             }
         })
     }

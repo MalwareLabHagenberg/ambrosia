@@ -75,13 +75,21 @@ ambrosia_web.view.mainview = {
             this.g_events = this.svg.group(this.g_zoomed);
             this.g_measure_text = this.svg.group(this.g_unzoomed);
 
+            A.event.resetFilterCounters();
+
+            var counter = 0;
             for (var i in A.result.events) {
                 assert(A.result.events[i] instanceof A.event.Event);
                 assert(A.result.events[i].startTS >= lastTS);
                 lastTS = A.result.events[i].startTS;
-                A.result.events[i].calcVisible();
+                var rarr = A.result.events[i].calcVisible();
+
+                counter += rarr[1];
+
                 A.result.events[i].calcDimensions(A.event.DEFAULT_BLOCK_LAYOUT_MANAGER);
             }
+
+            $('#eventcount').text(counter+' events shown');
 
             this.setWidth(A.view.mainview.EXTRA_WIDTH +
                 A.view.mainview.X_OFFSET +
@@ -91,6 +99,7 @@ ambrosia_web.view.mainview = {
                 A.result.events[i].draw();
             }
 
+            A.event.redrawFilters();
 
             this._drawn_zoom_level = 0;
             this._zoomAndPan();

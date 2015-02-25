@@ -6,48 +6,58 @@
 ambrosia_web.view.entityview = {
     /**
      * Implements a simple view that shows details about the selected entity
+     * @param {jQuery} element the jQuery element the view should be located
      * @constructor
      */
-    EntityView: Class('ambrosia_web.view.entityview.EntityView',
+    EntityView: Class(
+            'ambrosia_web.view.entityview.EntityView',
+            'ambrosia_web.view.View',
         {
-        setup: function(element){
-            element.text('no entity selected');
+            __init__: function(element){
+                this.super('Entity', element);
+            },
 
-            A.entity.onSelectHandler.push(function(entity){
-                var table = $('<table class="propertytable"/>');
+            setup: function(){
+                this.content.text('no entity selected');
 
-                var add = A.util.addToPropertyTable;
+                var ths = this;
 
-                var fths = $('<button type="button"/>').text('this');
-                fths.click(function(){
-                    A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" : r.*.id', 'show entity filter'));
-                });
+                A.entity.onSelectHandler.push(function(entity){
+                    var table = $('<table class="propertytable"/>');
 
-                var fnths = $('<button type="button"/>').text('not this');
-                fnths.click(function(){
-                    A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" !: r.*.id', 'hide entity filter'));
-                });
+                    var add = A.util.addToPropertyTable;
 
-                add('filter', $('<span/>').append(fths).append(fnths), table);
+                    var fths = $('<button type="button"/>').text('this');
+                    fths.click(function(){
+                        A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" : r.*.id', 'show entity filter'));
+                    });
 
-                for(var i in entity){
-                    if($.inArray(i, ['id', 'type', 'description']) != -1) {
-                        add(i, entity[i], table);
+                    var fnths = $('<button type="button"/>').text('not this');
+                    fnths.click(function(){
+                        A.event.addFilter(null, new A.filter.BlacklistFilter('"'+entity.id+'" !: r.*.id', 'hide entity filter'));
+                    });
+
+                    add('filter', $('<span/>').append(fths).append(fnths), table);
+
+                    for(var i in entity){
+                        if($.inArray(i, ['id', 'type', 'description']) != -1) {
+                            add(i, entity[i], table);
+                        }
                     }
-                }
 
-                for(var i in entity.properties){
-                    add('p.'+i, entity.properties[i], table);
-                }
+                    for(var i in entity.properties){
+                        add('p.'+i, entity.properties[i], table);
+                    }
 
-                for(var i in entity.references){
-                    add('r.'+i, entity.references[i], table);
-                }
+                    for(var i in entity.references){
+                        add('r.'+i, entity.references[i], table);
+                    }
 
-                element.empty().append(table);
-            });
+                    ths.content.empty().append(table);
+                    ths.show();
+                });
 
-        }
-    })
+            }
+        })
 };
 

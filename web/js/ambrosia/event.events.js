@@ -23,7 +23,7 @@ ambrosia_web.event.events = function(){
     var StartTaskEvent = Class('ambrosia_web.event.events.StartTaskEvent',
         A.event.BlockEvent, {
         filters: [
-            new A.filter.BlacklistFilter('p.is_process==false', 'hide forks that spawn a thread')
+            new A.filter.BlacklistFilter('p.is_process==true', 'hide forks that spawn a thread')
         ]
     });
 
@@ -47,7 +47,7 @@ ambrosia_web.event.events = function(){
     var DeleteFileEvent = Class('ambrosia_web.event.events.DeleteFileEvent',
         A.event.BlockEvent, {
         filters: [
-            new A.filter.BlacklistFilter('r.file.abspath != "/data/ananaslkm.ko"',
+            new A.filter.BlacklistFilter('r.file.p.abspath != "/data/ananaslkm.ko"',
                 'hide the removal of the lkm file (done by ANANAS)')
         ]
     });
@@ -106,27 +106,65 @@ ambrosia_web.event.events = function(){
                 '!(p.abspath~"^/proc/\\d+/smaps$" && p.flags==131072 && r.process.p.type=="ZYGOTE_CHILD")',
                 'Several zygote childs access /proc/*/smaps'),
             new A.filter.BlacklistFilter(
-                '!(p.abspath=="/proc/net/xt_qtaguid/iface_stat_fmt" && p.flags==131072 &&  "m.android.phone" !: p.process.comm)',
-                'android phone accesses /proc/net/xt_qtaguid/iface_stat_fmt'),
-            new A.filter.BlacklistFilter(
-                '!(p.abspath~"^/proc/" && p.flg_O_RDWR==false && p.flg_O_WRONLY==false)',
+                '!(p.abspath~"^/proc" && p.flg_O_RDWR==false && p.flg_O_WRONLY==false)',
                 'hide misc read-only /proc/* access'),
             new A.filter.BlacklistFilter(
                 '!(p.abspath=="/proc/net/xt_qtaguid/ctrl" && p.flags==131073 && "NetworkPolicy" : r.process.p.comm)',
                 'hide NetworkPolicy operations'),
             new A.filter.BlacklistFilter(
-                '!(p.abspath=="/proc/net/xt_quota/globalAlert" && p.flags==131649 && "netd" : r.process.p.comm)',
+                '!(p.abspath=="/proc/net/xt_quota/globalAlert" && p.flags==131649 && r.process.p.type == "NETD")',
                 'hide netd /proc/net operations'),
+            new A.filter.BlacklistFilter('!(p.abspath=="/dev/ashmem" && p.flags==131074)',
+                'hide Android shared memory operations'),
+            new A.filter.BlacklistFilter('!(p.abspath=="/dev/__properties__" && p.flags==688128)',
+                'hide access to /dev/__properties__'),
+            new A.filter.BlacklistFilter('!((p.abspath=="/dev/ptmx" && p.flags==131074 && r.process.p.type=="ADBD")' +
+                ' || (p.abspath~"^/dev/pts/\\d+$" && p.flags==131074 && r.process.p.type=="ADBD_CHILD")' +
+                ' || (p.abspath=="/dev/tty" && p.flags==131074 && r.process.p.type=="ADBD_CHILD"))',
+                'hide ADB pseudoterminal operations'),
+            new A.filter.BlacklistFilter('!(p.abspath~"^/dev/log/")',
+                'hide logging operations'),
+            new A.filter.BlacklistFilter('!(p.abspath=="/dev/qemu_trace")',
+                'hide access to /dev/qemu_trace'),
+            /*
+            see
+             https://www.sqlite.org/tempfiles.html
+             https://www.sqlite.org/atomiccommit.html
+            */
+            new A.filter.BlacklistFilter('!(p.abspath~"^/data/(data|user)/.+\\.db(-journal|-shm|-wal|-mj[0-9A-F]{9})?$")',
+                'hide access to databases'),
 
+            new A.filter.BlacklistFilter('!(p.abspath~"^/data/dalvik-cache/.+\\.dex" && (p.flags == 131072 || p.flags == 131138))',
+                'hide dalvik cache access'),
+
+            new A.filter.BlacklistFilter('!(p.abspath~"^/sys/class/power_supply" && r.process.p.type=="HEALTHD")',
+                'hide healthd operations'),
+
+            new A.filter.BlacklistFilter(
+                '!(r.process.r.app.p.package == "com.android.providers.telephony" && p.abspath~"^/data/data/com\\.android\\.(providers\\.telephony|phone)")',
+                'hide events phone'),
+
+            new A.filter.BlacklistFilter(
+                '!(p.abspath~"^/data/data/com.google.android.googlequicksearchbox" && r.process.r.app.p.package == "com.google.android.googlequicksearchbox")',
+                'hide events from google searchbox'),
+
+            new A.filter.BlacklistFilter(
+                '!(p.abspath~"^/data/data/com.google.android.gms" && r.process.r.app.p.package == "com.google.android.syncadapters.contacts")',
+                'hide contacts app'),
+
+            new A.filter.BlacklistFilter('!(p.abspath~"^/system/media/audio/.+\\.ogg" && r.process.r.app.p.package == "com.android.providers.settings")',
+                'hide audio effects')
 
             /*
+            new A.filter.BlacklistFilter(
+                '!(p.abspath=="/proc/net/xt_qtaguid/iface_stat_fmt" && p.flags==131072 &&  "m.android.phone" !: p.process.comm)',
+                'android phone accesses /proc/net/xt_qtaguid/iface_stat_fmt'),
 
 
 
 
             new A.filter.BlacklistFilter('!(p.abspath=="/dev/binder" && p.mode==131074)', ''),
-            new A.filter.BlacklistFilter('!(p.abspath=="/dev/__properties__" && p.mode==688128)', ''),
-            new A.filter.BlacklistFilter('!(p.abspath=="/dev/ashmem" && p.mode==131074)', ''),
+
             new A.filter.BlacklistFilter(
                 '!(p.abspath ~ "/system/framework/.*\\.jar" && p.mode==131072 && r.process.p.type=="ADBD_CHILD")',
                 '')*/
@@ -141,6 +179,8 @@ ambrosia_web.event.events = function(){
     var AnonymousFileEvent = Class('ambrosia_web.event.events.AnonymousFileEvent',
         A.event.BlockEvent, {
         filters: [
+            new A.filter.BlacklistFilter('!(p.description=="pipe")', 'hide file operations on fds created by pipe()'),
+            new A.filter.BlacklistFilter('!(p.description=="epoll")', 'hide file operations on fds created by epoll()')
         ]
     });
 
@@ -176,6 +216,8 @@ ambrosia_web.event.events = function(){
     var CommandExecuteEvent = Class('ambrosia_web.event.events.CommandExecuteEvent',
         A.event.BlockEvent, {
         filters: [
+            new A.filter.BlacklistFilter('!(p.path == "/system/bin/iptables" && r.process.r.parent.p.type == "NETD")',
+                'hide netd iptables calls')
         ]
     });
 
@@ -289,6 +331,33 @@ ambrosia_web.event.events = function(){
         ]
     });
 
+
+    /**
+     * Represents :class:`ambrosia_plugins.lkm.events.JavaLibraryLoad`
+     * @constructor
+     */
+    var JavaLibraryLoad = Class('ambrosia_web.event.events.JavaLibraryLoad',
+        A.event.BlockEvent, {
+        filters: [
+            new A.filter.BlacklistFilter("p.system_library==false", 'hide all system java library loads'),
+            new A.filter.BlacklistFilter('!(r.file.p.abspath~"^/data/app/.+\\.(apk|odex)$")',
+                'hide all standard application java library loads')
+        ]
+    });
+
+
+    /**
+     * Represents :class:`ambrosia_plugins.lkm.events.ZygoteForkEvent`
+     * @constructor
+     */
+    var ZygoteForkEvent = Class('ambrosia_web.event.events.ZygoteForkEvent',
+        A.event.BlockEvent, {
+        filters: [
+            new A.filter.BlacklistFilter("false", 'hide Zygote forks')
+        ]
+    });
+
+
     var evt_registry = {
         'ambrosia_plugins.events.ANANASEvent':              ANANASEvent,
         'ambrosia_plugins.lkm.events.SyscallEvent':         SyscallEvent,
@@ -311,7 +380,9 @@ ambrosia_web.event.events = function(){
         'ambrosia_plugins.apimonitor.PhoneCall':            PhoneCall,
         'ambrosia_plugins.apimonitor.SMSAccess':            SMSAccess,
         'ambrosia_plugins.lkm.events.AnonymousFileEvent':   AnonymousFileEvent,
-        'ambrosia_plugins.lkm.events.LibraryLoad':          LibraryLoad
+        'ambrosia_plugins.lkm.events.LibraryLoad':          LibraryLoad,
+        'ambrosia_plugins.lkm.events.JavaLibraryLoad':      JavaLibraryLoad,
+        'ambrosia_plugins.lkm.events.ZygoteForkEvent':      ZygoteForkEvent
     };
 
     var ret = {

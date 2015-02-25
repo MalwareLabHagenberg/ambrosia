@@ -80,7 +80,13 @@ ambrosia_web.entity = {
      * @param {object} el the deserialized data
      */
     enrich: function(el){
-        var new_el = new (A.entity.entities.entity_registry[el.type]);
+        var type = A.entity.entities.entity_registry[el.type];
+
+        if(type == undefined){
+            throw "Undefined entity: " + el.type;
+        }
+
+        var new_el = new (type);
 
         for(var i in el){
             new_el[i] = el[i];
