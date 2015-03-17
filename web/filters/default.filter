@@ -1,0 +1,271 @@
+################################################################################
+# Filter certain events with very litte information                            #
+################################################################################
+stype == "SyscallEvent" {
+    # hide all syscall events
+    true;
+}
+
+stype == "UnknownFdEvent" {
+    # hide all unknown df events
+    true;
+}
+
+stype == "MemoryMapEvent" {
+    # hide all anonymous mmaps
+    p.anonymous == true;
+}
+
+stype == "StartTaskEvent" {
+    # hide all forks that spawn a thread
+    p.is_process == false;
+}
+
+stype == "AnonymousFileEvent" {
+    # hide file operations on fds created by pipe()
+    p.description == "pipe";
+    # hide file operations on fds created by epoll()
+    p.description == "epoll";
+}
+
+# hide Android shared memory operations
+(r.file.p.abspath=="/dev/ashmem" && p.flags==131074);
+
+# hide access to /dev/__properties__
+(r.file.p.abspath=="/dev/__properties__" && p.flags == 688128);
+
+# hide pseudoterminal operations
+((r.file.p.abspath=="/dev/ptmx" && p.flags==131074)
+ || (r.file.p.abspath~"^/dev/pts/\d+$" && p.flags==131074)
+ || (r.file.p.abspath=="/dev/tty" && p.flags==131074));
+
+# hide logging operations
+r.file.p.abspath~"^/dev/log/";
+
+# hide access to /dev/qemu_trace
+r.file.p.abspath=="/dev/qemu_trace";
+
+# hide dalvik cache access
+r.file.p.abspath~"^/data/dalvik-cache/.+\.dex" {
+    p.flags == 131072;
+    p.flags == 131138;
+}
+
+stype == "JavaLibraryLoad" {
+    # hide all system java library loads
+    p.system_library == true;
+    # hide all standard application java library loads
+    (r.file.p.abspath~"^/data/app/.+\.(apk|odex)$")
+}
+
+stype == "ANANASEvent" {
+    p.name == "adb_cmd";
+    p.name == "forward_port";
+    p.name == "add_contact";
+    p.name == "telnet_cmd";
+    p.name == "set_time";
+}
+
+stype == "AndroidApicall";
+stype == "LibraryLoad";
+stype == "ZygoteForkEvent";
+
+stype == "FileEvent" {
+    # read only
+    p.flg_O_RDWR==false && p.flg_O_WRONLY==false {
+        # hide getting random numbers
+        r.file.p.abspath=="/dev/urandom";
+        r.file.p.abspath ~ "/system/fonts/.*\.ttf";
+        r.file.p.abspath == "/system/usr/icu/icudt51l.dat";
+
+        r.file.p.abspath=="/sys/devices/system/cpu";
+
+        # hide misc read-only /proc/* access
+        r.file.p.abspath~"^/proc";
+
+        # hide read only access to tzdata
+        r.file.p.abspath == "/system/usr/share/zoneinfo/tzdata";
+        r.file.p.abspath == "/data/misc/zoneinfo/tzdata";
+
+        r.file.p.abspath == "/cache";
+
+        r.file.p.abspath == "/system/lib/logging.properties";
+    }
+
+    r.file.p.abspath == "/dev/binder";
+    r.file.p.abspath == "/sys/kernel/debug/tracing/trace_marker";
+    r.file.p.abspath == "/dev/cpuctl/apps/bg_non_interactive/tasks";
+
+    r.file.p.abspath == "/system/bin/am" && "/system/bin/am" : r.process.p.path;
+}
+
+################################################################################
+# Filter events triggered by ANANAS                                            #
+################################################################################
+stype == "DeleteFileEvent" {
+    # hide the removal of the lkm file (done by ANANAS)
+    r.file.p.abspath == "/data/ananaslkm.ko";
+}
+
+stype == "ANANASAdbShellExec";
+
+################################################################################
+# Filter Android processes                                                     #
+################################################################################
+r.process.p.type == "ADBD" {
+    # hide the sockets created by ADBD
+    stype == "SocketEvent";
+}
+
+r.process.p.type == "INIT" {
+    # hide the sockets created by INIT
+    stype == "SocketEvent";
+}
+
+r.process.r.tg_leader.p.type == "NETD" {
+    # hide netd /proc/net operations
+    (r.file.p.abspath=="/proc/net/xt_quota/globalAlert" && p.flags==131649);
+    # hide sockets of NETD
+    stype == "SocketEvent";
+    r.file.p.abspath=="/system/etc/hosts";
+    r.file.p.abspath=="/sys/class/net/eth0/mtu";
+}
+
+# children of NETD
+r.process.r.parent.p.type == "NETD" {
+    stype == "CommandExecuteEvent" {
+        p.path == "/system/bin/iptables";
+        p.path == "/system/bin/ip6tables";
+        p.path == "/system/bin/ip";
+    }
+    "/system/bin/iptables" : r.process.p.path;
+    "/system/bin/ip6tables" : r.process.p.path;
+    "/system/bin/ip" : r.process.p.path;
+}
+
+r.process.p.type=="HEALTHD" {
+    r.file.p.abspath~"^/sys/class/power_supply";
+}
+
+################################################################################
+# Filter preinstalled apps                                                     #
+################################################################################
+"com.android.providers.telephony" : r.process.r.apps.p.package {
+    r.file.p.abspath ~ "^/data/data/com\.android\.(providers\.telephony|phone)"
+    stype=="SocketEvent";
+}
+
+"com.google.android.googlequicksearchbox" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.google\.android\.googlequicksearchbox";
+}
+
+"com.google.android.gms" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.google\.android\.gms";
+    r.file.p.abspath~"^/data/user/0/com\.google\.android\.gsf/";
+    r.file.p.abspath~"^/data/data/com.google.android.gsf/";
+    r.file.p.abspath~"^/data/data/com\.google\.android\.backuptransport";
+    r.file.p.abspath=="/system/etc/security/otacerts.zip";
+    stype=="SocketEvent";
+}
+
+"com.android.contacts" : r.process.r.apps.p.package {
+    r.file.p.abspath~"/data/user/0/com.android.providers.contacts";
+}
+
+"com.android.providers.settings" : r.process.r.apps.p.package {
+    # hide audio effects
+    r.file.p.abspath~"^/system/media/audio/.+\.ogg";
+}
+
+"com.android.calendar": r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.android\.calendar/";
+}
+
+"com.android.providers.calendar" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.android\.providers\.calendar/";
+}
+
+"com.android.inputmethod.latin" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.android\.inputmethod\.latin/";
+}
+
+"com.google.android.partnersetup" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.google\.android\.partnersetup/";
+}
+
+"com.android.providers.downloads" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.android\.providers\.downloads/";
+    stype=="SocketEvent";
+    r.file.p.abspath=="/proc/net/xt_qtaguid/ctrl";
+}
+
+"com.google.android.youtube" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.google\.android\.youtube/";
+}
+
+"com.android.deskclock" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.android\.deskclock/";
+}
+
+"android" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.android\.providers\.settings/";
+
+    r.file.p.abspath~"^/data/system/dropbox/";
+
+    stype == "SocketEvent";
+
+    # only hide user 0, there should only be one
+    r.file.p.abspath~"^/data/system/users/0/" || r.file.p.abspath == "/data/system/users/0";
+    "NetworkStats" : r.process.p.comm {
+        r.file.p.abspath == "/data/system/netstats";
+    }
+    "NetworkPolicy" : r.process.p.comm {
+        # hide NetworkPolicy proc file operations
+        r.file.p.abspath=="/proc/net/xt_qtaguid/ctrl";
+        r.file.p.abspath=="/data/system/netstats";
+    }
+    "ActivityManager" : r.process.p.comm {
+        # ActivityManager regularily opens /proc/*/stat
+        (r.file.p.abspath~"^/proc/\d+/stat$" && p.flags == 131072);
+        r.file.p.abspath == "/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state";
+    }
+    "backup" : r.process.p.comm {
+        r.file.p.abspath ~ "^/data/backup/";
+        r.file.p.abspath == "/cache/backup";
+        r.file.p.abspath == "/cache/@pm@.data";
+    }
+    "ConnectivitySer" : r.process.p.comm {
+        r.file.p.abspath ~ "^/sys/kernel/ipv4/tcp_";
+    }
+}
+
+################################################################################
+# Filter app processes                                                         #
+################################################################################
+(r.process.p.type=="ZYGOTE_CHILD" || r.process.p.type=="TARGET_APP") {
+    # several zygote childs access /proc/*/oom_adj
+    (r.file.p.abspath~"^/proc/\d+/oom_adj$" && p.flags==131073);
+
+    (r.file.p.abspath~"^/proc/\d+/task$" && p.flags==147456)
+    # several zygote childs access /proc/*/task
+
+    # Several zygote childs access /proc/*/smaps
+    (r.file.p.abspath~"^/proc/\d+/smaps$" && p.flags==131072)
+
+}
+
+################################################################################
+# Additional common events                                                     #
+################################################################################
+# hide access to databases
+# see
+# https://www.sqlite.org/tempfiles.html
+# https://www.sqlite.org/atomiccommit.html
+r.file.p.abspath~"^/data/(data|user)/.+\.db(-journal|-shm|-wal|-mj[0-9A-F]{9})?$";
+
+################################################################################
+# normal behaviour of commands                                                 #
+################################################################################
+"/system/bin/date": r.process.p.path {
+    stype == "FileEvent" && r.file.p.abspath == "/dev/alarm";
+}

@@ -75,7 +75,7 @@ ambrosia_web.view.mainview = {
             this.g_events = this.svg.group(this.g_zoomed);
             this.g_measure_text = this.svg.group(this.g_unzoomed);
 
-            A.event.resetFilterCounters();
+            A.filter.resetFilterCounters();
 
             var counter = 0;
             for (var i in A.result.events) {
@@ -99,7 +99,7 @@ ambrosia_web.view.mainview = {
                 A.result.events[i].draw();
             }
 
-            A.event.redrawFilters();
+            // TODO counter
 
             this._drawn_zoom_level = 0;
             this._zoomAndPan();

@@ -49,7 +49,15 @@ ambrosia_web.entity = {
          */
         resolveReferences: function () {
             for (var i in this.references) {
-                this.references[i] = A.result.entities[this.references[i]];
+                if($.isArray(this.references[i])){
+                    var arr = [];
+                    for(var j in this.references[i]){
+                        arr[j] = A.result.entities[this.references[i][j]]
+                    }
+                    this.references[i] = arr;
+                }else {
+                    this.references[i] = A.result.entities[this.references[i]];
+                }
             }
         },
 

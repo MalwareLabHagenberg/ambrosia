@@ -321,6 +321,14 @@ rect.mainview_selected {
     fill: #9d9d9d;
 }
 
+.lineevent {
+    stroke: #fff;
+    stroke-width: 300px;
+}
+
+.event_ANANASEvent {
+    stroke: #d5b3a9;
+}
 
 
 

@@ -67,10 +67,19 @@ var ambrosia_web = {
 
                 loading.finish();
 
-                A.mainView.setup();
-                A.detailsView.setup();
-                A.filterView.setup();
-                A.entityView.setup();
+                var loading_filters = busy('Loading default filters');
+
+                $.ajax('filters/default.filter', {
+                    success: function (r) {
+                        A.filter.addFilter(new A.filter.Filter(r, 'default filter'));
+                        loading_filters.finish();
+
+                        A.mainView.setup();
+                        A.detailsView.setup();
+                        A.filterView.setup();
+                        A.entityView.setup();
+                    }
+                })
             }
         })
     }

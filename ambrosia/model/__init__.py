@@ -50,7 +50,7 @@ class Analysis(Persistent):
         {
             class_name: {
                 key: Binary Tree {
-                        attribute_value: [event, ...]
+                        attribute_value: set(event, ...)
                     }
             }
         }
@@ -174,7 +174,7 @@ class Analysis(Persistent):
                     for el in lst:
                         yield el
 
-    def _event_index_list(self, evt, key):
+    def _event_index_set(self, evt, key):
         """Locates the index for a specific event and key (and creates it if it does not exist)
         """
         assert isinstance(key, str)
@@ -198,7 +198,7 @@ class Analysis(Persistent):
 
         ret = key_index.get(key_val)
         if ret is None:
-            ret = PersistentList()
+            ret = OOBTree.OOTreeSet()
             key_index[key_val] = ret
 
         return ret
@@ -218,9 +218,9 @@ class Analysis(Persistent):
         self._events.add(evt)
 
         for idx in getattr(evt.__class__, 'indices'):
-            idxlist = self._event_index_list(evt, idx)
-            if idxlist is not None:
-                idxlist.append(evt)
+            idxset = self._event_index_set(evt, idx)
+            if idxset is not None:
+                idxset.add(evt)
 
     def del_event(self, evt):
         """Delete event and update indices
@@ -237,9 +237,9 @@ class Analysis(Persistent):
             return
 
         for idx in getattr(evt.__class__, 'indices'):
-            idxlist = self._event_index_list(evt, idx)
-            if idxlist is not None:
-                idxlist.remove(evt)
+            idxset = self._event_index_set(evt, idx)
+            if idxset is not None:
+                idxset.remove(evt)
 
     def to_serializeable(self):
         """Returns all results in a serializable form
@@ -304,6 +304,20 @@ class Event(Persistent):
 
         if end_ts is not None:
             self.end_ts = end_ts
+
+        self._unique_identifier = unique_id()
+
+    def __eq__(self, other):
+        if not isinstance(other, Event):
+            return NotImplemented
+        else:
+            return self._unique_identifier == other._unique_identifier
+
+    def __cmp__(self, other):
+        if not isinstance(other, Event):
+            return NotImplemented
+        else:
+            return cmp(self._unique_identifier, other._unique_identifier)
 
     @property
     def start_ts(self):
@@ -489,21 +503,28 @@ class Entity(Persistent):
     def to_serializeable(self):
         """Returns a dict containing all relevant information about the entity.
         """
-        properties, references = {}, {}
+        properties, references = self.get_serializeable_properties()
 
-        props = self.get_serializeable_properties()
+        refs = {}
 
-        for k, v in props.iteritems():
-            if isinstance(v, Entity):
-                references[k] = v.primary_key
+        for k, v in references.iteritems():
+            if isinstance(v, list) or isinstance(v, set):
+                lst = []
+
+                for l in v:
+                    lst.append(l.primary_key)
+
+                refs[k] = lst
+            elif v is None:
+                refs[k] = None
             else:
-                properties[k] = v
+                refs[k] = v.primary_key
 
         return {
             'id': self.primary_key,
             'type': classname(type(self)),
             'properties': properties,
-            'references': references,
+            'references': refs,
             'description': str(self)
         }
 

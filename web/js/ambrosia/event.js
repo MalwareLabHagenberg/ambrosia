@@ -18,19 +18,6 @@ ambrosia_web.event = {
      */
     onUnSelectHandler: [],
 
-    /**
-     * contains all handlers for adding filters to an  event class. Any part of the application may listen to those
-     * events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.
-     */
-    addFilterHandler: [],
-
-    /**
-     * contains all handlers for removing filters from an  event class. Any part of the application may listen to those
-     * events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.
-     */
-    removeFilterHandler: [],
-
-    _generalFilters: [],
     _selected: [],
 
     /**
@@ -120,17 +107,16 @@ ambrosia_web.event = {
             this.visible = this.visible || child_forces_visible;
 
             if(!child_forces_visible) {
-                var filters = A.event.getEffectiveFilters(A.event.events.event_registry[this.type]);
 
-                for (var i in filters) {
-                    if (!filters[i].isEnabled()) {
+                for (var i in A.filter.filters) {
+                    if (!A.filter.filters[i].isEnabled()) {
                         continue;
                     }
 
-                    if (filters[i].evaluate(this) == false) {
+                    if (A.filter.filters[i].evaluate(this) == true) {
                         /* filter explicitly says hide */
                         this.visible = false;
-                        filters[i].counter++;
+                        A.filter.filters[i].counter++;
                     }
                 }
             }
@@ -247,138 +233,6 @@ ambrosia_web.event = {
         new_el.p = new_el.properties;
 
         return new_el;
-    },
-
-    /**
-     * Returns the filters that are effective for a specific event class.
-     * @param {class} cls the event class
-     * @returns {Array} the filters
-     */
-    getEffectiveFilters: function(cls){
-        var res = [];
-
-        if(cls.prototype.filters){
-            for(var i in cls.prototype.filters){
-                res.push(cls.prototype.filters[i]);
-            }
-        }
-
-        for(var i in A.event._generalFilters){
-            res.push(A.event._generalFilters[i]);
-        }
-
-        return res;
-    },
-
-    getAllFilters: function(){
-        var res = [];
-        var evts = A.event.events.event_registry;
-
-        for(var classname in evts){
-            var filters = A.event.getFilters(evts[classname]);
-
-            for(var filteridx in filters){
-                res.push(filters[filteridx]);
-            }
-        }
-
-        for(var i in A.event._generalFilters){
-            res.push(A.event._generalFilters[i]);
-        }
-
-        return res;
-    },
-
-    /**
-     * TODO
-     */
-    resetFilterCounters: function(){
-        var filters = A.event.getAllFilters();
-
-        for(var i in filters){
-            filters[i].counter = 0;
-        }
-    },
-
-    /**
-     * TODO
-     */
-    redrawFilters: function(){
-        var filters = A.event.getAllFilters();
-
-        for(var i in filters){
-            filters[i].redraw();
-        }
-    },
-
-    /**
-     * Returns all filter for a class. If null is passed, returns the general filters.
-     * @param {class} cls the event class
-     * @returns {Array} the filter
-     */
-    getFilters: function(cls){
-        if(!cls){
-            return A.event._generalFilters;
-        }else{
-            if(!cls.prototype.filters){
-                cls.prototype.filters = [];
-            }
-
-            return cls.prototype.filters;
-        }
-    },
-
-    /**
-     * Add a filter to an event class. If null is passed, the filter is added to the general filters.
-     * @param {class} cls the event class
-     * @param {ambrosia_web.filter.Filter} filter the filter to add
-     */
-    addFilter: function(cls, filter){
-        var filters = A.event._generalFilters;
-
-        if(cls){
-            if(!cls.prototype.filters){
-                cls.prototype.filters = [];
-            }
-
-            filters = cls.prototype.filters;
-        }
-
-        filters.push(filter);
-
-        for(var i in A.event.addFilterHandler){
-            A.event.addFilterHandler[i](cls, filter);
-        }
-
-        A.redraw();
-    },
-
-    /**
-     * Removes a filter
-     * @param {ambrosia_web.filter.Filter} filter the filter to remove
-     */
-    removeFilter: function(filter){
-        for(var i in A.event._generalFilters){
-            if(A.event._generalFilters[i] == filter){
-                A.event._generalFilters.splice(i, 1);
-            }
-        }
-
-        for(var type in A.event.events.event_registry){
-            var filters = A.event.getFilters(A.event.events.event_registry[type]);
-
-            for(var i in filters){
-                if(filters[i] == filter){
-                    filters.splice(i, 1);
-                }
-            }
-        }
-
-        for(var i in A.event.removeFilterHandler){
-            A.event.removeFilterHandler[i](filter);
-        }
-
-        A.redraw();
     },
 
     /**
@@ -535,7 +389,17 @@ ambrosia_web.event = {
                 pos,
                 A.mainView.getWidth(),
                 pos,
-                {class_: this.cssClass});
+                {class_: this.cssClass + ' lineevent'});
+
+            var ths = this;
+
+            $(this.svgElement).click(function(event){
+                if(event.ctrlKey){
+                    ths.selectAdd();
+                }else {
+                    ths.select();
+                }
+            });
         }
     })
 };

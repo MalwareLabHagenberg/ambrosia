@@ -9,11 +9,12 @@ from ambrosia.plugins import PluginInfoTop
 from ambrosia.util import get_logger, join_command
 from ambrosia import model, Correlator
 from ambrosia.context import AmbrosiaContext
-from ambrosia.model.entities import Task, File
+from ambrosia.model.entities import Task, File, App
 from ambrosia_plugins.events import ANANASEvent
 from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
     SocketEvent, SocketAccept, MemoryMapEvent, StartTaskEvent, SuperUserRequest, CreateDir, SendSignal, \
-    DeleteFileEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent, LibraryLoad
+    DeleteFileEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent, LibraryLoad, JavaLibraryLoad, \
+    ZygoteForkEvent
 
 __author__ = 'Wolfgang Ettlinger'
 
@@ -193,6 +194,15 @@ class LkmPluginParser(ambrosia.ResultParser):
                 idx += 1
 
                 analysis.add_event(syscall_event)
+        elif name == 'appinfo':
+            self.log.info('Parsing appinfo-tag')
+
+            for ap in el:
+                appinfo = analysis.get_entity(context, App, str(ap.attrib['package']))
+                appinfo.uid = int(ap.attrib['uid'])
+                appinfo.apk_path = str(ap.attrib['apk-path'])
+                appinfo.native_lib_path = str(ap.attrib['native-lib-path'])
+                appinfo.version = str(ap.attrib['version'])
 
     def finish(self, context):
         """Calculate additional information for each process.
@@ -202,6 +212,15 @@ class LkmPluginParser(ambrosia.ResultParser):
         referenced). The method sets the tg_leader and the parent. Moreover, it copies the reference to *fds* from the
         parent for all threads (in linux a thread *normally* shares FDs with its thread group leader).
         """
+
+        appuids = {}
+
+        for app in context.analysis.iter_entities(context, App):
+            if app.uid not in appuids:
+                appuids[app.uid] = set()
+
+            appuids[app.uid].add(app)
+
         for ananas_id, proc in self.processes.iteritems():
             assert isinstance(proc, Task)
 
@@ -218,6 +237,9 @@ class LkmPluginParser(ambrosia.ResultParser):
                         # non-kernel processes with no FDs but that existed
                         # during fd-listing are strange
                         self.log.warn("Process {} does not have any FDs".format(proc))
+
+            if proc.uid in appuids:
+                proc.apps = appuids[proc.uid]
 
         for ananas_id, proc in self.processes.iteritems():
             assert proc.tg_leader is None or proc.tg_leader.is_process
@@ -543,6 +565,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             parent_evt = CreateDir(evt.start_ts,
                                    evt.end_ts,
                                    proc,
+                                   evt.returnval >= 0,
                                    self.context.analysis.get_entity(
                                        self.context,
                                        File,
@@ -575,22 +598,28 @@ class FileEventCorrelator(Correlator):
         for fe in self.context.analysis.iter_events(self.context, FileEvent):
             if re.match('^/vendor/lib/.+\.so', fe.abspath) or re.match('^/system/lib/.+\.so', fe.abspath):
 
-                lle = None
+                lle = LibraryLoad(fe.file, fe.process, False)
 
-                if not fe.successful:
-                    # failed library load
-                    lle = LibraryLoad(fe.file, fe.process, False)
-
-                if lle is None:
+                if fe.successful:
                     for c in fe.children:
                         if isinstance(c, MemoryMapEvent):
-                            lle = LibraryLoad(fe.file, fe.process, True)
+                            # successful library loads need a mmap
+                            lle.successful = True
                             break
 
-                if lle is not None:
-                    lle.add_child(fe)
-                    self.to_add.add(lle)
-                    self.to_remove.add(fe)
+                lle.add_child(fe)
+                self.to_add.add(lle)
+                self.to_remove.add(fe)
+
+            elif re.match('.+\.(jar|odex|apk)$', fe.abspath) and fe.flags_val == 131072:
+                system_library_load = (
+                    bool(re.match('^/system/framework/.+\.(jar|odex)', fe.abspath))
+                    or bool(re.match('^/system/(priv-)?app/.+\.(apk|odex)', fe.abspath)))
+
+                jll = JavaLibraryLoad(fe.file, fe.process, False, system_library_load)
+                jll.add_child(fe)
+                self.to_add.add(jll)
+                self.to_remove.add(fe)
 
         self.update_tree()
 
@@ -612,7 +641,10 @@ class CommandExecuteCorrelator(Correlator):
             mintimediff = None
             execs_to_add = set()
 
-            exes = list(self.context.analysis.iter_events(self.context, ExecEvent, 'process_entity',
+            if not fork.is_process:
+                continue
+
+            exes = list(self.context.analysis.iter_events(self.context, ExecEvent, 'process',
                                                           value=fork.spawned_child))
 
             for exe in exes:
@@ -639,50 +671,89 @@ class CommandExecuteCorrelator(Correlator):
                 # we use the argv of the first execve. e.g. sh -c 'xxx' instead of xxx
                 cmd_evt = CommandExecuteEvent(lastexe.path, exec_.argv, fork.spawned_child)
                 cmd_evt.add_child(fork)
+                self.to_remove.add(fork)
 
                 for e in execs_to_add:
                     cmd_evt.add_child(e)
                     self.to_remove.add(e)
 
+                self.log.debug("Found command event: {}".format(cmd_evt))
+
                 if cmd_evt.path == '/system/xbin/su':
                     su_evt = SuperUserRequest(cmd_evt.start_ts, cmd_evt.end_ts, cmd_evt.process)
                     su_evt.add_child(cmd_evt)
                     self.to_add.add(su_evt)
+                    self.log.debug("Found SU event: {}".format(su_evt))
                 else:
                     self.to_add.add(cmd_evt)
-            else:
-                continue
 
-            for fe in self.context.analysis.iter_events(self.context, FileEvent, 'process',
-                                                        value=fork.spawned_child):
-                assert isinstance(fe, FileEvent)
+                self._find_file_events(fork.spawned_child,
+                                       cmd_evt,
+                                       fork.start_ts,
+                                       lambda fe:
+                                           fe.abspath == '/proc/mounts' or
+                                           fe.abspath == '/proc/filesystems' or
+                                           fe.abspath == '/' or
+                                           re.match('/acct/uid/\d+/tasks', fe.abspath) or
+                                           fe.abspath == '/proc/' + str(fork.spawned_child.pid) + '/oom_adj')
 
-                if (fe.start_ts - fork.start_ts) > datetime.timedelta(0, 2):
-                    # we consider everything within 2 seconds as startup
-                    continue
+                self._find_mkdir_events(fork.spawned_child, cmd_evt, fork.start_ts)
+                self._find_library_loads(fork.spawned_child, cmd_evt, fork.start_ts)
+            elif fork.process.type == "ZYGOTE" and (fork.spawned_child.type == "ZYGOTE_CHILD"
+                                                    or fork.spawned_child.type == "TARGET_APP"):
+                zfe = ZygoteForkEvent(fork.spawned_child)
+                zfe.add_child(fork)
+                self.to_remove.add(fork)
 
-                if fe.successful:
-                    if fe.abspath == '/proc/mounts' or \
-                            fe.abspath == '/proc/filesystems' or \
-                            fe.abspath == '/' or \
-                            re.match('/acct/uid/\d+/tasks', fe.abspath) or \
-                            fe.abspath == '/proc/'+str(fork.spawned_child.pid)+'/oom_adj':
-                        # startup stuff
-                        cmd_evt.add_child(fe)
-                        self.to_remove.add(fe)
+                self._find_file_events(fork.spawned_child,
+                                       zfe,
+                                       fork.start_ts,
+                                       lambda fe:
+                                           re.match('/acct/uid/\d+/tasks', fe.abspath) or
+                                           fe.abspath == "/dev/cpuctl/apps/tasks" or
+                                           fe.abspath == "/dev/cpuctl/apps/bg_non_interactive/tasks" or
+                                           fe.abspath == "/sys/qemu_trace/process_name" or
+                                           fe.abspath == "/dev/binder")
 
-            for lle in self.context.analysis.iter_events(self.context, LibraryLoad, 'process',
-                                                         value=fork.spawned_child):
+                self._find_mkdir_events(fork.spawned_child, zfe, fork.start_ts)
 
-                if (lle.start_ts - fork.start_ts) > datetime.timedelta(0, 2):
-                    # we consider everything within 2 seconds as startup
-                    continue
-
-                cmd_evt.add_child(lle)
-                self.to_remove.add(lle)
+                self.to_add.add(zfe)
 
         self.update_tree()
 
+    def _find_file_events(self, process, evt, start_ts, matches):
+        for fe in self.context.analysis.iter_events(self.context, FileEvent, 'process', value=process):
+            assert isinstance(fe, FileEvent)
+
+            if (fe.start_ts - start_ts) > datetime.timedelta(0, 2):
+                # we consider everything within 2 seconds as startup
+                continue
+
+            if matches(fe):
+                # startup stuff
+                evt.add_child(fe)
+                self.to_remove.add(fe)
+
+    def _find_mkdir_events(self, process, evt, start_ts):
+        for mde in self.context.analysis.iter_events(self.context, CreateDir, 'process', value=process):
+            assert isinstance(mde, CreateDir)
+
+            if (mde.start_ts - start_ts) > datetime.timedelta(0, 2):
+                # we consider everything within 2 seconds as startup
+                continue
+
+            if mde.file.abspath == "/acct/uid/"+str(process.uid):
+                evt.add_child(mde)
+                self.to_remove.add(mde)
+
+    def _find_library_loads(self, process, evt, start_ts):
+        for lle in self.context.analysis.iter_events(self.context, LibraryLoad, 'process', value=process):
+            if (lle.start_ts - start_ts) > datetime.timedelta(0, 2):
+                # we consider everything within 2 seconds as startup
+                continue
+
+            evt.add_child(lle)
+            self.to_remove.add(lle)
 
 class AdbCommandCorrelator(Correlator):
     """Find command executions that happen because of ANANAS (through ADB)
@@ -727,10 +798,11 @@ class AdbCommandCorrelator(Correlator):
             self.to_remove.add(adb_cmd)
             self.to_remove.add(cmd_evt)
 
-            ase = ANANASAdbShellExec()
+            ase = ANANASAdbShellExec(cmd_evt.process)
             ase.add_child(adb_cmd)
             ase.add_child(cmd_evt)
 
+            self.log.debug("Found ANANAS shell exec: {}".format(cmd_evt))
             self.to_add.add(ase)
 
         self.update_tree()

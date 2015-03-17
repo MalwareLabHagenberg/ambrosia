@@ -30,6 +30,7 @@ class Task(Entity):
         self.path = None
         self.type = None
         self.uid = None
+        self.apps = set()
         self.parent = None
         self.fds = []
         self.start_captured = start_ts is not None  # TODO write this information to the report
@@ -40,17 +41,20 @@ class Task(Entity):
         self.end_ts = end_ts
 
     def get_serializeable_properties(self):
-        return {
-            'pid': self.pid,
-            'tgid': self.tgid,
-            'tg_leader': self.tg_leader,
-            'comm': self.comm,
-            'path': self.path,
-            'type': self.type,
-            'uid': self.uid,
-            'parent': self.parent,
-            'start_captured': self.start_captured
-        }
+        return (
+            {
+                'pid': self.pid,
+                'tgid': self.tgid,
+                'comm': self.comm,
+                'path': self.path,
+                'type': self.type,
+                'uid': self.uid,
+                'start_captured': self.start_captured
+            }, {
+                'apps': self.apps,
+                'parent': self.parent,
+                'tg_leader': self.tg_leader
+            })
 
     @staticmethod
     def _normalize_times(context, start_ts, end_ts):
@@ -103,6 +107,36 @@ class Task(Entity):
         return self == self.tg_leader
 
 
+class App(Entity):
+    def __init__(self, context, package):
+        assert isinstance(context, ambrosia.context.AmbrosiaContext)
+        super(App, self).__init__(package)
+        self.uid = None
+        self.package = package
+
+    def get_serializeable_properties(self):
+        return (
+            {
+                'uid': self.uid,
+                'package': self.package
+            }, {})
+
+    @staticmethod
+    def find(context, entities, identifier_btree, package):
+        assert isinstance(context, ambrosia.AmbrosiaContext)
+        assert isinstance(identifier_btree, OOBTree.BTree)
+
+        els = identifier_btree.get(package)
+
+        if els is None:
+            return None
+
+        return els[0]
+
+    def __str__(self):
+        return '[App: "{}"]'.format(self.package)
+
+
 class File(Entity):
     """Represents file (existing or not) on the emulator.
 
@@ -120,9 +154,10 @@ class File(Entity):
         self.abspath = abspath
 
     def get_serializeable_properties(self):
-        return {
-            'abspath': self.abspath
-        }
+        return (
+            {
+                'abspath': self.abspath
+            }, {})
 
     def matches_entity(self, abspath):
         return os.path.normpath(abspath) == self.abspath
@@ -173,11 +208,12 @@ class ServerEndpoint(Entity):
         self.port = port
 
     def get_serializeable_properties(self):
-        return {
-            'protocol': self.protocol,
-            'address': self.address,
-            'port': self.port
-        }
+        return (
+            {
+                'protocol': self.protocol,
+                'address': self.address,
+                'port': self.port
+            }, {})
 
     def find(context, entities, identifier_btree, protocol, address, port):
         assert isinstance(context, ambrosia.AmbrosiaContext)

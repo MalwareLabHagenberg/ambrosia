@@ -4,6 +4,20 @@
  * @namespace used for filtering events
  */
 ambrosia_web.filter = {
+    filters: [],
+
+    /**
+     * contains all handlers for adding filters to an  event class. Any part of the application may listen to those
+     * events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.
+     */
+    addFilterHandler: [],
+
+    /**
+     * contains all handlers for removing filters from an  event class. Any part of the application may listen to those
+     * events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.
+     */
+    removeFilterHandler: [],
+
     /***
      * A Filter represents a single condition (either entered by the user or a default condition).
      *
@@ -32,151 +46,113 @@ ambrosia_web.filter = {
      */
     Filter: Class('ambrosia_web.filter.Filter',
         {
-        __init__: function() {
-            this._rule_input = $('<input class="filterinput" placeholder="Rule"/>').val('true');
-            this._description_input = $('<input class="filterdescription" placeholder="Description"/>');
-            this._error_label = $('<div class="filtererror"/>');
-            this._delete_button = $('<button type="button"/>').text('delete filter');
-            this._enable_checkbox = $('<input type="checkbox"/>').prop('checked', true);
-            this._counter = $('<div class="filtercounter"/>');
-            this._div = undefined;
-            this._error = false;
-            this._filter = null;
+            __init__: function(rule, description, enabled) {
+                this._error = '';
+                this._filter = ambrosia_web.filter.parser.parse(rule);
+                this._enabled  = true;
+                this._rule = rule;
+                this.change_listener = [];
+                this._description = description;
 
-            var ths = this;
-
-            this._rule_input.keyup(function(){
-                ths._rule_input.addClass('filterchanged');
-                ths.setRule(ths._rule_input.val(), true);
-            });
-
-            this._rule_input.change(function(){
-                A.redraw();
-            });
-
-            this._rule_input.change(function(){
-                A.redraw();
-            });
-
-            this._delete_button.click(function(){
-                A.event.removeFilter(ths);
-            });
-
-            this._enable_checkbox.click(function(){
-                A.redraw();
-            });
-        },
-
-        /**
-         * TODO
-         */
-        redraw: function(){
-            this._counter.text(this.counter + ' events filtered');
-        },
-
-        /**
-         * A subclass may return custom jQuery elements
-         * @returns {Array}
-         * @methodOf ambrosia_web.filter.Filter
-         * @name getSubClassElements
-         */
-        getSubClassElements: function(){ return [];},
-
-        /**
-         * replaces the current rule with a new one
-         * @function
-         * @param {String} r the new rule in filter syntax
-         * @param {bool} no_input_update used internally, disables update of the text field
-         * @methodOf ambrosia_web.filter.Filter
-         * @name setRule
-         */
-        setRule: function(r, no_input_update){
-            try{
-                var f = ambrosia_web.filter.parser.parse(r);
-                if(!no_input_update){
-                    this._rule_input.val(r);
+                if (enabled != undefined) {
+                    this._enabled = enabled;
                 }
-                this._error_label.text('');
-                this._rule_input.removeClass('errorinput');
-                this._error = false;
-                this._filter = f;f
-            }catch(ex){
-                this._error_label.text(ex);
-                this._rule_input.addClass('errorinput');
-                this._error = true;
+
+            },
+
+            _call_change_listener: function(){
+                for(var i in this.change_listener){
+                    this.change_listener[i]()
+                }
+            },
+
+            /**
+             * TODO
+             */
+            redraw: function(){
+                this._counter.text(this.counter + ' events filtered');
+            },
+
+            /**
+             * replaces the current rule with a new one
+             * @function
+             * @param {String} r the new rule in filter syntax
+             * @methodOf ambrosia_web.filter.Filter
+             * @name setRule
+             */
+            setRule: function(r){
+                try{
+                    this._rule = r;
+                    var f = ambrosia_web.filter.parser.parse(r);
+                    this._error = '';
+                    this._filter = f;
+                }catch(ex){
+                    this._error = ex;
+                }
+                this._call_change_listener();
+            },
+
+            getRule: function () {
+                return this._rule;
+            },
+
+            getError: function () {
+                return this._error;
+            },
+
+            /**
+             * set the description
+             * @param {String} d the description
+             * @methodOf ambrosia_web.filter.Filter
+             * @name setDescription
+             */
+            setDescription: function(d){
+                this._description = d;
+                this._call_change_listener();
+            },
+
+            /**
+             * TODO
+             */
+            getDescription: function(){
+                return this._description;
+            },
+
+            /**
+             * enable or disable the filter
+             * @param {bool} b whether the filter should be enabled
+             * @methodOf ambrosia_web.filter.Filter
+             * @name setEnabled
+             */
+            setEnabled: function (b) {
+                this._enabled = b;
+                this._call_change_listener();
+            },
+
+            /**
+             * Checks whether this filter is enabled
+             * @returns {bool} true if enabled
+             * @methodOf ambrosia_web.filter.Filter
+             * @name isEnabled
+             */
+            isEnabled: function (){
+                return this._enabled;
+            },
+
+            toString: function () {
+                return 'Filter: '+this._rule_input.val();
+            },
+
+            /**
+             * Evaluate if an an event matches this filter
+             * @returns {bool} true if the event matches
+             * @methodOf ambrosia_web.filter.Filter
+             * @name evaluate
+             */
+            evaluate: function(evt){
+                return this._filter.evaluate(evt);
             }
-        },
-
-        /**
-         * set the description
-         * @param {String} d the description
-         * @methodOf ambrosia_web.filter.Filter
-         * @name setDescription
-         */
-        setDescription: function(d){
-            this._description_input.val(d);
-        },
-
-        /**
-         * enable or disable the filter
-         * @param {bool} b whether the filter should be enabled
-         * @methodOf ambrosia_web.filter.Filter
-         * @name setEnabled
-         */
-        setEnabled: function (b) {
-            this._enable_checkbox.prop('checked', b);
-        },
-
-        toString: function () {
-            return 'Filter: '+this._rule_input.val();
-        },
-
-        /**
-         * Checks whether this filter is enabled
-         * @returns {bool} true if enabled
-         * @methodOf ambrosia_web.filter.Filter
-         * @name isEnabled
-         */
-        isEnabled: function (){
-            return this._enable_checkbox.is(':checked');
-        },
-
-        /**
-         * Evaluate if an an event matches this filter
-         * @returns {bool} true if the event matches
-         * @methodOf ambrosia_web.filter.Filter
-         * @name evaluate
-         */
-        evaluate: function(evt){
-            return this._filter.evaluate(evt);
-        },
-
-        /**
-         * Get a jQuery Element that can be used as an graphical representation of the filter (a textbox)
-         * @returns {jQuery}
-         * @methodOf ambrosia_web.filter.Filter
-         * @name getInput
-         */
-        getInput: function(){
-            if(!this._div){
-                this._div = ($('<div class="tableentry"/>')
-                    .append(
-                        $('<div/>')
-                            .append(this._enable_checkbox)
-                            .append(this._description_input)
-                            .append(this._delete_button)
-                            .append(this.getSubClassElements())
-                            .append(this._counter)
-                    )
-                    .append(
-                        $('<div/>')
-                            .append(this._rule_input)
-                    )
-                    .append(this._error_label));
-            }
-            return this._div;
-        }
-    }),
+        }),
 
     /**
      * A property used in a filter. Used by the parser.
@@ -188,17 +164,17 @@ ambrosia_web.filter = {
             assert(evt instanceof A.event.Event);
 
             if(s == 'true'){
-                return [true];
+                return true;
             }else if(s == 'false'){
-                return [false];
+                return false;
             }else if(s == 'null'){
-                return  [null];
+                return  null;
             }else if(s == 'undefined') {
-                return  [undefined];
+                return  undefined;
             }
 
             var props = s.split('.');
-            var val = [evt];
+            var val = evt;
 
             for (var i in props) {
                 val = this._get_value(val, props[i]);
@@ -208,20 +184,86 @@ ambrosia_web.filter = {
         };
 
         this._get_value = function(oldval, property){
-            var new_val =[];
-            for(var i in oldval){
-                if(oldval[i] == undefined) {
-                    new_val.push(undefined);
-                }else if(property == '*'){
-                    for(var j in oldval[i]){
-                        new_val.push(oldval[i][j]);
+            if($.isArray(oldval)) {
+                var new_val = [];
+
+                for (var i in oldval) {
+                    if (oldval[i] == undefined) {
+                        new_val.push(undefined);
+                    } else if (property == '*') {
+                        for (var j in oldval[i]) {
+                            new_val.push(oldval[i][j]);
+                        }
+                    } else {
+                        new_val.push(oldval[i][property]);
                     }
+                }
+                return new_val;
+            }else{
+                if(oldval == undefined){
+                    return undefined;
+                }else if (property == '*'){
+                    new_val = [];
+                    for (var j in oldval) {
+                        new_val.push(oldval[j]);
+                    }
+                    return new_val;
                 }else{
-                    new_val.push(oldval[i][property]);
+                    return oldval[property];
                 }
             }
-            return new_val;
         };
+
+        this.toString = function(){
+            return '['+s+']';
+        }
+    },
+
+
+    Static: Class('ambrosia_web.filter.Static',
+        {
+        __init__: function(val) {
+            this.val = val;
+        },
+
+        evaluate: function(evt){
+            assert(evt instanceof A.event.Event);
+
+            return this.val;
+        },
+
+        toString: function(){
+            return 'static('+ this.val + ')';
+        }
+    }),
+
+    optimizeLogical: function(p1, op, p2){
+        var p1_static = p1 instanceof A.filter.Static;
+        var p2_static = p2 instanceof A.filter.Static;
+
+        if(op == 'OR'){
+            if(p1_static && p1.val == false){
+                return p2;
+            }else if(p1_static && p1.val == true){
+                return new A.filter.Static(true);
+            }else if(p2_static && p2.val == false){
+                return p1;
+            }else if(p2_static && p2.val == true){
+                return new A.filter.Static(true);
+            }
+       }else{
+            if(p1_static && p1.val == true){
+                return p2;
+            }else if(p1_static && p1.val == false){
+                return new A.filter.Static(false);
+            }else if(p2_static && p2.val == true){
+                return p1;
+            }else if(p2_static && p2.val == false){
+                return new A.filter.Static(false);
+            }
+        }
+
+        return new A.filter.LogicalOperation(p1, op, p2);
     },
 
     /**
@@ -244,6 +286,9 @@ ambrosia_web.filter = {
                 break;
             }
         };
+        this.toString = function(){
+            return 'unary('+op+', '+expression.toString() + ')';
+        }
     },
 
     /**
@@ -266,7 +311,7 @@ ambrosia_web.filter = {
                 return val.evaluate(evt)
             }
 
-            return [val];
+            return val;
         },
 
         evaluate: function(evt){
@@ -279,32 +324,32 @@ ambrosia_web.filter = {
 
             switch(this.op){
             case 'EQ':
-                return p1[0] == p2[0];
+                return p1 == p2;
                 break;
             case 'NEQ':
-                return p1[0] != p2[0];
+                return p1 != p2;
                 break;
             case 'G':
-                return p1[0] > p2[0];
+                return p1 > p2;
                 break;
             case 'GE':
-                return p1[0] >= p2[0];
+                return p1 >= p2;
                 break;
             case 'L':
-                return p1[0] < p2[0];
+                return p1 < p2;
                 break;
             case 'LE':
-                return p1[0] <= p2[0];
+                return p1 <= p2;
                 break;
             case 'REGEX':
-                return new RegExp(p2[0]).test(p1[0]);
+                return new RegExp(p2).test(p1);
                 break;
             case 'NIN':
                 reverseIn = true;
                 /* no break */
             case 'IN':
                 for(var i in p2){
-                    if(p2[i] == p1[0]){
+                    if(p2[i] == p1){
                         return !reverseIn;
                     }
                 }
@@ -314,6 +359,10 @@ ambrosia_web.filter = {
                 throw "Unknown operation";
                 break;
             }
+        },
+
+        toString: function(){
+            return 'cmp(' + this.p1.toString() + ', ' + this.op + ', ' + this.p2.toString() + ')';
         }
     }),
 
@@ -346,30 +395,10 @@ ambrosia_web.filter = {
                 throw "Unknown operation";
                 break;
             }
-        }
-    }),
+        },
 
-    /**
-     * A blacklisting filter
-     *
-     * @param {String} rule the condition for the filter
-     * @param {String} description a string describing the filter
-     * @param {bool} enabled (optional) whether the filter is effective
-     * @constructor
-     */
-    BlacklistFilter: Class(
-            'ambrosia_web.filter.BlacklistFilter',
-            'ambrosia_web.filter.Filter',
-        {
-        __init__: function(rule, description, enabled) {
-            this.super();
-
-            if (enabled != undefined) {
-                this.setEnabled(enabled);
-            }
-
-            this.setDescription(description);
-            this.setRule(rule);
+        toString: function(){
+            return 'logical(' + this.p1.toString() + ', ' + this.op + ', ' + this.p2.toString() + ')';
         }
     }),
 
@@ -385,6 +414,23 @@ ambrosia_web.filter = {
         }else{
             return ex1;
         }
-    }
+    },
 
+    handleStatement: function(op, block, stmt2){
+        var stmt = A.filter.optimizeLogical(op, 'AND', block);
+        return A.filter.optimizeLogical(stmt, 'OR', stmt2);
+    },
+
+    resetFilterCounters: function(){
+        for(var i in A.filter.filters){
+            A.filter.filters[i].counter = 0;
+        }
+    },
+
+    addFilter: function(filter){
+        A.filter.filters.push(filter);
+        for(var i in A.filter.addFilterHandler){
+            A.filter.addFilterHandler[i](filter);
+        }
+    }
 };

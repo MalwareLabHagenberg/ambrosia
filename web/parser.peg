@@ -88,14 +88,12 @@ operation
     { return A.filter.handleLogicalOperation(arguments[0], arguments[1])}
 
 expression
-  = "(" exp:start ws ")" 
+  = "(" exp:operation ws ")"
     { return exp; }
   / cmp:comparison 
     { return cmp; }
-  / uo:unary_operator ex:start 
+  / uo:unary_operator ex:operation
     { return new A.filter.UnaryOperator(uo, ex); }
-  / "#" [^\n]+ "\n"
-    { return new A.filter.Static(false); }
 
 comparison
   = p1:value ws op:operand ws p2:value
@@ -140,4 +138,5 @@ number
   = num:[0-9\.]+ { return parseFloat(num.join("")) }
 
 ws
-  = [ \t\n]*
+  = [ \t\n]* "#" [^\n]* "\n"? ws?
+  / [ \t\n]* 

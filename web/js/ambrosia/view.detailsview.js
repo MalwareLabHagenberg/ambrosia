@@ -36,7 +36,7 @@ ambrosia_web.view.detailsview = {
                     var add = A.util.addToPropertyTable;
 
                     for(var i in evt){
-                        if($.inArray(i, ['startTS', 'endTS', 'type', 'parent', 'description', 'visible']) != -1) {
+                        if($.inArray(i, ['startTS', 'endTS', 'type', 'stype', 'parent', 'description', 'visible']) != -1) {
                             add(i, evt[i], table);
                         }
                     }

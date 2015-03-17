@@ -11,9 +11,9 @@ class SyscallEvent(model.Event):
     """
     indices = {'name', 'index'}
 
-    def __init__(self, context, props, time, monotonic_ts, process_entity, idx, spawned_child=None):
+    def __init__(self, context, props, time, monotonic_ts, process, idx, spawned_child=None):
         assert isinstance(context, AmbrosiaContext)
-        assert isinstance(process_entity, Task)
+        assert isinstance(process, Task)
         super(SyscallEvent, self).__init__(end_ts=time)
 
         self.name = props['name']
@@ -21,7 +21,7 @@ class SyscallEvent(model.Event):
         self.pid = int(props['pid'])
         self.params = props['params']
         self.returnval = props['returnval']
-        self.process = process_entity
+        self.process = process
         self.spawned_child = spawned_child
         self.index = idx
 
@@ -90,6 +90,23 @@ class CommandExecuteEvent(model.Event):
         return '[Execute: {}, {}]'.format(self.path, join_command(self.command))
 
 
+class ZygoteForkEvent(model.Event):
+    indices = {'process'}
+
+    def __init__(self, process):
+        assert isinstance(process, Task)
+        super(ZygoteForkEvent, self).__init__()
+        self.process = process
+
+    def get_serializeable_properties(self):
+        return {
+            'process': self.process
+        }
+
+    def __str__(self):
+        return '[Zygote Fork, UID: {}]'.format(self.process.uid)
+
+
 class FileDescriptorEvent(model.Event):
     """The base event for all file descriptor related events
     """
@@ -155,11 +172,11 @@ class FileEvent(FileDescriptorEvent):
         'O_PATH': 010000000
     }
 
-    def __init__(self, file_entity, flags, mode, process, successful):
-        assert isinstance(file_entity, File)
+    def __init__(self, file, flags, mode, process, successful):
+        assert isinstance(file, File)
         super(FileEvent, self).__init__(process, successful)
-        self.abspath = file_entity.abspath
-        self.file = file_entity
+        self.abspath = file.abspath
+        self.file = file
         self.mode = mode
         self.flags_val = flags
         self.flags = set()
@@ -173,7 +190,6 @@ class FileEvent(FileDescriptorEvent):
 
         props.update({
             'mode': self.mode,
-            'abspath': self.abspath,
             'file': self.file,
             'flags': self.flags_val
         })
@@ -196,6 +212,11 @@ class AnonymousFileEvent(FileEvent):
         assert isinstance(context, AmbrosiaContext)
         super(AnonymousFileEvent, self).__init__(File.unknown(context), None, None, process, successful)
         self.description = description
+
+    def get_serializeable_properties(self):
+        props = super(AnonymousFileEvent, self).get_serializeable_properties()
+        props['description'] = self.description
+        return props
 
     def __str__(self):
         return '[Anonymous File "{}"]'.format(self.description)
@@ -241,7 +262,7 @@ class SocketAccept(FileDescriptorEvent):
 class MemoryMapEvent(model.Event):
     """Represents a call to mmap(). It's parent normally is a :class:`ambrosia_plugins.lkm.events.FileDescriptorEvent`
     """
-    indices = {'process_entity'}
+    indices = {'process'}
 
     mmap_flags = {'MAP_SHARED': 0x1,
                   'MAP_PRIVATE': 0x2,
@@ -259,11 +280,11 @@ class MemoryMapEvent(model.Event):
                   'MAP_UNINITIALIZED': 0x4000000,
                   }
 
-    def __init__(self, flags, fd, address, process_entity, return_value, start_ts, end_ts):
-        assert isinstance(process_entity, Task)
+    def __init__(self, flags, fd, address, process, return_value, start_ts, end_ts):
+        assert isinstance(process, Task)
         super(MemoryMapEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
-        self.process_entity = process_entity
-        self.file_entity = None
+        self.process = process
+        self.file = None
         self.address = address
         self.flags_val = flags
         self.flags = set()
@@ -275,8 +296,8 @@ class MemoryMapEvent(model.Event):
 
     def get_serializeable_properties(self):
         return {
-            'process': self.process_entity,
-            'file': self.file_entity,
+            'process': self.process,
+            'file': self.file,
             'address': self.address,
             'flags_value': self.flags_val,
             'sucessful': self.successful,
@@ -293,10 +314,10 @@ class MemoryMapEvent(model.Event):
         if not self.successful:
             res += 'FAILED: '
 
-        if self.file_entity is None:
+        if self.file is None:
             res += 'Memory'
         else:
-            res += str(self.file_entity)
+            res += str(self.file)
 
         res += ' mapped to '+hex(self.address)
 
@@ -308,19 +329,19 @@ class StartTaskEvent(model.Event):
     """
     indices = set()
 
-    def __init__(self, start_ts, end_ts, process_entity, child_pid, spawned_child):
-        assert isinstance(process_entity, Task)
+    def __init__(self, start_ts, end_ts, process, child_pid, spawned_child):
+        assert isinstance(process, Task)
         assert isinstance(spawned_child, Task)
         super(StartTaskEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
         self.child_pid = child_pid
-        self.process_entity = process_entity
+        self.process = process
         self.spawned_child = spawned_child
         self.is_process = spawned_child.is_process
 
     def get_serializeable_properties(self):
         return {
             'child_pid': self.child_pid,
-            'process': self.process_entity,
+            'process': self.process,
             'spawned_child': self.spawned_child,
             'is_process': self.is_process
         }
@@ -334,40 +355,42 @@ class SuperUserRequest(model.Event):
     """
     indices = set()
 
-    def __init__(self, start_ts, end_ts, process_entity):
-        assert isinstance(process_entity, Task)
+    def __init__(self, start_ts, end_ts, process):
+        assert isinstance(process, Task)
         super(SuperUserRequest, self).__init__(start_ts=start_ts, end_ts=end_ts)
-        self.process_entity = process_entity
+        self.process = process
 
     def get_serializeable_properties(self):
         return {
-            'process': self.process_entity
+            'process': self.process
         }
 
     def __str__(self):
-        return '[SU-Request by PID {}, UID {}]'.format(self.process_entity.pid, self.process_entity.uid)
+        return '[SU-Request by PID {}, UID {}]'.format(self.process.pid, self.process.uid)
 
 
 class CreateDir(model.Event):
     """Represents an mkdir() syscall
     """
-    indices = set()
+    indices = {'process'}
 
-    def __init__(self, start_ts, end_ts, process_entity, file_entity):
-        assert isinstance(process_entity, Task)
-        assert isinstance(file_entity, File)
+    def __init__(self, start_ts, end_ts, process, successful, file):
+        assert isinstance(process, Task)
+        assert isinstance(file, File)
         super(CreateDir, self).__init__(start_ts=start_ts, end_ts=end_ts)
-        self.process_entity = process_entity
-        self.file_entity = file_entity
+        self.process = process
+        self.file = file
+        self.successful = successful
 
     def get_serializeable_properties(self):
         return {
-            'file': self.file_entity,
-            'process': self.process_entity
+            'file': self.file,
+            'process': self.process,
+            'successful': self.successful
         }
 
     def __str__(self):
-        return '[Mkdir: {}]'.format(str(self.file_entity))
+        return '[Mkdir: {}]'.format(str(self.file))
 
 
 class SendSignal(model.Event):
@@ -375,23 +398,23 @@ class SendSignal(model.Event):
     """
     indices = set()
 
-    def __init__(self, start_ts, end_ts, number, process_entity, target_process):
-        assert isinstance(process_entity, Task)
+    def __init__(self, start_ts, end_ts, number, process, target_process):
+        assert isinstance(process, Task)
         assert isinstance(target_process, Task)
         super(SendSignal, self).__init__(start_ts=start_ts, end_ts=end_ts)
-        self.process_entity = process_entity
+        self.process = process
         self.target_process = target_process
         self.number = number
 
     def get_serializeable_properties(self):
         return {
-            'process': self.process_entity,
+            'process': self.process,
             'target_process': self.target_process,
             'number': self.number
         }
 
     def __str__(self):
-        return '[Signal {} to {} (by {})]'.format(self.number, self.target_process, self.process_entity)
+        return '[Signal {} to {} (by {})]'.format(self.number, self.target_process, self.process)
 
 
 class DeleteFileEvent(model.Event):
@@ -399,33 +422,34 @@ class DeleteFileEvent(model.Event):
     """
     indices = set()
 
-    def __init__(self, start_ts, end_ts, successful, file_entity, process):
-        assert isinstance(file_entity, File)
+    def __init__(self, start_ts, end_ts, successful, file, process):
+        assert isinstance(file, File)
         assert isinstance(process, Task)
         super(DeleteFileEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
-        self.file_entity = file_entity
+        self.file = file
         self.successful = successful
         self.process = process
 
     def get_serializeable_properties(self):
         return {
-            'file': self.file_entity,
-            'successful': self.successful
+            'file': self.file,
+            'successful': self.successful,
+            'process': self.process
         }
 
     def __str__(self):
-        return "[Delete File: {}]".format(str(self.file_entity))
+        return "[Delete File: {}]".format(str(self.file))
 
 
 class ExecEvent(model.Event):
     """Represents an execve() syscall
     """
-    indices = {'process_entity'}
+    indices = {'process'}
 
-    def __init__(self, start_ts, end_ts, path, argv, env, process_entity):
-        assert isinstance(process_entity, Task)
+    def __init__(self, start_ts, end_ts, path, argv, env, process):
+        assert isinstance(process, Task)
         super(ExecEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
-        self.process_entity = process_entity
+        self.process = process
         self.argv = argv
         self.env = env
         self.path = path
@@ -434,7 +458,8 @@ class ExecEvent(model.Event):
         return {
             'argv': join_command(self.argv),
             'env': '\n'.join(self.env),
-            'path': self.path
+            'path': self.path,
+            'process': self.process
         }
 
     def __str__(self):
@@ -446,11 +471,15 @@ class ANANASAdbShellExec(model.Event):
     """
     indices = set()
 
-    def __init__(self):
+    def __init__(self, process):
+        assert isinstance(process, Task)
         super(ANANASAdbShellExec, self).__init__()
+        self.process = process
 
     def get_serializeable_properties(self):
-        return {}
+        return {
+            'process': self.process
+        }
 
     def __str__(self):
         return '[ANANAS Shell Command]'
@@ -477,3 +506,28 @@ class LibraryLoad(model.Event):
 
     def __str__(self):
         return '[Library load: {}]'.format(self.file.abspath)
+
+
+class JavaLibraryLoad(model.Event):
+    """Represents dalvik library load operation
+    """
+    indices = {'process'}
+
+    def __init__(self, file, process, successful, system_library_load):
+        assert isinstance(file, File)
+        assert isinstance(process, Task)
+        super(JavaLibraryLoad, self).__init__()
+        self.file = file
+        self.process = process
+        self.successful = successful
+        self.system_library = system_library_load
+
+    def get_serializeable_properties(self):
+        return {
+            'file': self.file,
+            'process': self.process,
+            'system_library': self.system_library
+        }
+
+    def __str__(self):
+        return '[Java Library load: {}]'.format(self.file.abspath)

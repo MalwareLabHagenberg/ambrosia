@@ -70,26 +70,29 @@ class SerializationError(Exception):
     pass
 
 
-def _serialize_entry(obj, objs, _serialized_set):
+def _serialize_entry(obj, objs, _obj_idx_cache):
     if obj is None:
         return 0
     elif isinstance(obj, (int, float, basestring)):
         # we use sets, they are faster for "in" operations
-        if obj in _serialized_set:
-            return objs.index(obj)
-        else:
-            objs.append(obj)
-            _serialized_set.add(obj)
-            return len(objs) - 1
+        if obj in _obj_idx_cache:
+            idx = _obj_idx_cache[obj]
+            if type(objs[idx]) == type(obj):
+                # because 0==False
+                return idx
+
+        objs.append(obj)
+        _obj_idx_cache[obj] = len(objs) - 1
+        return len(objs) - 1
     elif isinstance(obj, dict):
         ret = {}
         for k, v in obj.iteritems():
-            ret[_serialize_entry(k, objs, _serialized_set)] = _serialize_entry(v, objs, _serialized_set)
+            ret[_serialize_entry(k, objs, _obj_idx_cache)] = _serialize_entry(v, objs, _obj_idx_cache)
         return ret
-    elif isinstance(obj, list):
+    elif isinstance(obj, list) or isinstance(obj, set):
         ret = []
         for x in obj:
-            ret.append(_serialize_entry(x, objs, _serialized_set))
+            ret.append(_serialize_entry(x, objs, _obj_idx_cache))
 
         return ret
     else:
@@ -135,7 +138,7 @@ def serialize_obj(obj):
     """
     objs = [None]
 
-    res = _serialize_entry(obj, objs, set())
+    res = _serialize_entry(obj, objs, {})
 
     return json.dumps([res, objs])
 
