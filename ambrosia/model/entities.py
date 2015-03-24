@@ -1,5 +1,6 @@
 from datetime import datetime
 import os.path
+import traceback
 from BTrees import OOBTree
 import ambrosia.context
 from ambrosia.model import Entity
@@ -26,8 +27,8 @@ class Task(Entity):
         self.tgid = None
         self.tg_leader_id = None
         self.tg_leader = None
-        self.comm = None
-        self.path = None
+        self.comm = []
+        self.path = []
         self.type = None
         self.uid = None
         self.apps = set()
@@ -215,11 +216,17 @@ class ServerEndpoint(Entity):
                 'port': self.port
             }, {})
 
+    @staticmethod
     def find(context, entities, identifier_btree, protocol, address, port):
         assert isinstance(context, ambrosia.AmbrosiaContext)
         assert isinstance(identifier_btree, OOBTree.BTree)
 
-        for el in identifier_btree.get(address):
+        els = identifier_btree.get(address)
+
+        if els is None:
+            return
+
+        for el in els:
             assert isinstance(el, ServerEndpoint)
 
             if el.protocol != protocol:
@@ -229,3 +236,6 @@ class ServerEndpoint(Entity):
                 continue
 
             return el
+
+    def __str__(self):
+        return '[Server Endpoint: {}:[{}]:{}]'.format(self.protocol, self.address, self.port)

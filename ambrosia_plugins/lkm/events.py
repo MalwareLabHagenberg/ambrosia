@@ -61,6 +61,7 @@ class SyscallEvent(model.Event):
         return props
 
     def __str__(self):
+        print self.name
         return '[Syscall: {} {} result:{}]'.format(
             self.name,
             (','.join(self.params)),
@@ -131,8 +132,8 @@ class FileDescriptorEvent(model.Event):
 class UnknownFdEvent(FileDescriptorEvent):
     """Represents a fd event where no syscall opening the fd has been found.
     """
-    def __init__(self, process, fd_number):
-        super(UnknownFdEvent, self).__init__(process, True)
+    def __init__(self, process, fd_number, successful):
+        super(UnknownFdEvent, self).__init__(process, successful)
         self.fd_number = fd_number
 
     def get_serializeable_properties(self):
@@ -227,11 +228,81 @@ class SocketEvent(FileDescriptorEvent):
     """
     indices = FileDescriptorEvent.indices | set()
 
+    address_families = {
+        0: 'AF_UNSPEC',
+        1: 'AF_UNIX',  # Unix domain sockets
+        2: 'AF_INET',  # Internet IP Protocol
+        3: 'AF_AX25',  # Amateur Radio AX.25
+        4: 'AF_IPX',  # Novell IPX
+        5: 'AF_APPLETALK',  # AppleTalk DDP
+        6: 'AF_NETROM',  # Amateur Radio NET/ROM
+        7: 'AF_BRIDGE',  # Multiprotocol bridge
+        8: 'AF_ATMPVC',  # ATM PVCs
+        9: 'AF_X25',  # Reserved for X.25,         project
+        10: 'AF_INET6',  # IP version:6
+        11: 'AF_ROSE',  # Amateur Radio X.25,         PLP
+        12: 'AF_DECnet',  # Reserved for DECnet project
+        13: 'AF_NETBEUI',  # Reserved for:802.2LLC projec
+        14: 'AF_SECURITY',  # Security callback pseudo AF
+        15: 'AF_KEY',  # PF_KEY key management API
+        16: 'AF_NETLINK',
+        17: 'AF_PACKET',  # Packet family
+        18: 'AF_ASH',  # Ash
+        19: 'AF_ECONET',  # Acorn Econet
+        20: 'AF_ATMSVC',  # ATM SVCs
+        21: 'AF_RDS',  # RDS sockets
+        22: 'AF_SNA',  # Linux SNA Project (nutters!)
+        23: 'AF_IRDA',  # IRDA sockets
+        24: 'AF_PPPOX',  # PPPoX sockets
+        25: 'AF_WANPIPE',  # Wanpipe API Sockets
+        26: 'AF_LLC',  # Linux LLC
+        27: 'AF_IB',  # Native InfiniBand address
+        29: 'AF_CAN',  # Controller Area Network
+        30: 'AF_TIPC',  # TIPC sockets
+        31: 'AF_BLUETOOTH',  # Bluetooth sockets
+        32: 'AF_IUCV',  # IUCV sockets
+        33: 'AF_RXRPC',  # RxRPC sockets
+        34: 'AF_ISDN',  # mISDN sockets
+        35: 'AF_PHONET',  # Phonet sockets
+        36: 'AF_IEEE802154',  # IEEE80,2154 sockets
+        37: 'AF_CAIF',  # CAIF sockets
+        38: 'AF_ALG',  # Algorithm sockets
+        39: 'AF_NFC',  # NFC sockets
+        40: 'AF_VSOCK',  # vSockets
+    }
+
+    sock_types = {
+        1: 'SOCK_STREAM',
+        2: 'SOCK_DGRAM',
+        3: 'SOCK_RAW',
+        4: 'SOCK_RDM',
+        5: 'SOCK_SEQPACKET',
+        6: 'SOCK_DCCP',
+        10: 'SOCK_PACKET'
+    }
+
     def __init__(self, process, successful):
         super(SocketEvent, self).__init__(process, successful)
+        self.client_socket = False
+        self.server_socket = False
+        self.address_family = None
+        self.socket_type = None
+        self.connected_to = None
+        self.bound_to = None
 
     def get_serializeable_properties(self):
         props = super(SocketEvent, self).get_serializeable_properties()
+        props['client_socket'] = self.client_socket
+        props['server_socket'] = self.server_socket
+
+        if self.address_family in SocketEvent.address_families:
+            props['address_family'] = SocketEvent.address_families[self.address_family]
+
+        if self.socket_type in SocketEvent.sock_types:
+            props['socket_type'] = SocketEvent.sock_types[self.socket_type]
+
+        props['connected_to'] = self.connected_to
+        props['bound_to'] = self.bound_to
 
         return props
 

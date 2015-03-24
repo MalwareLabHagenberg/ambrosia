@@ -18,6 +18,9 @@ ambrosia_web.filter = {
      */
     removeFilterHandler: [],
 
+    TYPE_FORCE_SHOW_PARENT: 'force_show_parent',
+    TYPE_BLACKLIST: 'blacklist',
+
     /***
      * A Filter represents a single condition (either entered by the user or a default condition).
      *
@@ -46,18 +49,22 @@ ambrosia_web.filter = {
      */
     Filter: Class('ambrosia_web.filter.Filter',
         {
-            __init__: function(rule, description, enabled) {
+            __init__: function(rule, description, enabled, type) {
                 this._error = '';
                 this._filter = ambrosia_web.filter.parser.parse(rule);
                 this._enabled  = true;
                 this._rule = rule;
                 this.change_listener = [];
                 this._description = description;
+                this._type = A.filter.TYPE_BLACKLIST;
 
                 if (enabled != undefined) {
                     this._enabled = enabled;
                 }
 
+                if(type != undefined){
+                    this._type = type;
+                }
             },
 
             _call_change_listener: function(){
@@ -100,6 +107,10 @@ ambrosia_web.filter = {
                 return this._error;
             },
 
+            getType: function () {
+                return this._type;
+            },
+
             /**
              * set the description
              * @param {String} d the description
@@ -108,6 +119,11 @@ ambrosia_web.filter = {
              */
             setDescription: function(d){
                 this._description = d;
+                this._call_change_listener();
+            },
+
+            setType: function(t){
+                this._type = t;
                 this._call_change_listener();
             },
 
@@ -150,7 +166,19 @@ ambrosia_web.filter = {
              * @name evaluate
              */
             evaluate: function(evt){
-                return this._filter.evaluate(evt);
+                var res = this._filter.evaluate(evt);
+
+                switch (this._type) {
+                    case A.filter.TYPE_BLACKLIST:
+                    return [(res == true)?(false):(null), false];
+                    break;
+                case A.filter.TYPE_FORCE_SHOW_PARENT:
+                    return [res, res];
+                    break;
+                default:
+                    throw "Invalid type";
+                    break;
+                }
             }
         }),
 
@@ -432,5 +460,21 @@ ambrosia_web.filter = {
         for(var i in A.filter.addFilterHandler){
             A.filter.addFilterHandler[i](filter);
         }
+
+        A.redraw();
+    },
+
+    removeFilter: function(filter){
+        var idx = A.filter.filters.indexOf(filter);
+
+        if(idx > -1){
+            A.filter.filters.splice(idx, 1);
+        }
+
+        for(var i in A.filter.removeFilterHandler){
+            A.filter.removeFilterHandler[i](filter);
+        }
+
+        A.redraw();
     }
 };

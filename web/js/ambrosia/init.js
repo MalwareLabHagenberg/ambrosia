@@ -89,3 +89,7 @@ var ambrosia_web = {
 var A = ambrosia_web;
 
 $(document).ready(A.init);
+
+window.onerror = function(msg, file, line){
+    A.log.E(file+':'+line+': '+msg);
+};

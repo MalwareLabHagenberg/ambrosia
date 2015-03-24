@@ -1,6 +1,9 @@
 import json
 import re
 import datetime
+import binascii
+import socket
+import struct
 
 import dateutil.parser
 
@@ -9,7 +12,7 @@ from ambrosia.plugins import PluginInfoTop
 from ambrosia.util import get_logger, join_command
 from ambrosia import model, Correlator
 from ambrosia.context import AmbrosiaContext
-from ambrosia.model.entities import Task, File, App
+from ambrosia.model.entities import Task, File, App, ServerEndpoint
 from ambrosia_plugins.events import ANANASEvent
 from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
     SocketEvent, SocketAccept, MemoryMapEvent, StartTaskEvent, SuperUserRequest, CreateDir, SendSignal, \
@@ -113,7 +116,9 @@ class LkmPluginParser(ambrosia.ResultParser):
                 proc.path = json.loads(json.loads(props['path']))
                 proc.type = props['type']
                 proc.fds = props['fds']
-                proc.tgid = int(props['tgid'])
+
+                if props['tgid'] != 'None':
+                    proc.tgid = int(props['tgid'])
 
                 try:
                     proc.tg_leader_id = int(props['threadgroup-leader'])
@@ -161,7 +166,12 @@ class LkmPluginParser(ambrosia.ResultParser):
                     if info_name not in props['add_info']:
                         props['add_info'][info_name] = []
 
-                    props['add_info'][info_name].append(info.text)
+                    text = info.text
+
+                    if text is None:
+                        text = ''
+
+                    props['add_info'][info_name].append(text)
 
                 spawned_child = None
                 if 'child_id' in props:
@@ -226,12 +236,14 @@ class LkmPluginParser(ambrosia.ResultParser):
 
             if proc.parent_id != -1:
                 proc.parent = self.processes[proc.parent_id]
-                proc.tg_leader = self.processes[proc.tg_leader_id]
+                if proc.tg_leader_id is not None:
+                    proc.tg_leader = self.processes[proc.tg_leader_id]
 
                 if not proc.is_process:
                     # threads do not heave any files
                     assert len(proc.fds) == 0
-                    proc.fds = proc.tg_leader.fds
+                    if proc.tg_leader is not None:
+                        proc.fds = proc.tg_leader.fds
                 else:
                     if len(proc.fds) == 0 and proc.type != 'KERNEL' and not proc.start_captured:
                         # non-kernel processes with no FDs but that existed
@@ -346,7 +358,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             if success:
                 self.log.warn("operation on unknown fd, process {}, fd".format(process, fd))
 
-            fdevt = UnknownFdEvent(process, fd)
+            fdevt = UnknownFdEvent(process, fd, success)
             if default_start_ts is not None:
                 fdevt.start_ts = default_start_ts
             proc_fds[fd] = fdevt
@@ -398,7 +410,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             if success:
                 self.log.warn("dup on an unknown fd, process {}, fd".format(process, oldfd))
 
-            fdevt = UnknownFdEvent(process, oldfd)
+            fdevt = UnknownFdEvent(process, oldfd, success)
             proc_fds[oldfd] = fdevt
             self.to_add.add(fdevt)
 
@@ -415,6 +427,65 @@ class SyscallCorrelator(ambrosia.Correlator):
             self._check_syscall(evt)
 
         self.update_tree()
+
+    def _parse_addr_str(self, addrstr, socket_evt):
+        assert isinstance(socket_evt, SocketEvent)
+        raw = binascii.unhexlify(addrstr)
+
+        sa_family = struct.unpack("<H", raw[0:2])[0]
+
+        assert socket_evt.address_family == sa_family
+
+        entity = None
+
+        if sa_family == 1: # AF_UNIX # TODO
+            address = raw[2:].rstrip('\x00')
+
+            if address[0] == '\x00':
+                entity = self.context.analysis.get_entity(
+                    self.context,
+                    ServerEndpoint,
+                    'unix',
+                    address,
+                    0)
+            else:
+                entity = self.context.analysis.get_entity(self.context, File, address)
+        elif sa_family == 2: # AF_INET TODO
+            port = struct.unpack("<H", raw[2:4])[0]
+            addr = socket.inet_ntoa(raw[4:8])
+
+            if socket_evt.socket_type == 1:  # TODO SOCK_STREAM
+                protocol = 'tcp'
+            elif socket_evt.socket_type == 2:  # TODO SOCK_DGRAM
+                protocol = 'udp'
+            else:
+                protocol = 'unknown'
+
+            entity = self.context.analysis.get_entity(
+                self.context,
+                ServerEndpoint,
+                protocol,
+                addr,
+                port)
+        elif sa_family == 10: # TODO AF_INET6
+            port = struct.unpack("<H", raw[2:4])[0]
+            addr = socket.inet_ntop(socket.AF_INET6, raw[4:20])
+
+            if socket_evt.socket_type == 1:  # TODO SOCK_STREAM
+                protocol = 'tcp6'
+            elif socket_evt.socket_type == 2:  # TODO SOCK_DGRAM
+                protocol = 'udp6'
+            else:
+                protocol = 'unknown'
+
+            entity = self.context.analysis.get_entity(
+                self.context,
+                ServerEndpoint,
+                protocol,
+                addr,
+                port)
+
+        return entity
 
     def _check_syscall(self, evt):
         """Wraps a single syscall event into a higher-level event
@@ -478,6 +549,9 @@ class SyscallCorrelator(ambrosia.Correlator):
                 proc,
                 evt.returnval >= 0)
 
+            parent_evt.address_family = int(evt.params[0])
+            parent_evt.socket_type = int(evt.params[1])
+
             if parent_evt.successful:
                 proc_fds[evt.returnval] = parent_evt
 
@@ -503,11 +577,26 @@ class SyscallCorrelator(ambrosia.Correlator):
 
             if parent_evt.successful:
                 proc_fds[evt.returnval] = parent_evt
+                assert isinstance(mainsocket, SocketEvent)
+                mainsocket.server_socket = True
 
             mainsocket.add_child(parent_evt)
             self.to_add.add(mainsocket)
         elif evt.name == "connect":
             parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
+
+            if evt.returnval >= 0:
+                assert isinstance(parent_evt, SocketEvent)
+                parent_evt.connected_to = self._parse_addr_str(evt.params[1], parent_evt)
+                parent_evt.client_socket = True
+
+        elif evt.name == "bind":
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
+
+            if evt.returnval >= 0:
+                assert isinstance(parent_evt, SocketEvent)
+                parent_evt.bound_to = self._parse_addr_str(evt.params[1], parent_evt)
+                parent_evt.server_socket = True
         elif evt.name == "read" or \
                 evt.name == "write" or \
                 evt.name == "sendto" or \
@@ -699,6 +788,7 @@ class CommandExecuteCorrelator(Correlator):
 
                 self._find_mkdir_events(fork.spawned_child, cmd_evt, fork.start_ts)
                 self._find_library_loads(fork.spawned_child, cmd_evt, fork.start_ts)
+                self._find_java_library_loads(fork.spawned_child, cmd_evt, fork.start_ts)
             elif fork.process.type == "ZYGOTE" and (fork.spawned_child.type == "ZYGOTE_CHILD"
                                                     or fork.spawned_child.type == "TARGET_APP"):
                 zfe = ZygoteForkEvent(fork.spawned_child)
@@ -755,6 +845,15 @@ class CommandExecuteCorrelator(Correlator):
             evt.add_child(lle)
             self.to_remove.add(lle)
 
+    def _find_java_library_loads(self, process, evt, start_ts):
+        for jlle in self.context.analysis.iter_events(self.context, JavaLibraryLoad, 'process', value=process):
+            if (jlle.start_ts - start_ts) > datetime.timedelta(0, 2):
+                # we consider everything within 2 seconds as startup
+                continue
+
+            evt.add_child(jlle)
+            self.to_remove.add(jlle)
+
 class AdbCommandCorrelator(Correlator):
     """Find command executions that happen because of ANANAS (through ADB)
     """
@@ -804,5 +903,68 @@ class AdbCommandCorrelator(Correlator):
 
             self.log.debug("Found ANANAS shell exec: {}".format(cmd_evt))
             self.to_add.add(ase)
+            '''
+            for evt in self.context.analysis.iter_all_events(self.context, 'process', value=cmd_evt.process):
+                if evt == cmd_evt:
+                    continue
+                self.to_remove.add(evt)
+                ase.add_child(evt)
+            '''
+
+        self.update_tree()
+
+
+class InstallCorelator(Correlator):
+    def correlate(self):
+        self.log.info('Correlating App installations')
+
+        for cmd_evt in self.context.analysis.iter_events(self.context, CommandExecuteEvent):
+            if ['/system/bin/sh', '-c'] != cmd_evt.command[:2]:
+                # adb commands are started using /system/bin/sh
+                continue
+
+            if cmd_evt.process.type != 'ADBD_CHILD':
+                continue
+
+            cmd_str = cmd_evt.command[2]
+
+            for adb_cmd in self.context.analysis.iter_events(self.context, ANANASEvent, 'start_ts',
+                                                             min_value=cmd_evt.start_ts - datetime.timedelta(0, 1)):
+                if adb_cmd.name != 'adb_cmd':
+                    continue
+
+                if adb_cmd in found_matches:
+                        continue
+
+                if 'shell' in adb_cmd.params:
+                    idx = adb_cmd.params.index('shell')
+                    cmd = adb_cmd.params[idx+1:]
+
+                    if len(cmd) > 1:
+                        cmd = join_command(cmd)
+                    else:
+                        cmd = cmd[0]
+
+                    if cmd == cmd_str:
+                        found_matches[adb_cmd] = cmd_evt
+                        break
+
+        for adb_cmd, cmd_evt in found_matches.iteritems():
+            self.to_remove.add(adb_cmd)
+            self.to_remove.add(cmd_evt)
+
+            ase = ANANASAdbShellExec(cmd_evt.process)
+            ase.add_child(adb_cmd)
+            ase.add_child(cmd_evt)
+
+            self.log.debug("Found ANANAS shell exec: {}".format(cmd_evt))
+            self.to_add.add(ase)
+            '''
+            for evt in self.context.analysis.iter_all_events(self.context, 'process', value=cmd_evt.process):
+                if evt == cmd_evt:
+                    continue
+                self.to_remove.add(evt)
+                ase.add_child(evt)
+            '''
 
         self.update_tree()

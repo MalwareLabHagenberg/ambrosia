@@ -6,7 +6,7 @@ from persistent.list import PersistentList
 from persistent.mapping import PersistentMapping
 
 import ambrosia.context
-from ambrosia.util import js_date, obj_classname, classname, unique_id
+from ambrosia.util import js_date, obj_classname, classname, unique_id, get_class
 
 __author__ = 'Wolfgang Ettlinger'
 
@@ -123,6 +123,18 @@ class Analysis(Persistent):
 
         return res
 
+    def iter_all_events(self, context, key=None, min_value=None, max_value=None, value=None):
+        for class_name, idx in self._event_index.iteritems():
+            cls = get_class(class_name)
+            assert issubclass(cls, Event)
+
+            if key not in cls.indices:
+                continue
+
+            for evt in self.iter_events(context, cls, key, min_value, max_value, value):
+                yield evt
+
+    # TODO cls is None
     def iter_events(self, context, cls=None, key=None, min_value=None, max_value=None, value=None):
         """Iterates over all events matching specific conditions in an efficient manner.
 
@@ -246,6 +258,8 @@ class Analysis(Persistent):
         """
         for el in self._events:
             assert isinstance(el, Event)
+            assert(el.start_ts > self.start_time)
+            assert(el.start_ts < self.end_time)
             el.sort()
 
         events = list(self._events)

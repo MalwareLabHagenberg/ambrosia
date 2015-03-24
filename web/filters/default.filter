@@ -1,3 +1,6 @@
+# do not force parent to show
+parent.visible == false;
+
 ################################################################################
 # Filter certain events with very litte information                            #
 ################################################################################
@@ -69,6 +72,8 @@ stype == "ANANASEvent" {
 stype == "AndroidApicall";
 stype == "LibraryLoad";
 stype == "ZygoteForkEvent";
+stype == "SendSignal";
+
 
 stype == "FileEvent" {
     # read only
@@ -94,7 +99,8 @@ stype == "FileEvent" {
 
     r.file.p.abspath == "/dev/binder";
     r.file.p.abspath == "/sys/kernel/debug/tracing/trace_marker";
-    r.file.p.abspath == "/dev/cpuctl/apps/bg_non_interactive/tasks";
+
+    r.file.p.abspath ~ "^/dev/cpuctl/apps/";
 
     r.file.p.abspath == "/system/bin/am" && "/system/bin/am" : r.process.p.path;
 }
@@ -107,6 +113,10 @@ stype == "DeleteFileEvent" {
     r.file.p.abspath == "/data/ananaslkm.ko";
 }
 
+stype == "FileEvent" {
+    r.process.p.type == "ADBD_CHILD" && r.file.p.abspath == "/data/system/packages.xml";
+}
+
 stype == "ANANASAdbShellExec";
 
 ################################################################################
@@ -114,12 +124,16 @@ stype == "ANANASAdbShellExec";
 ################################################################################
 r.process.p.type == "ADBD" {
     # hide the sockets created by ADBD
-    stype == "SocketEvent";
+    stype == "SocketEvent" && p.server_socket == true;
 }
 
 r.process.p.type == "INIT" {
     # hide the sockets created by INIT
-    stype == "SocketEvent";
+    stype == "SocketEvent" && p.server_socket == true;
+}
+
+r.process.p.type == "SDCARD" {
+    r.file.p.abspath ~ "^/mnt/media_rw/sdcard";
 }
 
 r.process.r.tg_leader.p.type == "NETD" {
@@ -147,16 +161,22 @@ r.process.p.type=="HEALTHD" {
     r.file.p.abspath~"^/sys/class/power_supply";
 }
 
+"JDWP" : r.process.p.comm {
+    stype == "SocketEvent" {
+        p.client_socket == true && r.connected_to.p.address ~ "^.jdwp-control$";
+    }
+}
+
 ################################################################################
 # Filter preinstalled apps                                                     #
 ################################################################################
 "com.android.providers.telephony" : r.process.r.apps.p.package {
     r.file.p.abspath ~ "^/data/data/com\.android\.(providers\.telephony|phone)"
-    stype=="SocketEvent";
 }
 
 "com.google.android.googlequicksearchbox" : r.process.r.apps.p.package {
     r.file.p.abspath~"^/data/data/com\.google\.android\.googlequicksearchbox";
+    stype == "SocketEvent" && p.client_socket == true && r.connected_to.p.protocol == "tcp";
 }
 
 "com.google.android.gms" : r.process.r.apps.p.package {
@@ -165,11 +185,16 @@ r.process.p.type=="HEALTHD" {
     r.file.p.abspath~"^/data/data/com.google.android.gsf/";
     r.file.p.abspath~"^/data/data/com\.google\.android\.backuptransport";
     r.file.p.abspath=="/system/etc/security/otacerts.zip";
-    stype=="SocketEvent";
+    stype == "SocketEvent" && p.client_socket == true && r.connected_to.p.protocol == "tcp";
+}
+
+"com.google.android.gm" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.google\.android\.gm/";
 }
 
 "com.android.contacts" : r.process.r.apps.p.package {
-    r.file.p.abspath~"/data/user/0/com.android.providers.contacts";
+    r.file.p.abspath~"/data/user/0/com\.android\.providers\.contacts/";
+    r.file.p.abspath~"/data/data/com\.android\.providers\.contacts/";
 }
 
 "com.android.providers.settings" : r.process.r.apps.p.package {
@@ -193,10 +218,40 @@ r.process.p.type=="HEALTHD" {
     r.file.p.abspath~"^/data/data/com\.google\.android\.partnersetup/";
 }
 
+"com.google.android.talk" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.google\.android\.talk/";
+}
+
 "com.android.providers.downloads" : r.process.r.apps.p.package {
-    r.file.p.abspath~"^/data/data/com\.android\.providers\.downloads/";
-    stype=="SocketEvent";
-    r.file.p.abspath=="/proc/net/xt_qtaguid/ctrl";
+    r.file.p.abspath~"^/data/data/com\.android\.providers\.(downloads|media)/";
+    r.file.p.abspath~"/storage/sdcard/Android/data/com\.google\.android\.apps\.magazines/";
+
+    "MediaScannerSer" : r.process.p.comm {
+        r.file.p.abspath == "/storage/sdcard";
+        r.file.p.abspath ~ "^/system/media";
+        r.file.p.abspath ~ "^/storage/sdcard/Android";
+        r.file.p.abspath ~ "/sdcard/DCIM/";
+        r.file.p.abspath == "/storage/sdcard/LOST.DIR";
+    }
+}
+
+"com.android.email" : r.process.r.apps.p.package {
+    r.file.p.abspath~"/data/data/com\.google\.android\.email/";
+}
+
+"com.google.android.apps.magazines" : r.process.r.apps.p.package {
+    r.file.p.abspath~"/storage/sdcard/Android/data/com\.google\.android\.apps\.magazines/";
+    r.file.p.abspath~"/data/data/com\.google\.android\.apps\.magazines/";
+}
+
+"com.google.android.music" : r.process.r.apps.p.package {
+    r.file.p.abspath~"/data/data/com\.google\.android\.music/";
+    r.file.p.abspath~"/mnt/media_rw/sdcard/Android/data/com\.google\.android\.music/";
+}
+
+
+"com.google.android.configupdater" : r.process.r.apps.p.package {
+    r.file.p.abspath~"^/data/data/com\.google\.android\.configupdater/";
 }
 
 "com.google.android.youtube" : r.process.r.apps.p.package {
@@ -212,8 +267,6 @@ r.process.p.type=="HEALTHD" {
 
     r.file.p.abspath~"^/data/system/dropbox/";
 
-    stype == "SocketEvent";
-
     # only hide user 0, there should only be one
     r.file.p.abspath~"^/data/system/users/0/" || r.file.p.abspath == "/data/system/users/0";
     "NetworkStats" : r.process.p.comm {
@@ -221,7 +274,6 @@ r.process.p.type=="HEALTHD" {
     }
     "NetworkPolicy" : r.process.p.comm {
         # hide NetworkPolicy proc file operations
-        r.file.p.abspath=="/proc/net/xt_qtaguid/ctrl";
         r.file.p.abspath=="/data/system/netstats";
     }
     "ActivityManager" : r.process.p.comm {
@@ -243,15 +295,25 @@ r.process.p.type=="HEALTHD" {
 # Filter app processes                                                         #
 ################################################################################
 (r.process.p.type=="ZYGOTE_CHILD" || r.process.p.type=="TARGET_APP") {
-    # several zygote childs access /proc/*/oom_adj
-    (r.file.p.abspath~"^/proc/\d+/oom_adj$" && p.flags==131073);
+    stype == "FileEvent" {
+        # several zygote childs access /proc/*/oom_adj
+        (r.file.p.abspath~"^/proc/\d+/oom_adj$" && p.flags==131073);
 
-    (r.file.p.abspath~"^/proc/\d+/task$" && p.flags==147456)
-    # several zygote childs access /proc/*/task
+        r.file.p.abspath=="/proc/net/xt_qtaguid/ctrl";
 
-    # Several zygote childs access /proc/*/smaps
-    (r.file.p.abspath~"^/proc/\d+/smaps$" && p.flags==131072)
+        # read only
+        p.flg_O_RDWR==false && p.flg_O_WRONLY==false {
+            r.file.p.abspath == "/sys/devices/system/cpu/present";
+            r.file.p.abspath == "/sys/class/net" || r.file.p.abspath ~ "^/sys/class/net/";
+            r.file.p.abspath == "/dev/alarm";
 
+            (r.file.p.abspath~"^/proc/\d+/task$" && p.flags==147456)
+            # several zygote childs access /proc/*/task
+
+            # Several zygote childs access /proc/*/smaps
+            (r.file.p.abspath~"^/proc/\d+/smaps$" && p.flags==131072)
+        }
+    }
 }
 
 ################################################################################
@@ -268,4 +330,14 @@ r.file.p.abspath~"^/data/(data|user)/.+\.db(-journal|-shm|-wal|-mj[0-9A-F]{9})?$
 ################################################################################
 "/system/bin/date": r.process.p.path {
     stype == "FileEvent" && r.file.p.abspath == "/dev/alarm";
+}
+
+"/system/bin/dexopt" : r.process.p.path {
+    stype == "FileEvent" && r.file.p.abspath == "/sys/qemu_trace/process_name";
+}
+
+"/system/bin/app_process" : r.process.r.tg_leader.p.path {
+    "JDWP" : r.process.p.comm {
+        false;
+    }
 }

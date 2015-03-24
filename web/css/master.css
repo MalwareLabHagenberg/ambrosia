@@ -164,8 +164,8 @@ button {
 
 .filterinput{
     width: 648px;
-    font-family: monospace;
-    font-size: 8pt;
+    height: 400px;
+    text-align: left;
 }
 
 .filterdescription{
@@ -178,7 +178,7 @@ button {
 }
 
 .filterinput.filterchanged {
-    background-color: #ffffcc;
+    /* background-color: #ffffcc; */
 }
 
 .filterinput.errorinput {

@@ -94,9 +94,41 @@ ambrosia_web.event = {
          */
         calcVisible: function(){
             this.visible = true;
+            var counter = 0;
+
+            var forceVisible = false;
+
+            var show = false;
+            var hide = false;
+
+            for (var i in A.filter.filters) {
+                if (!A.filter.filters[i].isEnabled()) {
+                    continue;
+                }
+
+                var filterRes = A.filter.filters[i].evaluate(this);
+
+                if (filterRes[0] == false) {
+                    /* filter explicitly says hide */
+                    hide = true;
+                }else if (filterRes[0] == true) {
+                    show = true;
+                }
+
+                forceVisible = forceVisible || filterRes[1];
+            }
+
+            if(hide) {
+                this.visible = false;
+            }
+
+            if(show) {
+                /* explicit show has precedence */
+                this.visible = true;
+            }
 
             var child_forces_visible = false;
-            var counter = 0;
+
             for(var i in this.children) {
                 /* a child is visible, parent needs to be visible too */
                 var rarr =this.children[i].calcVisible();
@@ -106,28 +138,13 @@ ambrosia_web.event = {
 
             this.visible = this.visible || child_forces_visible;
 
-            if(!child_forces_visible) {
-
-                for (var i in A.filter.filters) {
-                    if (!A.filter.filters[i].isEnabled()) {
-                        continue;
-                    }
-
-                    if (A.filter.filters[i].evaluate(this) == true) {
-                        /* filter explicitly says hide */
-                        this.visible = false;
-                        A.filter.filters[i].counter++;
-                    }
-                }
-            }
-
             if(this.visible){
                 counter ++;
             }else{
                 counter = 0;
             }
 
-            return [false, counter];
+            return [forceVisible, counter];
         },
 
         /**

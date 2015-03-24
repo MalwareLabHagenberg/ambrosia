@@ -43,6 +43,12 @@ def classname(cls):
 
     return cls.__module__ + "." + cls.__name__
 
+def get_class(name):
+    idx = name.rfind('.')
+    assert idx > 0
+    clsname = name[idx+1:]
+
+    return getattr(__import__(name[0:idx], globals(), locals(), [clsname]), clsname)
 
 def unique_id():
     """Generates a uniqe id

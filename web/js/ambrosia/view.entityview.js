@@ -29,12 +29,20 @@ ambrosia_web.view.entityview = {
 
                     var fths = $('<button type="button"/>').text('this');
                     fths.click(function(){
-                        A.event.addFilter(null, new A.filter.Filter('"'+entity.id+'" : r.*.id', 'show entity filter'));
+                        A.filter.addFilter(new A.filter.Filter(
+                            '"'+entity.id+'" : r.*.id',
+                            'only show '+entity,
+                            true,
+                            A.filter.TYPE_FORCE_SHOW_PARENT));
                     });
 
                     var fnths = $('<button type="button"/>').text('not this');
                     fnths.click(function(){
-                        A.event.addFilter(null, new A.filter.Filter('"'+entity.id+'" !: r.*.id', 'hide entity filter'));
+                        A.filter.addFilter(new A.filter.Filter(
+                            '"'+entity.id+'" : r.*.id',
+                            'hide '+entity,
+                            true,
+                            A.filter.TYPE_BLACKLIST));
                     });
 
                     add('filter', $('<span/>').append(fths).append(fnths), table);
