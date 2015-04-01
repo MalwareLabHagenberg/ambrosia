@@ -17,7 +17,7 @@ from ambrosia_plugins.events import ANANASEvent
 from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
     SocketEvent, SocketAccept, MemoryMapEvent, StartTaskEvent, SuperUserRequest, CreateDir, SendSignal, \
     DeleteFileEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent, LibraryLoad, JavaLibraryLoad, \
-    ZygoteForkEvent
+    ZygoteForkEvent, APKInstall
 
 __author__ = 'Wolfgang Ettlinger'
 
@@ -29,7 +29,8 @@ class PluginInfo(PluginInfoTop):
             (SyscallCorrelator, 10),  # basic correlation
             (FileEventCorrelator, 20),  # classifies file events
             (CommandExecuteCorrelator, 30),  # finds command executions
-            (AdbCommandCorrelator, 40)  # correlates command executions with adb commands
+            (AdbCommandCorrelator, 40),  # correlates command executions with adb commands
+            (InstallCorelator, 50)  # find APK installations
         ]
 
     @staticmethod
@@ -46,9 +47,9 @@ class LkmPluginParser(ambrosia.ResultParser):
         self.log = get_logger(self)
 
     def parse(self, name, el, context):
-        """Does the acutual parsing.
+        """Does the actual parsing.
 
-        * *process* elment: All processes reported by the LKM/ANANAS are parsed and
+        * *process* element: All processes reported by the LKM/ANANAS are parsed and
           :class:`ambrosia_web.model.entities.Task` entities are created. Moreover, the attributes
           * *ananas_id* (id in the ANANAS db)
           * *parent_id* (the ANANAS db id of the parent task)
@@ -150,7 +151,10 @@ class LkmPluginParser(ambrosia.ResultParser):
 
                 params = []
                 for param in sc.findall('param'):
-                    params.append(param.text)
+                    if param.text is None:
+                        params.append('')
+                    else:
+                        params.append(param.text)
                 
                 time = dateutil.parser.parse(props['time'])
                 
@@ -439,6 +443,7 @@ class SyscallCorrelator(ambrosia.Correlator):
         entity = None
 
         if sa_family == 1: # AF_UNIX # TODO
+            # struct sockaddr_un
             address = raw[2:].rstrip('\x00')
 
             if address[0] == '\x00':
@@ -451,6 +456,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             else:
                 entity = self.context.analysis.get_entity(self.context, File, address)
         elif sa_family == 2: # AF_INET TODO
+            # sockaddr_in
             port = struct.unpack("<H", raw[2:4])[0]
             addr = socket.inet_ntoa(raw[4:8])
 
@@ -468,6 +474,7 @@ class SyscallCorrelator(ambrosia.Correlator):
                 addr,
                 port)
         elif sa_family == 10: # TODO AF_INET6
+            # sockaddr_in6
             port = struct.unpack("<H", raw[2:4])[0]
             addr = socket.inet_ntop(socket.AF_INET6, raw[4:20])
 
@@ -854,6 +861,7 @@ class CommandExecuteCorrelator(Correlator):
             evt.add_child(jlle)
             self.to_remove.add(jlle)
 
+
 class AdbCommandCorrelator(Correlator):
     """Find command executions that happen because of ANANAS (through ADB)
     """
@@ -920,51 +928,34 @@ class InstallCorelator(Correlator):
 
         for cmd_evt in self.context.analysis.iter_events(self.context, CommandExecuteEvent):
             if ['/system/bin/sh', '-c'] != cmd_evt.command[:2]:
-                # adb commands are started using /system/bin/sh
-                continue
-
-            if cmd_evt.process.type != 'ADBD_CHILD':
+                # TODO can a app be installed differently?
                 continue
 
             cmd_str = cmd_evt.command[2]
 
-            for adb_cmd in self.context.analysis.iter_events(self.context, ANANASEvent, 'start_ts',
-                                                             min_value=cmd_evt.start_ts - datetime.timedelta(0, 1)):
-                if adb_cmd.name != 'adb_cmd':
-                    continue
+            if not cmd_str.startswith('pm install'):
+                continue
 
-                if adb_cmd in found_matches:
-                        continue
+            apk = cmd_str.split(' ')[2]
 
-                if 'shell' in adb_cmd.params:
-                    idx = adb_cmd.params.index('shell')
-                    cmd = adb_cmd.params[idx+1:]
+            if '/system/bin/pm' not in cmd_evt.process.path:
+                continue
 
-                    if len(cmd) > 1:
-                        cmd = join_command(cmd)
-                    else:
-                        cmd = cmd[0]
-
-                    if cmd == cmd_str:
-                        found_matches[adb_cmd] = cmd_evt
-                        break
-
-        for adb_cmd, cmd_evt in found_matches.iteritems():
-            self.to_remove.add(adb_cmd)
             self.to_remove.add(cmd_evt)
 
-            ase = ANANASAdbShellExec(cmd_evt.process)
-            ase.add_child(adb_cmd)
-            ase.add_child(cmd_evt)
+            ai = APKInstall(self.context.analysis.get_entity(self.context, File, apk),
+                            cmd_evt.process)
 
-            self.log.debug("Found ANANAS shell exec: {}".format(cmd_evt))
-            self.to_add.add(ase)
-            '''
+            ai.add_child(cmd_evt)
+
+            self.log.debug("Found APK installation: {}".format(cmd_evt))
+
+            self.to_add.add(ai)
+
             for evt in self.context.analysis.iter_all_events(self.context, 'process', value=cmd_evt.process):
                 if evt == cmd_evt:
                     continue
                 self.to_remove.add(evt)
-                ase.add_child(evt)
-            '''
+                ai.add_child(evt)
 
         self.update_tree()

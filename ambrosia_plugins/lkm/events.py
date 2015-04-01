@@ -61,7 +61,6 @@ class SyscallEvent(model.Event):
         return props
 
     def __str__(self):
-        print self.name
         return '[Syscall: {} {} result:{}]'.format(
             self.name,
             (','.join(self.params)),
@@ -602,3 +601,23 @@ class JavaLibraryLoad(model.Event):
 
     def __str__(self):
         return '[Java Library load: {}]'.format(self.file.abspath)
+
+
+class APKInstall(model.Event):
+    indices = set()
+
+    def __init__(self, file, process):
+        assert isinstance(file, File)
+        assert isinstance(process, Task)
+        super(APKInstall, self).__init__()
+        self.file = file
+        self.process = process
+
+    def get_serializeable_properties(self):
+        return {
+            'file': self.file,
+            'process': self.process
+        }
+
+    def __str__(self):
+        return '[APK install: {}]'.format(self.file.abspath)

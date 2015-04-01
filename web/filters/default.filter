@@ -105,6 +105,11 @@ stype == "FileEvent" {
     r.file.p.abspath == "/system/bin/am" && "/system/bin/am" : r.process.p.path;
 }
 
+stype == "SocketEvent" {
+    # sockets that were not used at
+    p.client_socket == false && p.server_socket == false;
+}
+
 ################################################################################
 # Filter events triggered by ANANAS                                            #
 ################################################################################
@@ -171,7 +176,11 @@ r.process.p.type=="HEALTHD" {
 # Filter preinstalled apps                                                     #
 ################################################################################
 "com.android.providers.telephony" : r.process.r.apps.p.package {
-    r.file.p.abspath ~ "^/data/data/com\.android\.(providers\.telephony|phone)"
+    r.file.p.abspath ~ "^/data/data/com\.android\.(providers\.telephony|phone)";
+
+    stype == "SocketEvent" {
+        p.client_socket == true && r.connected_to.p.abspath == "/dev/socket/property_service";
+    }
 }
 
 "com.google.android.googlequicksearchbox" : r.process.r.apps.p.package {
@@ -339,5 +348,19 @@ r.file.p.abspath~"^/data/(data|user)/.+\.db(-journal|-shm|-wal|-mj[0-9A-F]{9})?$
 "/system/bin/app_process" : r.process.r.tg_leader.p.path {
     "JDWP" : r.process.p.comm {
         false;
+    }
+}
+
+################################################################################
+# SU stuff                                                                     #
+################################################################################
+"/system/xbin/su" : r.process.p.path {
+    stype == "FileEvent" {
+        r.file.p.abspath == "/system/build.prop";
+        r.file.p.abspath == "/sys/fs/selinux/enforce";
+    }
+
+    stype == "SocketEvent" {
+        p.client_socket == true && r.connected_to.p.address ~ "^.eu\.chainfire\.supersu";
     }
 }

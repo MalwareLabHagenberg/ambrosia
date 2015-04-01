@@ -210,6 +210,12 @@ ambrosia_web.event.events = function(){
     var ZygoteForkEvent = Class('ambrosia_web.event.events.ZygoteForkEvent',
         A.event.BlockEvent, { });
 
+    /**
+     * Represents :class:`ambrosia_plugins.lkm.events.APKInstall`
+     * @constructor
+     */
+    var APKInstall = Class('ambrosia_web.event.events.APKInstall',
+        A.event.BlockEvent, { });
 
     var evt_registry = {
         'ambrosia_plugins.events.ANANASEvent':              ANANASEvent,
@@ -235,7 +241,8 @@ ambrosia_web.event.events = function(){
         'ambrosia_plugins.lkm.events.AnonymousFileEvent':   AnonymousFileEvent,
         'ambrosia_plugins.lkm.events.LibraryLoad':          LibraryLoad,
         'ambrosia_plugins.lkm.events.JavaLibraryLoad':      JavaLibraryLoad,
-        'ambrosia_plugins.lkm.events.ZygoteForkEvent':      ZygoteForkEvent
+        'ambrosia_plugins.lkm.events.ZygoteForkEvent':      ZygoteForkEvent,
+        'ambrosia_plugins.lkm.events.APKInstall':           APKInstall
     };
 
     var ret = {

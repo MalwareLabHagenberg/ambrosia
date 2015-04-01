@@ -45,6 +45,7 @@ var ambrosia_web = {
 
         if(result_file == ''){
             A.log.E("no file give, please load Ambrosia with an input file");
+            loading.finish();
             return;
         }
 
@@ -93,3 +94,11 @@ $(document).ready(A.init);
 window.onerror = function(msg, file, line){
     A.log.E(file+':'+line+': '+msg);
 };
+
+$(window).bind('hashchange', function(e) {
+    window.location.reload();
+});
+
+$(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+    A.log.E(thrownError);
+});

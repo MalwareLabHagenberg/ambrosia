@@ -21,6 +21,10 @@ a:hover {
     text-decoration: underline;
 }
 
+table {
+    border-collapse: collapse;
+}
+
 #head {
     height: 50px;
     background-color: #b0b0b0;
@@ -49,7 +53,6 @@ a:hover {
     height: 30px;
     text-align: center;
     padding: 10px;
-    border-radius: 10px;
     opacity: 0.7;
     font-size: 13pt;
     color: #fff;
@@ -58,7 +61,7 @@ a:hover {
 .view .viewcontent{
     background-color: #222325;
     color: #B0B0B0;
-    border-radius: 0px 0px 0px 8px;
+    border: #B0B0B0 1px solid;
     max-height: 90%;
     min-width: 300px;
     min-height: 50px;
@@ -79,10 +82,6 @@ a:hover {
     font-size: 14px;
     line-height: 20px;
     cursor: pointer;
-}
-
-.view .viewheader:hover {
-    background-color: #ebebeb;
 }
 
 input {
@@ -131,7 +130,6 @@ button {
 }
 
 .filtercontainer {
-    border-radius: 3px;
     margin-bottom: 3px;
     width: 660px;
     color: #333;
@@ -156,10 +154,6 @@ button {
     margin-bottom: 5px;
     border-top: 1px solid #ddd;
     padding: 8px;
-}
-
-.tableentry:hover {
-    background-color: #ebebeb;
 }
 
 .filterinput{
@@ -200,7 +194,6 @@ rect.mainview_selected {
 }
 
 .propertytable {
-    border-radius: 3px;
     margin-bottom: 3px;
     width: 660px;
     color: #333;
@@ -210,12 +203,12 @@ rect.mainview_selected {
 
 .propertytable th {
     text-align: right;
-    font-family: monospace;
+    font-weight: normal;
 }
 
 .propertytable td {
     text-align: left;
-    font-family: monospace;
+    font-family: "Courier New", courier, monospace;
 }
 
 .propertytable tr:hover th, .propertytable tr:hover td {
@@ -230,52 +223,60 @@ rect.mainview_selected {
 
 /* file events: green */
 .event_FileEvent {
-    fill: #04b200;
+    fill: #04ff00;
 }
 
 .event_AnonymousFileEvent {
-    fill: #65b200;
+    fill: #91ff00;
 }
 
 .event_UnknownFdEvent {
-    fill: #00b28e;
+    fill: #00ff7a;
 }
 
+.event_DeleteFileEvent {
+    fill: #00ffc0;
+}
+
+.event_CreateDir {
+    fill: #89ffa3;
+}
 
 /* network events: blue */
 .event_SocketEvent {
-    fill: #2a00b2;
+    fill: #3c00ff;
 }
 
 .event_SocketAccept {
-    fill: #0069b2;
+    fill: #04b9ff;
 }
 
 /* potentially malicious behaviour: red */
 .event_SMSAccess {
-    fill: #b25000;
+    fill: #ffb800;
 }
-.event_PhoneCall {
-    fill: #b20000;
+.event_CommandExecuteEvent {
+    fill: #ff8500;
+}
+.event_SuperUserRequest {
+    fill: #ff4600;
 }
 
-.event_ContactAccess {
-    fill: #b2004b;
+.event_PhoneCall {
+    fill: #ff0000;
 }
 
 .event_CallLogAccess {
-    fill: #d4001e;
+    fill: #ff0081;
 }
-.event_SuperUserRequest {
-    fill: #eb0000;
-}
-
-.event_CommandExecuteEvent {
-    fill: #d46e00;
+.event_ContactsAccess {
+    fill: #ff00e8;
 }
 
 
-/* low-level events: white */
+
+
+/* low-level events: black */
 .event_ExecEvent {
     fill: #ffd4d4;
 }
@@ -284,16 +285,8 @@ rect.mainview_selected {
     fill: #ffd4f3;
 }
 
-.event_CreateDir {
-    fill: #eed4ff;
-}
-
 .event_SendSignal {
     fill: #dbd4ff;
-}
-
-.event_DeleteFileEvent {
-    fill: #d4ecff;
 }
 
 .event_MemoryMapEvent {
