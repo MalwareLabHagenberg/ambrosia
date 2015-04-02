@@ -16,7 +16,7 @@ from ambrosia.model.entities import Task, File, App, ServerEndpoint
 from ambrosia_plugins.events import ANANASEvent
 from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
     SocketEvent, SocketAccept, MemoryMapEvent, StartTaskEvent, SuperUserRequest, CreateDir, SendSignal, \
-    DeleteFileEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent, LibraryLoad, JavaLibraryLoad, \
+    DeletePathEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent, LibraryLoad, JavaLibraryLoad, \
     ZygoteForkEvent, APKInstall
 
 __author__ = 'Wolfgang Ettlinger'
@@ -604,6 +604,11 @@ class SyscallCorrelator(ambrosia.Correlator):
                 assert isinstance(parent_evt, SocketEvent)
                 parent_evt.bound_to = self._parse_addr_str(evt.params[1], parent_evt)
                 parent_evt.server_socket = True
+
+        elif evt.name == "listen":
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
+        elif evt.name == "fchown32":
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
         elif evt.name == "read" or \
                 evt.name == "write" or \
                 evt.name == "sendto" or \
@@ -647,8 +652,8 @@ class SyscallCorrelator(ambrosia.Correlator):
         elif evt.name == "execve":
             parent_evt = ExecEvent(evt.start_ts, evt.end_ts, evt.params[0], evt.argv, evt.env, proc)
             self.to_add.add(parent_evt)
-        elif evt.name == "unlink":
-            parent_evt = DeleteFileEvent(evt.start_ts,
+        elif evt.name == "unlink" or evt.name == "rmdir":
+            parent_evt = DeletePathEvent(evt.start_ts,
                                          evt.end_ts,
                                          evt.returnval >= 0,
                                          self.context.analysis.get_entity(
@@ -667,7 +672,7 @@ class SyscallCorrelator(ambrosia.Correlator):
                                        File,
                                        evt.params[0]))
             self.to_add.add(parent_evt)
-        elif evt.name == "kill":
+        elif evt.name == "kill" or evt.name == "tgkill":
             parent_evt = SendSignal(evt.start_ts,
                                     evt.end_ts,
                                     int(evt.params[1]),

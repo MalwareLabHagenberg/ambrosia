@@ -487,7 +487,7 @@ class SendSignal(model.Event):
         return '[Signal {} to {} (by {})]'.format(self.number, self.target_process, self.process)
 
 
-class DeleteFileEvent(model.Event):
+class DeletePathEvent(model.Event):
     """Represents an unlink() syscall
     """
     indices = set()
@@ -495,7 +495,7 @@ class DeleteFileEvent(model.Event):
     def __init__(self, start_ts, end_ts, successful, file, process):
         assert isinstance(file, File)
         assert isinstance(process, Task)
-        super(DeleteFileEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
+        super(DeletePathEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
         self.file = file
         self.successful = successful
         self.process = process
