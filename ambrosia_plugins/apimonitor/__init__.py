@@ -16,14 +16,14 @@ __author__ = 'Wolfgang Ettlinger'
 class PluginInfo(PluginInfoTop):
     @staticmethod
     def correlators():
-        return [(ApiCallCorrelator, 10)]
+        return [(ApiCallCorrelatorEvent, 10)]
 
     @staticmethod
     def parsers():
         return [ApimonitorPluginParser]
 
 
-class AndroidApicall(model.Event):
+class AndroidApicallEvent(model.Event):
     """Represents an API call of the App
 
     Args:
@@ -35,7 +35,7 @@ class AndroidApicall(model.Event):
     indices = {}
 
     def __init__(self, api, method, params, returnval, start_ts):
-        super(AndroidApicall, self).__init__(start_ts=start_ts)
+        super(AndroidApicallEvent, self).__init__(start_ts=start_ts)
         self.api = api
         self.method = method
         self.params = params
@@ -66,7 +66,7 @@ class ApimonitorPluginParser(ambrosia.ResultParser):
             for ac in el:
                 assert ac.tag == 'apicall'
                 ts = dateutil.parser.parse(str(ac.attrib['timestamp']))
-                apicall = AndroidApicall(ac.find('api').text,
+                apicall = AndroidApicallEvent(ac.find('api').text,
                                          ac.find('method').text,
                                          ac.find('parameters').text,
                                          ac.find('returnvalue').text,
@@ -78,13 +78,13 @@ class ApimonitorPluginParser(ambrosia.ResultParser):
         assert isinstance(context, AmbrosiaContext)
 
 
-class ContactsAccess(model.Event):
+class ContactAccessEvent(model.Event):
     """App accesses contacts
     """
     indices = {}
 
     def __init__(self):
-        super(ContactsAccess, self).__init__()
+        super(ContactAccessEvent, self).__init__()
 
     def get_serializeable_properties(self):
         return {} # TODO
@@ -93,13 +93,13 @@ class ContactsAccess(model.Event):
         return '[Contact access]'
 
 
-class SMSAccess(model.Event):
+class SMSAccessEvent(model.Event):
     """App accesses SMS
     """
     indices = {}
 
     def __init__(self):
-        super(SMSAccess, self).__init__()
+        super(SMSAccessEvent, self).__init__()
 
     def get_serializeable_properties(self):
         return {} # TODO
@@ -108,13 +108,13 @@ class SMSAccess(model.Event):
         return '[SMS access]'
 
 
-class CallLogAccess(model.Event):
+class CallLogAccessEvent(model.Event):
     """App accesses call logs
     """
     indices = {}
 
     def __init__(self):
-        super(CallLogAccess, self).__init__()
+        super(CallLogAccessEvent, self).__init__()
 
     def get_serializeable_properties(self):
         return {} # TODO
@@ -123,13 +123,13 @@ class CallLogAccess(model.Event):
         return '[Call log access]'
 
 
-class PhoneCall(model.Event):
+class PhoneCallEvent(model.Event):
     """App calls someone
     """
     indices = {}
 
     def __init__(self):
-        super(PhoneCall, self).__init__()
+        super(PhoneCallEvent, self).__init__()
 
     def get_serializeable_properties(self):
         return {} # TODO
@@ -138,7 +138,7 @@ class PhoneCall(model.Event):
         return '[Phone call]'
 
 
-class ApiCallCorrelator(ambrosia.Correlator):
+class ApiCallCorrelatorEvent(ambrosia.Correlator):
     """Goes through all API calls and wraps known API calls into higher-level events.
 
     Args:
@@ -146,11 +146,11 @@ class ApiCallCorrelator(ambrosia.Correlator):
     """
     def __init__(self, context):
         assert isinstance(context, AmbrosiaContext)
-        super(ApiCallCorrelator, self).__init__(context)
+        super(ApiCallCorrelatorEvent, self).__init__(context)
 
     def correlate(self):
         self.log.info('Generating events from API calls')
-        for evt in self.context.analysis.iter_events(self.context, cls=AndroidApicall):
+        for evt in self.context.analysis.iter_events(self.context, cls=AndroidApicallEvent):
             self._check_apicall(evt)
 
         self.update_tree()
@@ -158,7 +158,7 @@ class ApiCallCorrelator(ambrosia.Correlator):
     def _wrap_evt(self, apicall, cls):
         """Helper function that creates an Event and adds a child to it
         """
-        assert isinstance(apicall, AndroidApicall)
+        assert isinstance(apicall, AndroidApicallEvent)
         assert issubclass(cls, Event)
 
         o = cls()
@@ -170,7 +170,7 @@ class ApiCallCorrelator(ambrosia.Correlator):
     def _check_apicall(self, evt):
         """Check a single API call event and wrap it into a higher-level event.
         """
-        assert isinstance(evt, AndroidApicall)
+        assert isinstance(evt, AndroidApicallEvent)
 
         if evt.api == 'Landroid/content/ContentResolver' and evt.method == 'query':
             # accessing a content provider
@@ -180,11 +180,11 @@ class ApiCallCorrelator(ambrosia.Correlator):
                 uri = m.group(1)
 
                 if uri == 'content://com.android.contacts/contacts':
-                    self._wrap_evt(evt, ContactsAccess)
+                    self._wrap_evt(evt, ContactAccessEvent)
                 elif uri == 'content://sms/inbox':
-                    self._wrap_evt(evt, SMSAccess)
+                    self._wrap_evt(evt, SMSAccessEvent)
                 elif uri == 'content://call_log/calls':
-                    self._wrap_evt(evt, CallLogAccess)
+                    self._wrap_evt(evt, CallLogAccessEvent)
         elif evt.method == 'startActivity' and 'act=android.intent.action.CALL' in evt.params:
             # startActivity with CALL-intent -> phone call
-            self._wrap_evt(evt, PhoneCall)
+            self._wrap_evt(evt, PhoneCallEvent)

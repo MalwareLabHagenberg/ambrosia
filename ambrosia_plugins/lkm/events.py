@@ -309,7 +309,7 @@ class SocketEvent(FileDescriptorEvent):
         return '[Socket Event]'
 
 
-class SocketAccept(FileDescriptorEvent):
+class SocketAcceptEvent(FileDescriptorEvent):
     """Represents a successful accept() on a socket
 
     This event's parent normally is a :class:`ambrosia_plugins.lkm.events.SocketEvent` and it is a
@@ -318,10 +318,10 @@ class SocketAccept(FileDescriptorEvent):
     indices = FileDescriptorEvent.indices | set()
 
     def __init__(self, process, successful):
-        super(SocketAccept, self).__init__(process, successful)
+        super(SocketAcceptEvent, self).__init__(process, successful)
 
     def get_serializeable_properties(self):
-        props = super(SocketAccept, self).get_serializeable_properties()
+        props = super(SocketAcceptEvent, self).get_serializeable_properties()
 
         return props
 
@@ -420,14 +420,14 @@ class StartTaskEvent(model.Event):
         return '[Start {}: {}]'.format('process' if self.is_process else 'thread', self.child_pid)
 
 
-class SuperUserRequest(model.Event):
+class SuperUserRequestEvent(model.Event):
     """Indicates that the process tried to run "su"
     """
     indices = set()
 
     def __init__(self, start_ts, end_ts, process):
         assert isinstance(process, Task)
-        super(SuperUserRequest, self).__init__(start_ts=start_ts, end_ts=end_ts)
+        super(SuperUserRequestEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
         self.process = process
 
     def get_serializeable_properties(self):
@@ -439,7 +439,7 @@ class SuperUserRequest(model.Event):
         return '[SU-Request by PID {}, UID {}]'.format(self.process.pid, self.process.uid)
 
 
-class CreateDir(model.Event):
+class CreateDirEvent(model.Event):
     """Represents an mkdir() syscall
     """
     indices = {'process'}
@@ -447,7 +447,7 @@ class CreateDir(model.Event):
     def __init__(self, start_ts, end_ts, process, successful, file):
         assert isinstance(process, Task)
         assert isinstance(file, File)
-        super(CreateDir, self).__init__(start_ts=start_ts, end_ts=end_ts)
+        super(CreateDirEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
         self.process = process
         self.file = file
         self.successful = successful
@@ -463,7 +463,7 @@ class CreateDir(model.Event):
         return '[Mkdir: {}]'.format(str(self.file))
 
 
-class SendSignal(model.Event):
+class SendSignalEvent(model.Event):
     """Represents a kill() syscall
     """
     indices = set()
@@ -471,7 +471,7 @@ class SendSignal(model.Event):
     def __init__(self, start_ts, end_ts, number, process, target_process):
         assert isinstance(process, Task)
         assert isinstance(target_process, Task)
-        super(SendSignal, self).__init__(start_ts=start_ts, end_ts=end_ts)
+        super(SendSignalEvent, self).__init__(start_ts=start_ts, end_ts=end_ts)
         self.process = process
         self.target_process = target_process
         self.number = number
@@ -536,14 +536,14 @@ class ExecEvent(model.Event):
         return '[Exec: {}, {}]'.format(self.path, join_command(self.argv))
 
 
-class ANANASAdbShellExec(model.Event):
+class ANANASAdbShellExecEvent(model.Event):
     """Represents a command that has been executed by ANANAS
     """
     indices = set()
 
     def __init__(self, process):
         assert isinstance(process, Task)
-        super(ANANASAdbShellExec, self).__init__()
+        super(ANANASAdbShellExecEvent, self).__init__()
         self.process = process
 
     def get_serializeable_properties(self):
@@ -555,7 +555,7 @@ class ANANASAdbShellExec(model.Event):
         return '[ANANAS Shell Command]'
 
 
-class LibraryLoad(model.Event):
+class LibraryLoadEvent(model.Event):
     """Represents mmap() operations on a library file
     """
     indices = {'process'}
@@ -563,7 +563,7 @@ class LibraryLoad(model.Event):
     def __init__(self, file, process, successful):
         assert isinstance(file, File)
         assert isinstance(process, Task)
-        super(LibraryLoad, self).__init__()
+        super(LibraryLoadEvent, self).__init__()
         self.file = file
         self.process = process
         self.successful = successful
@@ -578,7 +578,7 @@ class LibraryLoad(model.Event):
         return '[Library load: {}]'.format(self.file.abspath)
 
 
-class JavaLibraryLoad(model.Event):
+class JavaLibraryLoadEvent(model.Event):
     """Represents dalvik library load operation
     """
     indices = {'process'}
@@ -586,7 +586,7 @@ class JavaLibraryLoad(model.Event):
     def __init__(self, file, process, successful, system_library_load):
         assert isinstance(file, File)
         assert isinstance(process, Task)
-        super(JavaLibraryLoad, self).__init__()
+        super(JavaLibraryLoadEvent, self).__init__()
         self.file = file
         self.process = process
         self.successful = successful
@@ -603,13 +603,13 @@ class JavaLibraryLoad(model.Event):
         return '[Java Library load: {}]'.format(self.file.abspath)
 
 
-class APKInstall(model.Event):
+class APKInstallEvent(model.Event):
     indices = set()
 
     def __init__(self, file, process):
         assert isinstance(file, File)
         assert isinstance(process, Task)
-        super(APKInstall, self).__init__()
+        super(APKInstallEvent, self).__init__()
         self.file = file
         self.process = process
 

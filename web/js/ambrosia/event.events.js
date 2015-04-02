@@ -29,34 +29,34 @@ ambrosia_web.event.events = function(){
 
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.DeleteFileEvent`
+     * Represents :class:`ambrosia_plugins.lkm.events.DeletePathEvent`
      * @constructor
      */
-    var DeleteFileEvent = Class('ambrosia_web.event.events.DeleteFileEvent',
+    var DeletePathEvent = Class('ambrosia_web.event.events.DeletePathEvent',
         A.event.BlockEvent, { });
     
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.SendSignal`
+     * Represents :class:`ambrosia_plugins.lkm.events.SendSignalEvent`
      * @constructor
      */
-    var SendSignal = Class('ambrosia_web.event.events.SendSignal',
+    var SendSignalEvent = Class('ambrosia_web.event.events.SendSignalEvent',
         A.event.BlockEvent, { });
 
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.CreateDir`
+     * Represents :class:`ambrosia_plugins.lkm.events.CreateDirEvent`
      * @constructor
      */
-    var CreateDir = Class('ambrosia_web.event.events.CreateDir',
+    var CreateDirEvent = Class('ambrosia_web.event.events.CreateDirEvent',
         A.event.BlockEvent, { });
 
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.SocketAccept`
+     * Represents :class:`ambrosia_plugins.lkm.events.SocketAcceptEvent`
      * @constructor
      */
-    var SocketAccept = Class('ambrosia_web.event.events.SocketAccept',
+    var SocketAcceptEvent = Class('ambrosia_web.event.events.SocketAcceptEvent',
         A.event.BlockEvent, { });
 
 
@@ -116,50 +116,50 @@ ambrosia_web.event.events = function(){
 
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.SuperUserRequest`
+     * Represents :class:`ambrosia_plugins.lkm.events.SuperUserRequestEvent`
      * @constructor
      */
-    var SuperUserRequest = Class('ambrosia_web.event.events.SuperUserRequest',
+    var SuperUserRequestEvent = Class('ambrosia_web.event.events.SuperUserRequestEvent',
         A.event.BlockEvent, { });
 
 
     /**
-     * Represents :class:`ambrosia_plugins.apimonitor.AndroidApicall`
+     * Represents :class:`ambrosia_plugins.apimonitor.AndroidApicallEvent`
      * @constructor
      */
-    var AndroidApicall = Class('ambrosia_web.event.events.AndroidApicall',
+    var AndroidApicallEvent = Class('ambrosia_web.event.events.AndroidApicallEvent',
         A.event.BlockEvent, {});
 
 
     /**
-     * Represents :class:`ambrosia_plugins.apimonitor.CallLogAccess`
+     * Represents :class:`ambrosia_plugins.apimonitor.CallLogAccessEvent`
      * @constructor
      */
-    var CallLogAccess = Class('ambrosia_web.event.events.CallLogAccess',
+    var CallLogAccessEvent = Class('ambrosia_web.event.events.CallLogAccessEvent',
         A.event.BlockEvent, {});
 
 
     /**
-     * Represents :class:`ambrosia_plugins.apimonitor.ContactsAccess`
+     * Represents :class:`ambrosia_plugins.apimonitor.ContactAccessEvent`
      * @constructor
      */
-    var ContactsAccess = Class('ambrosia_web.event.events.ContactsAccess',
+    var ContactAccessEvent = Class('ambrosia_web.event.events.ContactAccessEvent',
         A.event.BlockEvent, {});
 
 
     /**
-     * Represents :class:`ambrosia_plugins.apimonitor.PhoneCall`
+     * Represents :class:`ambrosia_plugins.apimonitor.PhoneCallEvent`
      * @constructor
      */
-    var PhoneCall = Class('ambrosia_web.event.events.PhoneCall',
+    var PhoneCallEvent = Class('ambrosia_web.event.events.PhoneCallEvent',
         A.event.BlockEvent, { });
 
 
     /**
-     * Represents :class:`ambrosia_plugins.apimonitor.SMSAccess`
+     * Represents :class:`ambrosia_plugins.apimonitor.SMSAccessEvent`
      * @constructor
      */
-    var SMSAccess = Class('ambrosia_web.event.events.SMSAccess',
+    var SMSAccessEvent = Class('ambrosia_web.event.events.SMSAccessEvent',
         A.event.BlockEvent, { });
 
 
@@ -180,26 +180,26 @@ ambrosia_web.event.events = function(){
     
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.ANANASAdbShellExec`
+     * Represents :class:`ambrosia_plugins.lkm.events.ANANASAdbShellExecEvent`
      * @constructor
      */
-    var ANANASAdbShellExec = Class('ambrosia_web.event.events.ANANASAdbShellExec',
+    var ANANASAdbShellExecEvent = Class('ambrosia_web.event.events.ANANASAdbShellExecEvent',
         A.event.BlockEvent, { });
 
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.LibraryLoad`
+     * Represents :class:`ambrosia_plugins.lkm.events.LibraryLoadEvent`
      * @constructor
      */
-    var LibraryLoad = Class('ambrosia_web.event.events.LibraryLoad',
+    var LibraryLoadEvent = Class('ambrosia_web.event.events.LibraryLoadEvent',
         A.event.BlockEvent, {});
 
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.JavaLibraryLoad`
+     * Represents :class:`ambrosia_plugins.lkm.events.JavaLibraryLoadEvent`
      * @constructor
      */
-    var JavaLibraryLoad = Class('ambrosia_web.event.events.JavaLibraryLoad',
+    var JavaLibraryLoadEvent = Class('ambrosia_web.event.events.JavaLibraryLoadEvent',
         A.event.BlockEvent, {});
 
 
@@ -211,38 +211,38 @@ ambrosia_web.event.events = function(){
         A.event.BlockEvent, { });
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.APKInstall`
+     * Represents :class:`ambrosia_plugins.lkm.events.APKInstallEvent`
      * @constructor
      */
-    var APKInstall = Class('ambrosia_web.event.events.APKInstall',
+    var APKInstallEvent = Class('ambrosia_web.event.events.APKInstallEvent',
         A.event.BlockEvent, { });
 
     var evt_registry = {
-        'ambrosia_plugins.events.ANANASEvent':              ANANASEvent,
-        'ambrosia_plugins.lkm.events.SyscallEvent':         SyscallEvent,
-        'ambrosia_plugins.apimonitor.AndroidApicall':       AndroidApicall,
-        'ambrosia_plugins.lkm.events.FileEvent':            FileEvent,
-        'ambrosia_plugins.lkm.events.StartTaskEvent':       StartTaskEvent,
-        'ambrosia_plugins.lkm.events.UnknownFdEvent':       UnknownFdEvent,
-        'ambrosia_plugins.lkm.events.MemoryMapEvent':       MemoryMapEvent,
-        'ambrosia_plugins.lkm.events.SocketEvent':          SocketEvent,
-        'ambrosia_plugins.lkm.events.DeleteFileEvent':      DeleteFileEvent,
-        'ambrosia_plugins.lkm.events.SendSignal':           SendSignal,
-        'ambrosia_plugins.lkm.events.CreateDir':            CreateDir,
-        'ambrosia_plugins.lkm.events.SocketAccept':         SocketAccept,
-        'ambrosia_plugins.lkm.events.ExecEvent':            ExecEvent,
-        'ambrosia_plugins.lkm.events.CommandExecuteEvent':  CommandExecuteEvent,
-        'ambrosia_plugins.lkm.events.SuperUserRequest':     SuperUserRequest,
-        'ambrosia_plugins.lkm.events.ANANASAdbShellExec':   ANANASAdbShellExec,
-        'ambrosia_plugins.apimonitor.CallLogAccess':        CallLogAccess,
-        'ambrosia_plugins.apimonitor.ContactsAccess':       ContactsAccess,
-        'ambrosia_plugins.apimonitor.PhoneCall':            PhoneCall,
-        'ambrosia_plugins.apimonitor.SMSAccess':            SMSAccess,
-        'ambrosia_plugins.lkm.events.AnonymousFileEvent':   AnonymousFileEvent,
-        'ambrosia_plugins.lkm.events.LibraryLoad':          LibraryLoad,
-        'ambrosia_plugins.lkm.events.JavaLibraryLoad':      JavaLibraryLoad,
-        'ambrosia_plugins.lkm.events.ZygoteForkEvent':      ZygoteForkEvent,
-        'ambrosia_plugins.lkm.events.APKInstall':           APKInstall
+        'ambrosia_plugins.events.ANANASEvent':                  ANANASEvent,
+        'ambrosia_plugins.lkm.events.SyscallEvent':             SyscallEvent,
+        'ambrosia_plugins.apimonitor.AndroidApicallEvent':      AndroidApicallEvent,
+        'ambrosia_plugins.lkm.events.FileEvent':                FileEvent,
+        'ambrosia_plugins.lkm.events.StartTaskEvent':           StartTaskEvent,
+        'ambrosia_plugins.lkm.events.UnknownFdEvent':           UnknownFdEvent,
+        'ambrosia_plugins.lkm.events.MemoryMapEvent':           MemoryMapEvent,
+        'ambrosia_plugins.lkm.events.SocketEvent':              SocketEvent,
+        'ambrosia_plugins.lkm.events.DeletePathEvent':          DeletePathEvent,
+        'ambrosia_plugins.lkm.events.SendSignalEvent':          SendSignalEvent,
+        'ambrosia_plugins.lkm.events.CreateDirEvent':           CreateDirEvent,
+        'ambrosia_plugins.lkm.events.SocketAcceptEvent':        SocketAcceptEvent,
+        'ambrosia_plugins.lkm.events.ExecEvent':                ExecEvent,
+        'ambrosia_plugins.lkm.events.CommandExecuteEvent':      CommandExecuteEvent,
+        'ambrosia_plugins.lkm.events.SuperUserRequestEvent':    SuperUserRequestEvent,
+        'ambrosia_plugins.lkm.events.ANANASAdbShellExecEvent':  ANANASAdbShellExecEvent,
+        'ambrosia_plugins.apimonitor.CallLogAccessEvent':       CallLogAccessEvent,
+        'ambrosia_plugins.apimonitor.ContactAccessEvent':       ContactAccessEvent,
+        'ambrosia_plugins.apimonitor.PhoneCallEvent':           PhoneCallEvent,
+        'ambrosia_plugins.apimonitor.SMSAccessEvent':           SMSAccessEvent,
+        'ambrosia_plugins.lkm.events.AnonymousFileEvent':       AnonymousFileEvent,
+        'ambrosia_plugins.lkm.events.LibraryLoadEvent':         LibraryLoadEvent,
+        'ambrosia_plugins.lkm.events.JavaLibraryLoadEvent':     JavaLibraryLoadEvent,
+        'ambrosia_plugins.lkm.events.ZygoteForkEvent':          ZygoteForkEvent,
+        'ambrosia_plugins.lkm.events.APKInstallEvent':          APKInstallEvent
     };
 
     var ret = {

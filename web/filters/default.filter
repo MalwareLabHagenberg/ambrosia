@@ -54,7 +54,7 @@ r.file.p.abspath~"^/data/dalvik-cache/.+\.dex" {
     p.flags == 131138;
 }
 
-stype == "JavaLibraryLoad" {
+stype == "JavaLibraryLoadEvent" {
     # hide all system java library loads
     p.system_library == true;
     # hide all standard application java library loads
@@ -69,10 +69,10 @@ stype == "ANANASEvent" {
     p.name == "set_time";
 }
 
-stype == "AndroidApicall";
-stype == "LibraryLoad";
+stype == "AndroidApicallEvent";
+stype == "LibraryLoadEvent";
 stype == "ZygoteForkEvent";
-stype == "SendSignal";
+stype == "SendSignalEvent";
 
 
 stype == "FileEvent" {
@@ -113,7 +113,7 @@ stype == "SocketEvent" {
 ################################################################################
 # Filter events triggered by ANANAS                                            #
 ################################################################################
-stype == "DeleteFileEvent" {
+stype == "DeletePathEvent" {
     # hide the removal of the lkm file (done by ANANAS)
     r.file.p.abspath == "/data/ananaslkm.ko";
 }
@@ -122,7 +122,7 @@ stype == "FileEvent" {
     r.process.p.type == "ADBD_CHILD" && r.file.p.abspath == "/data/system/packages.xml";
 }
 
-stype == "ANANASAdbShellExec";
+stype == "ANANASAdbShellExecEvent";
 
 ################################################################################
 # Filter Android processes                                                     #

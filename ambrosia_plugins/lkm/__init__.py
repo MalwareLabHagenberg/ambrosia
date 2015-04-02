@@ -15,9 +15,9 @@ from ambrosia.context import AmbrosiaContext
 from ambrosia.model.entities import Task, File, App, ServerEndpoint
 from ambrosia_plugins.events import ANANASEvent
 from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
-    SocketEvent, SocketAccept, MemoryMapEvent, StartTaskEvent, SuperUserRequest, CreateDir, SendSignal, \
-    DeletePathEvent, ExecEvent, ANANASAdbShellExec, AnonymousFileEvent, UnknownFdEvent, LibraryLoad, JavaLibraryLoad, \
-    ZygoteForkEvent, APKInstall
+    SocketEvent, SocketAcceptEvent, MemoryMapEvent, StartTaskEvent, SuperUserRequestEvent, CreateDirEvent, SendSignalEvent, \
+    DeletePathEvent, ExecEvent, ANANASAdbShellExecEvent, AnonymousFileEvent, UnknownFdEvent, LibraryLoadEvent, JavaLibraryLoadEvent, \
+    ZygoteForkEvent, APKInstallEvent
 
 __author__ = 'Wolfgang Ettlinger'
 
@@ -576,7 +576,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             self.to_add.add(parent_evt)
         elif evt.name == "accept":
 
-            parent_evt = SocketAccept(
+            parent_evt = SocketAcceptEvent(
                 proc,
                 evt.returnval >= 0)
 
@@ -663,7 +663,7 @@ class SyscallCorrelator(ambrosia.Correlator):
                                          proc)
             self.to_add.add(parent_evt)
         elif evt.name == "mkdir":
-            parent_evt = CreateDir(evt.start_ts,
+            parent_evt = CreateDirEvent(evt.start_ts,
                                    evt.end_ts,
                                    proc,
                                    evt.returnval >= 0,
@@ -673,7 +673,7 @@ class SyscallCorrelator(ambrosia.Correlator):
                                        evt.params[0]))
             self.to_add.add(parent_evt)
         elif evt.name == "kill" or evt.name == "tgkill":
-            parent_evt = SendSignal(evt.start_ts,
+            parent_evt = SendSignalEvent(evt.start_ts,
                                     evt.end_ts,
                                     int(evt.params[1]),
                                     proc,
@@ -699,7 +699,7 @@ class FileEventCorrelator(Correlator):
         for fe in self.context.analysis.iter_events(self.context, FileEvent):
             if re.match('^/vendor/lib/.+\.so', fe.abspath) or re.match('^/system/lib/.+\.so', fe.abspath):
 
-                lle = LibraryLoad(fe.file, fe.process, False)
+                lle = LibraryLoadEvent(fe.file, fe.process, False)
 
                 if fe.successful:
                     for c in fe.children:
@@ -717,7 +717,7 @@ class FileEventCorrelator(Correlator):
                     bool(re.match('^/system/framework/.+\.(jar|odex)', fe.abspath))
                     or bool(re.match('^/system/(priv-)?app/.+\.(apk|odex)', fe.abspath)))
 
-                jll = JavaLibraryLoad(fe.file, fe.process, False, system_library_load)
+                jll = JavaLibraryLoadEvent(fe.file, fe.process, False, system_library_load)
                 jll.add_child(fe)
                 self.to_add.add(jll)
                 self.to_remove.add(fe)
@@ -781,7 +781,7 @@ class CommandExecuteCorrelator(Correlator):
                 self.log.debug("Found command event: {}".format(cmd_evt))
 
                 if cmd_evt.path == '/system/xbin/su':
-                    su_evt = SuperUserRequest(cmd_evt.start_ts, cmd_evt.end_ts, cmd_evt.process)
+                    su_evt = SuperUserRequestEvent(cmd_evt.start_ts, cmd_evt.end_ts, cmd_evt.process)
                     su_evt.add_child(cmd_evt)
                     self.to_add.add(su_evt)
                     self.log.debug("Found SU event: {}".format(su_evt))
@@ -837,8 +837,8 @@ class CommandExecuteCorrelator(Correlator):
                 self.to_remove.add(fe)
 
     def _find_mkdir_events(self, process, evt, start_ts):
-        for mde in self.context.analysis.iter_events(self.context, CreateDir, 'process', value=process):
-            assert isinstance(mde, CreateDir)
+        for mde in self.context.analysis.iter_events(self.context, CreateDirEvent, 'process', value=process):
+            assert isinstance(mde, CreateDirEvent)
 
             if (mde.start_ts - start_ts) > datetime.timedelta(0, 2):
                 # we consider everything within 2 seconds as startup
@@ -849,7 +849,7 @@ class CommandExecuteCorrelator(Correlator):
                 self.to_remove.add(mde)
 
     def _find_library_loads(self, process, evt, start_ts):
-        for lle in self.context.analysis.iter_events(self.context, LibraryLoad, 'process', value=process):
+        for lle in self.context.analysis.iter_events(self.context, LibraryLoadEvent, 'process', value=process):
             if (lle.start_ts - start_ts) > datetime.timedelta(0, 2):
                 # we consider everything within 2 seconds as startup
                 continue
@@ -858,7 +858,7 @@ class CommandExecuteCorrelator(Correlator):
             self.to_remove.add(lle)
 
     def _find_java_library_loads(self, process, evt, start_ts):
-        for jlle in self.context.analysis.iter_events(self.context, JavaLibraryLoad, 'process', value=process):
+        for jlle in self.context.analysis.iter_events(self.context, JavaLibraryLoadEvent, 'process', value=process):
             if (jlle.start_ts - start_ts) > datetime.timedelta(0, 2):
                 # we consider everything within 2 seconds as startup
                 continue
@@ -910,7 +910,7 @@ class AdbCommandCorrelator(Correlator):
             self.to_remove.add(adb_cmd)
             self.to_remove.add(cmd_evt)
 
-            ase = ANANASAdbShellExec(cmd_evt.process)
+            ase = ANANASAdbShellExecEvent(cmd_evt.process)
             ase.add_child(adb_cmd)
             ase.add_child(cmd_evt)
 
@@ -948,7 +948,7 @@ class InstallCorelator(Correlator):
 
             self.to_remove.add(cmd_evt)
 
-            ai = APKInstall(self.context.analysis.get_entity(self.context, File, apk),
+            ai = APKInstallEvent(self.context.analysis.get_entity(self.context, File, apk),
                             cmd_evt.process)
 
             ai.add_child(cmd_evt)

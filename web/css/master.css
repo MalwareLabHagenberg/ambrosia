@@ -234,11 +234,11 @@ rect.mainview_selected {
     fill: #00ff7a;
 }
 
-.event_DeleteFileEvent {
+.event_DeletePathEvent {
     fill: #00ffc0;
 }
 
-.event_CreateDir {
+.event_CreateDirEvent {
     fill: #89ffa3;
 }
 
@@ -247,29 +247,29 @@ rect.mainview_selected {
     fill: #3c00ff;
 }
 
-.event_SocketAccept {
+.event_SocketAcceptEvent {
     fill: #04b9ff;
 }
 
 /* potentially malicious behaviour: red */
-.event_SMSAccess {
+.event_SMSAccessEvent {
     fill: #ffb800;
 }
 .event_CommandExecuteEvent {
     fill: #ff8500;
 }
-.event_SuperUserRequest {
+.event_SuperUserRequestEvent {
     fill: #ff4600;
 }
 
-.event_PhoneCall {
+.event_PhoneCallEvent {
     fill: #ff0000;
 }
 
-.event_CallLogAccess {
+.event_CallLogAccessEvent {
     fill: #ff0081;
 }
-.event_ContactsAccess {
+.event_ContactAccessEvent {
     fill: #ff00e8;
 }
 
@@ -281,11 +281,11 @@ rect.mainview_selected {
     fill: #ffd4d4;
 }
 
-.event_AndroidApiCall {
+.event_AndroidApiCallEvent {
     fill: #ffd4f3;
 }
 
-.event_SendSignal {
+.event_SendSignalEvent {
     fill: #dbd4ff;
 }
 
@@ -301,16 +301,16 @@ rect.mainview_selected {
     fill: #f3ffd4;
 }
 
-.event_LibraryLoad {
+.event_LibraryLoadEvent {
     fill: #ffffcc;
 }
 
-.event_JavaLibraryLoad {
+.event_JavaLibraryLoadEvent {
     fill: #dfffcc;
 }
 
 /* irrelevant events: grey */
-.event_ANANASAdbShellExec {
+.event_ANANASAdbShellExecEvent {
     fill: #9d9d9d;
 }
 
