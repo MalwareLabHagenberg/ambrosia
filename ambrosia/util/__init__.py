@@ -105,7 +105,7 @@ def _serialize_entry(obj, objs, _obj_idx_cache):
         raise SerializationError("invalid type: {}".format(type(obj)))
 
 
-def serialize_obj(obj):
+def serialize_obj(obj, fp):
     """Serialize an object
 
     Args:
@@ -146,5 +146,5 @@ def serialize_obj(obj):
 
     res = _serialize_entry(obj, objs, {})
 
-    return json.dumps([res, objs])
+    return json.dump([res, objs], fp)
 

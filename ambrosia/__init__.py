@@ -86,7 +86,7 @@ class Ambrosia(object):
             sc = c(self.context)
             sc.correlate()
 
-    def serialize(self):
+    def serialize(self, fp):
         """Serialize Events into a compact text format (see :func:`ambrosia_web.util.serialize_obj`).
 
         Should be called after :func:`Ambrosia.correlate`.
@@ -95,7 +95,7 @@ class Ambrosia(object):
             the serialized string
         """
         self.log.info("serializing")
-        return serialize_obj(self.context.analysis.to_serializeable())
+        return serialize_obj(self.context.analysis.to_serializeable(), fp)
 
 
 class Correlator(object):

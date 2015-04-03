@@ -44,7 +44,7 @@ def main():
     runner.correlate()
 
     if args.output_type == 'serialized':
-        args.output.write(runner.serialize())
+        runner.serialize(args.output)
     elif args.output_type == 'tree':
         for e in runner.context.analysis.iter_events(runner.context):
             _print_tree(args.output, e)
