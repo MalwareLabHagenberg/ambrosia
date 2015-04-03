@@ -321,7 +321,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
             self.fd_directory[proc] = fds
 
-    def _get_fd_event(self, fd, process, success, clazz=None, default_start_ts=None):
+    def _get_fd_event(self, fd, process, success, logname, clazz=None, default_start_ts=None):
         """Get an fd event from the a fd directory entry.
 
         The fd directory (`fd_directory`) is a dict in the form of
@@ -355,12 +355,13 @@ class SyscallCorrelator(ambrosia.Correlator):
 
         """
         assert isinstance(process, Task)
+        assert isinstance(logname, basestring)
 
         proc_fds = self.fd_directory[process]
 
         if fd not in proc_fds:
             if success:
-                self.log.warn("operation on unknown fd, process {}, fd".format(process, fd))
+                self.log.warn("{} operation on unknown fd, process {}, fd {}".format(logname, process, fd))
 
             fdevt = UnknownFdEvent(process, fd, success)
             if default_start_ts is not None:
@@ -376,7 +377,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
         return res
 
-    def _get_del_fd_event(self, fd, process, success, clazz=None):
+    def _get_del_fd_event(self, fd, process, success, logname, clazz=None):
         """Gets an fd event from the fd directory and deletes it.
 
         Args:
@@ -386,7 +387,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             process (ambrosia_web.model.entities.Task): the task the fd belongs to
         """
         proc_fds = self.fd_directory[process]
-        evt = self._get_fd_event(fd, process, success, clazz)
+        evt = self._get_fd_event(fd, process, success, logname, clazz)
 
         if evt is None:
             return
@@ -412,7 +413,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
         if oldfd not in proc_fds:
             if success:
-                self.log.warn("dup on an unknown fd, process {}, fd".format(process, oldfd))
+                self.log.warn("dup on an unknown fd, process {}, fd {}".format(process, oldfd))
 
             fdevt = UnknownFdEvent(process, oldfd, success)
             proc_fds[oldfd] = fdevt
@@ -580,7 +581,7 @@ class SyscallCorrelator(ambrosia.Correlator):
                 proc,
                 evt.returnval >= 0)
 
-            mainsocket = self._get_fd_event(int(evt.params[0]), proc, parent_evt.successful)
+            mainsocket = self._get_fd_event(int(evt.params[0]), proc, parent_evt.successful, "accept")
 
             if parent_evt.successful:
                 proc_fds[evt.returnval] = parent_evt
@@ -590,7 +591,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             mainsocket.add_child(parent_evt)
             self.to_add.add(mainsocket)
         elif evt.name == "connect":
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "connect")
 
             if evt.returnval >= 0:
                 assert isinstance(parent_evt, SocketEvent)
@@ -598,7 +599,7 @@ class SyscallCorrelator(ambrosia.Correlator):
                 parent_evt.client_socket = True
 
         elif evt.name == "bind":
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "bind")
 
             if evt.returnval >= 0:
                 assert isinstance(parent_evt, SocketEvent)
@@ -606,20 +607,21 @@ class SyscallCorrelator(ambrosia.Correlator):
                 parent_evt.server_socket = True
 
         elif evt.name == "listen":
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "listen")
         elif evt.name == "fchown32":
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "fchown32")
         elif evt.name == "read" or \
                 evt.name == "write" or \
+                evt.name == "send" or \
                 evt.name == "sendto" or \
                 evt.name == "sendmsg" or \
                 evt.name == "recvfrom" or \
                 evt.name == "recvmsg":
 
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, evt.name)
 
         elif evt.name == "close":
-            parent_evt = self._get_del_fd_event(int(evt.params[0]), proc, evt.returnval >= 0)
+            parent_evt = self._get_del_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "close")
         elif evt.name == "dup":
             parent_evt = self._get_dup(evt, int(evt.params[0]), evt.returnval, proc)
         elif evt.name == "dup2":
@@ -632,7 +634,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             parent_evt = MemoryMapEvent(flags, fd, address, proc, evt.returnval, evt.end_ts, evt.end_ts)
 
             if 'MAP_ANONYMOUS' not in parent_evt.flags:
-                fdevt = self._get_fd_event(fd, proc, parent_evt.successful, FileDescriptorEvent, evt.start_ts)
+                fdevt = self._get_fd_event(fd, proc, parent_evt.successful, "mmap2", FileDescriptorEvent, evt.start_ts)
                 fdevt.add_child(parent_evt)
             else:
                 self.to_add.add(parent_evt)
@@ -684,6 +686,8 @@ class SyscallCorrelator(ambrosia.Correlator):
                                         evt.start_ts,
                                         evt.end_ts))
             self.to_add.add(parent_evt)
+
+        # TODO exit
 
         if parent_evt is not None:
             assert isinstance(parent_evt, model.Event)
