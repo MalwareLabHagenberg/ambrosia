@@ -16,7 +16,7 @@ __author__ = 'Wolfgang Ettlinger'
 class PluginInfo(PluginInfoTop):
     @staticmethod
     def correlators():
-        return [(ApiCallCorrelatorEvent, 10)]
+        return [(ApiCallCorrelator, 10)]
 
     @staticmethod
     def parsers():
@@ -138,7 +138,7 @@ class PhoneCallEvent(model.Event):
         return '[Phone call]'
 
 
-class ApiCallCorrelatorEvent(ambrosia.Correlator):
+class ApiCallCorrelator(ambrosia.Correlator):
     """Goes through all API calls and wraps known API calls into higher-level events.
 
     Args:
@@ -146,7 +146,7 @@ class ApiCallCorrelatorEvent(ambrosia.Correlator):
     """
     def __init__(self, context):
         assert isinstance(context, AmbrosiaContext)
-        super(ApiCallCorrelatorEvent, self).__init__(context)
+        super(ApiCallCorrelator, self).__init__(context)
 
     def correlate(self):
         self.log.info('Generating events from API calls')
