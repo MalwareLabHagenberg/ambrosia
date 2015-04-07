@@ -24,7 +24,8 @@ def main():
     """
     parser = argparse.ArgumentParser(description='process ANANAS report for Ambrosia')
     parser.add_argument('report', type=file, help='the XML report input')
-    parser.add_argument('--config', type=file, help='the config file')
+    # not used in this version
+    # parser.add_argument('--config', type=file, help='the config file')
     parser.add_argument('--loglevel', choices=['FATAL', 'ERROR', 'WARN', 'INFO', 'DEBUG'], default='INFO',
                         help='the log level for stderr')
     parser.add_argument('--output', type=argparse.FileType('w'), help='the output file, default is stdout',
@@ -39,7 +40,7 @@ def main():
     xml_tree = ElementTree.parse(args.report)
     xml_root = xml_tree.getroot()
 
-    runner = ambrosia.Ambrosia(xml_root, args.config)
+    runner = ambrosia.Ambrosia(xml_root, None)
     runner.adjust_times()
     runner.correlate()
 
