@@ -1,6 +1,3 @@
-# do not force parent to show
-parent.visible == false;
-
 ################################################################################
 # Filter certain events with very litte information                            #
 ################################################################################
@@ -33,6 +30,9 @@ stype == "AnonymousFileEvent" {
 
 # hide Android shared memory operations
 (r.file.p.abspath=="/dev/ashmem" && p.flags==131074);
+
+# hide /dev/null
+(r.file.p.abspath=="/dev/null");
 
 # hide access to /dev/__properties__
 (r.file.p.abspath=="/dev/__properties__" && p.flags == 688128);
@@ -351,16 +351,20 @@ r.file.p.abspath~"^/data/(data|user)/.+\.db(-journal|-shm|-wal|-mj[0-9A-F]{9})?$
     }
 }
 
+"/system/bin/dexopt" : r.process.r.tg_leader.p.path {
+    stype == "CommandExecuteEvent";
+}
 ################################################################################
-# SU stuff                                                                     #
+# SU                                                                           #
 ################################################################################
-"/system/xbin/su" : r.process.p.path {
-    stype == "FileEvent" {
-        r.file.p.abspath == "/system/build.prop";
-        r.file.p.abspath == "/sys/fs/selinux/enforce";
-    }
+r.process.p.type == "DAEMONSU" {
+    stype == "SocketEvent";
+    stype == "StartTaskEvent";
+}
 
-    stype == "SocketEvent" {
-        p.client_socket == true && r.connected_to.p.address ~ "^.eu\.chainfire\.supersu";
+
+"/system/xbin/su" : r.process.p.path {
+    stype == "SocketEvent"{
+        p.socket_type == "SOCK_STREAM" && p.address_family == "AF_UNIX" && r.connected_to.p.address ~ ".ananassusocket";
     }
 }
