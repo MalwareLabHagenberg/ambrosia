@@ -17,7 +17,7 @@ from ambrosia_plugins.events import ANANASEvent
 from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
     SocketEvent, SocketAcceptEvent, MemoryMapEvent, StartTaskEvent, SuperUserRequestEvent, CreateDirEvent, SendSignalEvent, \
     DeletePathEvent, ExecEvent, ANANASAdbShellExecEvent, AnonymousFileEvent, UnknownFdEvent, LibraryLoadEvent, JavaLibraryLoadEvent, \
-    ZygoteForkEvent, APKInstallEvent
+    ZygoteForkEvent, APKInstallEvent, MountEvent
 
 __author__ = 'Wolfgang Ettlinger'
 
@@ -115,6 +115,17 @@ class LkmPluginParser(ambrosia.ResultParser):
                 proc.comm = json.loads(props['comm'])
                 # TODO fix double-json in ANANAS
                 proc.path = json.loads(json.loads(props['path']))
+
+                proc.execfiles = set()
+                for ep in proc.path:
+                    proc.execfiles.add(
+                        analysis.get_entity(
+                            context,
+                            File,
+                            ep
+                        )
+                    )
+
                 proc.type = props['type']
                 proc.fds = props['fds']
 
@@ -181,6 +192,10 @@ class LkmPluginParser(ambrosia.ResultParser):
                 if 'child_id' in props:
                     spawned_child = self.processes[int(props['child_id'])]
 
+                target_task = None
+                if 'target_task_id' in props:
+                    target_task = self.processes[int(props['target_task_id'])]
+
                 mt = float(props['monotonic_time'])
 
                 # calculate boot_time on first syscall
@@ -203,7 +218,8 @@ class LkmPluginParser(ambrosia.ResultParser):
                                              mt,
                                              self.processes[props['processid']],
                                              idx,
-                                             spawned_child)
+                                             spawned_child,
+                                             target_task)
 
                 idx += 1
 
@@ -212,11 +228,11 @@ class LkmPluginParser(ambrosia.ResultParser):
             self.log.info('Parsing appinfo-tag')
 
             for ap in el:
-                appinfo = analysis.get_entity(context, App, str(ap.attrib['package']))
+                appinfo = analysis.get_entity(context, App, unicode(ap.attrib['package']))
                 appinfo.uid = int(ap.attrib['uid'])
-                appinfo.apk_path = str(ap.attrib['apk-path'])
-                appinfo.native_lib_path = str(ap.attrib['native-lib-path'])
-                appinfo.version = str(ap.attrib['version'])
+                appinfo.apk_path = unicode(ap.attrib['apk-path'])
+                appinfo.native_lib_path = unicode(ap.attrib['native-lib-path'])
+                appinfo.version = unicode(ap.attrib['version'])
 
     def finish(self, context):
         """Calculate additional information for each process.
@@ -321,6 +337,10 @@ class SyscallCorrelator(ambrosia.Correlator):
 
             self.fd_directory[proc] = fds
 
+    def _is_success(self, val):
+        return val >= 0 or val == -115
+        # -115: EINPROGRESS
+
     def _get_fd_event(self, fd, process, success, logname, clazz=None, default_start_ts=None):
         """Get an fd event from the a fd directory entry.
 
@@ -409,7 +429,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
         proc_fds = self.fd_directory[process]
 
-        success = evt.returnval >= 0
+        success = self._is_success(evt.returnval)
 
         if oldfd not in proc_fds:
             if success:
@@ -495,6 +515,17 @@ class SyscallCorrelator(ambrosia.Correlator):
 
         return entity
 
+    def _create_fd_dir_entry(self, proc):
+        if proc.tg_leader in self.fd_directory:
+            # threadgroup is known -> fds are inherited
+            self.fd_directory[proc] = self.fd_directory[proc.tg_leader]
+        elif proc.is_process and proc.parent in self.fd_directory:
+            # its a new process and parent is known -> copy fd table
+            self.fd_directory[proc] = self.fd_directory[proc.parent].copy()
+        else:
+            self.log.warn("task without known threadgroup or parent: {}".format(proc))
+            self.fd_directory[proc] = {}
+
     def _check_syscall(self, evt):
         """Wraps a single syscall event into a higher-level event
 
@@ -509,17 +540,10 @@ class SyscallCorrelator(ambrosia.Correlator):
         assert isinstance(proc, Task)
 
         if proc not in self.fd_directory:
-            assert proc.start_captured
-
-            if proc.tg_leader in self.fd_directory:
-                # threadgroup is known -> fds are inherited
-                self.fd_directory[proc] = self.fd_directory[proc.tg_leader]
-            elif proc.is_process and proc.parent in self.fd_directory:
-                # its a new process and parent is known -> copy fd table
-                self.fd_directory[proc] = self.fd_directory[proc.parent].copy()
-            else:
-                self.log.warn("task without known threadgroup or parent: {}".format(proc))
-                self.fd_directory[proc] = {}
+            # we have a syscall but the fork() has not yet returned in the parent
+            # since the parent is currently in the middle of a fork() this should be a good time to copy the fd
+            # directory
+            self._create_fd_dir_entry(proc)
 
         proc_fds = self.fd_directory[proc]
 
@@ -539,14 +563,14 @@ class SyscallCorrelator(ambrosia.Correlator):
                 flags,
                 mode,
                 proc,
-                evt.returnval >= 0)
+                self._is_success(evt.returnval))
 
             if parent_evt.successful:
                 proc_fds[evt.returnval] = parent_evt
 
             self.to_add.add(parent_evt)
         elif evt.name == "epoll_create" or evt.name == "epoll_create1":
-            parent_evt = AnonymousFileEvent("epoll", proc, self.context, evt.returnval >= 0)
+            parent_evt = AnonymousFileEvent("epoll", proc, self.context, self._is_success(evt.returnval))
 
             if parent_evt.successful:
                 proc_fds[evt.returnval] = parent_evt
@@ -555,7 +579,7 @@ class SyscallCorrelator(ambrosia.Correlator):
         elif evt.name == "socket":
             parent_evt = SocketEvent(
                 proc,
-                evt.returnval >= 0)
+                self._is_success(evt.returnval))
 
             parent_evt.address_family = int(evt.params[0])
             parent_evt.socket_type = int(evt.params[1])
@@ -568,7 +592,8 @@ class SyscallCorrelator(ambrosia.Correlator):
             fd1 = int(evt.params[0])
             fd2 = int(evt.params[1])
 
-            parent_evt = AnonymousFileEvent('pipe', proc, self.context, evt.returnval >= 0 and fd1 >= 0 and fd2 >= 0)
+            parent_evt = AnonymousFileEvent('pipe', proc, self.context,
+                                            self._is_success(evt.returnval) and fd1 >= 0 and fd2 >= 0)
 
             if parent_evt.successful:
                 proc_fds[fd1] = parent_evt
@@ -579,7 +604,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
             parent_evt = SocketAcceptEvent(
                 proc,
-                evt.returnval >= 0)
+                self._is_success(evt.returnval))
 
             mainsocket = self._get_fd_event(int(evt.params[0]), proc, parent_evt.successful, "accept")
 
@@ -591,25 +616,24 @@ class SyscallCorrelator(ambrosia.Correlator):
             mainsocket.add_child(parent_evt)
             self.to_add.add(mainsocket)
         elif evt.name == "connect":
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "connect")
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, self._is_success(evt.returnval), "connect")
 
-            if evt.returnval >= 0:
-                assert isinstance(parent_evt, SocketEvent)
+            if self._is_success(evt.returnval) and isinstance(parent_evt, SocketEvent):
                 parent_evt.connected_to = self._parse_addr_str(evt.params[1], parent_evt)
                 parent_evt.client_socket = True
 
         elif evt.name == "bind":
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "bind")
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, self._is_success(evt.returnval), "bind")
 
-            if evt.returnval >= 0:
+            if self._is_success(evt.returnval):
                 assert isinstance(parent_evt, SocketEvent)
                 parent_evt.bound_to = self._parse_addr_str(evt.params[1], parent_evt)
                 parent_evt.server_socket = True
 
         elif evt.name == "listen":
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "listen")
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, self._is_success(evt.returnval), "listen")
         elif evt.name == "fchown32":
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "fchown32")
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, self._is_success(evt.returnval), "fchown32")
         elif evt.name == "read" or \
                 evt.name == "write" or \
                 evt.name == "send" or \
@@ -618,10 +642,10 @@ class SyscallCorrelator(ambrosia.Correlator):
                 evt.name == "recvfrom" or \
                 evt.name == "recvmsg":
 
-            parent_evt = self._get_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, evt.name)
+            parent_evt = self._get_fd_event(int(evt.params[0]), proc, self._is_success(evt.returnval), evt.name)
 
         elif evt.name == "close":
-            parent_evt = self._get_del_fd_event(int(evt.params[0]), proc, evt.returnval >= 0, "close")
+            parent_evt = self._get_del_fd_event(int(evt.params[0]), proc, self._is_success(evt.returnval), "close")
         elif evt.name == "dup":
             parent_evt = self._get_dup(evt, int(evt.params[0]), evt.returnval, proc)
         elif evt.name == "dup2":
@@ -651,13 +675,17 @@ class SyscallCorrelator(ambrosia.Correlator):
 
             parent_evt = StartTaskEvent(evt.end_ts, evt.end_ts, proc, pid, evt.spawned_child)
             self.to_add.add(parent_evt)
+
+            if evt.spawned_child not in self.fd_directory:
+                # the process hasn't done any syscalls (is not a "ghost process")
+                self._create_fd_dir_entry(evt.spawned_child)
         elif evt.name == "execve":
             parent_evt = ExecEvent(evt.start_ts, evt.end_ts, evt.params[0], evt.argv, evt.env, proc)
             self.to_add.add(parent_evt)
         elif evt.name == "unlink" or evt.name == "rmdir":
             parent_evt = DeletePathEvent(evt.start_ts,
                                          evt.end_ts,
-                                         evt.returnval >= 0,
+                                         self._is_success(evt.returnval),
                                          self.context.analysis.get_entity(
                                              self.context,
                                              File,
@@ -668,7 +696,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             parent_evt = CreateDirEvent(evt.start_ts,
                                    evt.end_ts,
                                    proc,
-                                   evt.returnval >= 0,
+                                   self._is_success(evt.returnval),
                                    self.context.analysis.get_entity(
                                        self.context,
                                        File,
@@ -679,12 +707,25 @@ class SyscallCorrelator(ambrosia.Correlator):
                                     evt.end_ts,
                                     int(evt.params[1]),
                                     proc,
-                                    self.context.analysis.get_entity(
-                                        self.context,
-                                        Task,
-                                        int(evt.params[0]),
-                                        evt.start_ts,
-                                        evt.end_ts))
+                                    evt.target_task)
+
+            self.to_add.add(parent_evt)
+        elif evt.name == "mount":
+            parent_evt = MountEvent(
+                self.context.analysis.get_entity(
+                    self.context,
+                    File,
+                    evt.params[0]),
+                self.context.analysis.get_entity(
+                    self.context,
+                    File,
+                    evt.params[1]),
+                evt.params[2],
+                evt.params[3],
+                evt.params[3],
+                proc,
+                self._is_success(evt.returnval))
+
             self.to_add.add(parent_evt)
 
         # TODO exit
@@ -774,7 +815,15 @@ class CommandExecuteCorrelator(Correlator):
                             lastexe = exe
 
                 # we use the argv of the first execve. e.g. sh -c 'xxx' instead of xxx
-                cmd_evt = CommandExecuteEvent(lastexe.path, exec_.argv, fork.spawned_child)
+                cmd_evt = CommandExecuteEvent(
+                    lastexe.path,
+                    exec_.argv,
+                    fork.spawned_child,
+                    self.context.analysis.get_entity(
+                        self.context,
+                        File,
+                        lastexe.path))
+
                 cmd_evt.add_child(fork)
                 self.to_remove.add(fork)
 

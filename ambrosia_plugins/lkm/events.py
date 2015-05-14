@@ -11,7 +11,7 @@ class SyscallEvent(model.Event):
     """
     indices = {'name', 'index'}
 
-    def __init__(self, context, props, time, monotonic_ts, process, idx, spawned_child=None):
+    def __init__(self, context, props, time, monotonic_ts, process, idx, spawned_child=None, target_task=None):
         assert isinstance(context, AmbrosiaContext)
         assert isinstance(process, Task)
         super(SyscallEvent, self).__init__(end_ts=time)
@@ -23,6 +23,7 @@ class SyscallEvent(model.Event):
         self.returnval = props['returnval']
         self.process = process
         self.spawned_child = spawned_child
+        self.target_task = target_task
         self.index = idx
 
         add_info = props['add_info']
@@ -43,6 +44,7 @@ class SyscallEvent(model.Event):
             'name': self.name,
             'process': self.process,
             'spawned_child': self.spawned_child,
+            'target_task': self.target_task,
             'monotonic_ts': self.monotonic_ts,
             'syscall_index': self.index
         }
@@ -72,18 +74,21 @@ class CommandExecuteEvent(model.Event):
     """
     indices = {'process'}
 
-    def __init__(self, path, command, process):
+    def __init__(self, path, command, process, execfile):
         assert isinstance(process, Task)
+        assert isinstance(execfile, File)
         super(CommandExecuteEvent, self).__init__()
         self.process = process
         self.command = command
         self.path = path
+        self.execfile = execfile
 
     def get_serializeable_properties(self):
         return {
             'process': self.process,
             'command': self.command,
-            'path': self.path
+            'path': self.path,
+            'execfile': self.execfile
         }
 
     def __str__(self):
@@ -621,3 +626,34 @@ class APKInstallEvent(model.Event):
 
     def __str__(self):
         return '[APK install: {}]'.format(self.file.abspath)
+
+
+class MountEvent(model.Event):
+    indices = set()
+
+    def __init__(self, dev, mountpoint, type, flags, data, process, successful):
+        assert isinstance(dev, File)
+        assert isinstance(mountpoint, File)
+        super(MountEvent, self).__init__()
+        self.dev = dev
+        self.mountpoint = mountpoint
+        self.type = type
+        self.flags = flags
+        self.data = data
+        self.process = process
+        self.successful = successful
+
+    def get_serializeable_properties(self):
+        return {
+            'dev': self.dev,
+            'mountpoint': self.mountpoint,
+            'type': self.type,
+            'flags': self.flags,
+            'data': self.data,
+            'process': self.process,
+            'successful': self.successful
+        }
+
+    def __str__(self):
+        return '[Mount: {} to {}]'.format(self.dev.abspath, self.mountpoint.abspath)
+
