@@ -132,6 +132,13 @@ ambrosia_web.event.events = function(){
 
 
     /**
+     * Represents :class:`ambrosia_plugins.apimonitor.SendSMSEvent`
+     * @constructor
+     */
+    var SendSMSEvent = Class('ambrosia_plugins.apimonitor.SendSMSEvent',
+        A.event.BlockEvent, {});
+
+    /**
      * Represents :class:`ambrosia_plugins.apimonitor.CallLogAccessEvent`
      * @constructor
      */
@@ -217,10 +224,19 @@ ambrosia_web.event.events = function(){
     var APKInstallEvent = Class('ambrosia_web.event.events.APKInstallEvent',
         A.event.BlockEvent, { });
 
+    /**
+     * Represents :class:`ambrosia_plugins.lkm.events.MountEvent`
+     * @constructor
+     */
+    var MountEvent = Class('ambrosia_plugins.lkm.events.MountEvent',
+        A.event.BlockEvent, { });
+
+
     var evt_registry = {
         'ambrosia_plugins.events.ANANASEvent':                  ANANASEvent,
         'ambrosia_plugins.lkm.events.SyscallEvent':             SyscallEvent,
         'ambrosia_plugins.apimonitor.AndroidApicallEvent':      AndroidApicallEvent,
+        'ambrosia_plugins.apimonitor.SendSMSEvent':             SendSMSEvent,
         'ambrosia_plugins.lkm.events.FileEvent':                FileEvent,
         'ambrosia_plugins.lkm.events.StartTaskEvent':           StartTaskEvent,
         'ambrosia_plugins.lkm.events.UnknownFdEvent':           UnknownFdEvent,
@@ -242,7 +258,8 @@ ambrosia_web.event.events = function(){
         'ambrosia_plugins.lkm.events.LibraryLoadEvent':         LibraryLoadEvent,
         'ambrosia_plugins.lkm.events.JavaLibraryLoadEvent':     JavaLibraryLoadEvent,
         'ambrosia_plugins.lkm.events.ZygoteForkEvent':          ZygoteForkEvent,
-        'ambrosia_plugins.lkm.events.APKInstallEvent':          APKInstallEvent
+        'ambrosia_plugins.lkm.events.APKInstallEvent':          APKInstallEvent,
+        'ambrosia_plugins.lkm.events.MountEvent':               MountEvent
     };
 
     var ret = {
