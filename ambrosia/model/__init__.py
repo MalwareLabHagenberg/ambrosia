@@ -450,7 +450,7 @@ class Event(Persistent):
                 'children': [c.to_serializeable() for c in self.children],
                 'startTS': js_date(self.start_ts),
                 'endTS': js_date(self.end_ts),
-                'description': str(self),
+                'description': unicode(self),
                 'properties': props,
                 'references': refs}
 
@@ -539,7 +539,7 @@ class Entity(Persistent):
             'type': classname(type(self)),
             'properties': properties,
             'references': refs,
-            'description': str(self)
+            'description': unicode(self)
         }
 
     def get_serializeable_properties(self):

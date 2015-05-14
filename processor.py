@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import argparse
+import codecs
 import sys
 import xml.etree.ElementTree as ElementTree
-import logging
 import code
 from ambrosia.util.log import init_logging
 
@@ -13,7 +13,7 @@ import ambrosia
 
 
 def _print_tree(output, t, i=''):
-    output.write(i + str(t) + '\n')
+    output.write(i + unicode(t) + '\n')
 
     for c in t.children:
         _print_tree(output, c, i+' ')
@@ -37,7 +37,7 @@ def main():
 
     init_logging(args.loglevel)
 
-    xml_tree = ElementTree.parse(args.report)
+    xml_tree = ElementTree.parse(codecs.EncodedFile(args.report, 'utf-8', 'utf-8', errors='replace'))
     xml_root = xml_tree.getroot()
 
     runner = ambrosia.Ambrosia(xml_root, None)

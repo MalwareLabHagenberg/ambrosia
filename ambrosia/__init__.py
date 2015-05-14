@@ -45,9 +45,9 @@ class Ambrosia(object):
             elif el.tag == 'package':
                 self.context.analysis.package = el.text
             elif el.tag == 'starttime':
-                self.context.analysis.start_time = dateutil.parser.parse(str(el.text))
+                self.context.analysis.start_time = dateutil.parser.parse(unicode(el.text))
             elif el.tag == 'endtime':
-                self.context.analysis.end_time = dateutil.parser.parse(str(el.text))
+                self.context.analysis.end_time = dateutil.parser.parse(unicode(el.text))
             elif el.tag == 'plugins':
                 for p in el:
                     assert p.tag == 'plugin'
