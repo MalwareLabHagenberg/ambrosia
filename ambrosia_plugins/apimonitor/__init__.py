@@ -46,10 +46,15 @@ class AndroidApicallEvent(model.Event):
         self.start_ts = context.clock_syncer.emu_time(self.start_ts)
 
     def get_serializeable_properties(self):
-        return {}
+        return {
+            'api': self.api,
+            'method': self.method,
+            'params': self.params,
+            'returnval': self.returnval
+        }
 
     def __str__(self):
-        return '[Android API-Call: {}, {}, {}, {}]'.format(self.api, self.method, self.params, self.returnval)
+        return u'[Android API-Call: {}, {}, {}, {}]'.format(self.api, self.method, self.params, self.returnval)
 
 
 class ApimonitorPluginParser(ambrosia.ResultParser):
@@ -65,7 +70,7 @@ class ApimonitorPluginParser(ambrosia.ResultParser):
         if name == 'apimonitor':
             for ac in el:
                 assert ac.tag == 'apicall'
-                ts = dateutil.parser.parse(str(ac.attrib['timestamp']))
+                ts = dateutil.parser.parse(unicode(ac.attrib['timestamp']))
                 apicall = AndroidApicallEvent(ac.find('api').text,
                                          ac.find('method').text,
                                          ac.find('parameters').text,
@@ -138,6 +143,20 @@ class PhoneCallEvent(model.Event):
         return '[Phone call]'
 
 
+class SendSMSEvent(model.Event):
+    """App calls someone
+    """
+    indices = {}
+
+    def __init__(self):
+        super(SendSMSEvent, self).__init__()
+
+    def get_serializeable_properties(self):
+        return {} # TODO
+
+    def __str__(self):
+        return '[Send SMS]'
+
 class ApiCallCorrelator(ambrosia.Correlator):
     """Goes through all API calls and wraps known API calls into higher-level events.
 
@@ -155,14 +174,12 @@ class ApiCallCorrelator(ambrosia.Correlator):
 
         self.update_tree()
 
-    def _wrap_evt(self, apicall, cls):
+    def _wrap_evt(self, apicall, o):
         """Helper function that creates an Event and adds a child to it
         """
         assert isinstance(apicall, AndroidApicallEvent)
-        assert issubclass(cls, Event)
-
-        o = cls()
         assert isinstance(o, Event)
+
         o.add_child(apicall)
         self.to_add.add(o)
         self.to_remove.add(apicall)
@@ -179,12 +196,15 @@ class ApiCallCorrelator(ambrosia.Correlator):
             if m is not None:
                 uri = m.group(1)
 
-                if uri == 'content://com.android.contacts/contacts':
-                    self._wrap_evt(evt, ContactAccessEvent)
+                if uri.startswith('content://com.android.contacts/'):
+                    self._wrap_evt(evt, ContactAccessEvent())
                 elif uri == 'content://sms/inbox':
-                    self._wrap_evt(evt, SMSAccessEvent)
+                    self._wrap_evt(evt, SMSAccessEvent())
                 elif uri == 'content://call_log/calls':
-                    self._wrap_evt(evt, CallLogAccessEvent)
+                    self._wrap_evt(evt, CallLogAccessEvent())
         elif evt.method == 'startActivity' and 'act=android.intent.action.CALL' in evt.params:
             # startActivity with CALL-intent -> phone call
-            self._wrap_evt(evt, PhoneCallEvent)
+            self._wrap_evt(evt, PhoneCallEvent())
+        elif evt.api == 'Landroid/telephony/SmsManager' and \
+                        evt.method in ('sendMultipartTextMessage', 'sendTextMessage', 'sendDataMessage'):
+            self._wrap_evt(evt, SendSMSEvent())
