@@ -10,6 +10,7 @@ body {
     margin: 0;
     padding: 0;
     height: 100%;
+    background-color: #4e4f55;
 }
 
 a {
@@ -56,6 +57,7 @@ table {
     opacity: 0.7;
     font-size: 13pt;
     color: #fff;
+    margin-top: 10px;
 }
 
 .view .viewcontent{
@@ -65,12 +67,11 @@ table {
     max-height: 90%;
     min-width: 300px;
     min-height: 50px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 3px;
     text-align: center;
     opacity: 0.7;
     padding: 5px;
+    max-width: 95%;
+    overflow: auto;
 }
 
 .view .viewcontent:hover{
@@ -221,37 +222,50 @@ rect.mainview_selected {
     font-size: 11px;
 }
 
+.lineevent {
+    stroke: #fff;
+    stroke-width: 300px;
+}
+
 /* file events: green */
 .event_FileEvent {
-    fill: #04ff00;
+    fill: #54cc52;
 }
 
 .event_AnonymousFileEvent {
-    fill: #91ff00;
+    fill: #99cc52;
 }
 
 .event_UnknownFdEvent {
-    fill: #00ff7a;
+    fill: #52cc8b;
 }
 
 .event_DeletePathEvent {
-    fill: #00ffc0;
+    fill: #52ccad;
 }
 
 .event_CreateDirEvent {
-    fill: #89ffa3;
+    fill: #6ecc82;
 }
 
 /* network events: blue */
 .event_SocketEvent {
-    fill: #3c00ff;
+    fill: #8e73e6;
 }
 
 .event_SocketAcceptEvent {
-    fill: #04b9ff;
+    fill: #60a1b3;
 }
 
-/* potentially malicious behaviour: red */
+/* potentially malicious behaviour: bright */
+.event_SendSMSEvent {
+    fill: #d6ff02;
+}
+
+.event_APKInstallEvent {
+    fill: #fff300;
+}
+
 .event_SMSAccessEvent {
     fill: #ffb800;
 }
@@ -260,6 +274,10 @@ rect.mainview_selected {
 }
 .event_SuperUserRequestEvent {
     fill: #ff4600;
+}
+
+.event_MountEvent {
+    fill: #ff3000;
 }
 
 .event_PhoneCallEvent {
@@ -273,55 +291,49 @@ rect.mainview_selected {
     fill: #ff00e8;
 }
 
-
-
-
-/* low-level events: black */
+/* low-level events: dark */
 .event_ExecEvent {
-    fill: #ffd4d4;
+    fill: #743234;
 }
 
-.event_AndroidApiCallEvent {
-    fill: #ffd4f3;
+.event_AndroidApicallEvent {
+    fill: #663a60;
 }
 
 .event_SendSignalEvent {
-    fill: #dbd4ff;
+    fill: #373265;
 }
 
 .event_MemoryMapEvent {
-    fill: #d4fff0;
+    fill: #1e512b;
 }
 
 .event_StartTaskEvent {
-    fill: #d4ffdb;
+    fill: #1d6d19;
 }
 
 .event_SyscallEvent {
-    fill: #f3ffd4;
+    fill: #687221;
 }
 
 .event_LibraryLoadEvent {
-    fill: #ffffcc;
+    fill: #634d17;
 }
 
 .event_JavaLibraryLoadEvent {
-    fill: #dfffcc;
+    fill: #426f1d;
 }
 
 /* irrelevant events: grey */
 .event_ANANASAdbShellExecEvent {
-    fill: #9d9d9d;
-}
-
-.lineevent {
-    stroke: #fff;
-    stroke-width: 300px;
+    fill: #818181;
 }
 
 .event_ANANASEvent {
-    stroke: #d5b3a9;
+    stroke: #666261;
 }
+
+
 
 
 
