@@ -2,6 +2,7 @@ from datetime import datetime
 import os.path
 import traceback
 from BTrees import OOBTree
+from ambrosia import js_date
 import ambrosia.context
 from ambrosia.model import Entity
 
@@ -29,6 +30,7 @@ class Task(Entity):
         self.tg_leader = None
         self.comm = []
         self.path = []
+        self.execfiles = []
         self.type = None
         self.uid = None
         self.apps = set()
@@ -50,7 +52,9 @@ class Task(Entity):
                 'path': self.path,
                 'type': self.type,
                 'uid': self.uid,
-                'start_captured': self.start_captured
+                'start_captured': self.start_captured,
+                'start_ts': js_date(self.start_ts),
+                'end_ts': js_date(self.end_ts)
             }, {
                 'apps': self.apps,
                 'parent': self.parent,
@@ -85,10 +89,8 @@ class Task(Entity):
 
         for el in els:
             # the two processes overlap and have the same pid -> match
+
             if start_ts < el.end_ts and end_ts > el.start_ts:
-                # update actual start/end
-                el.start_ts = min(el.start_ts, start_ts)
-                el.end_ts = max(el.end_ts, end_ts)
                 return el
 
     def __str__(self):
