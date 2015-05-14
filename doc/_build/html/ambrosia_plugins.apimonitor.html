@@ -61,8 +61,8 @@
 <div class="section" id="module-ambrosia_plugins.apimonitor">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ambrosia_plugins.apimonitor" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="ambrosia_plugins.apimonitor.AndroidApicall">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">AndroidApicall</tt><big>(</big><em>api</em>, <em>method</em>, <em>params</em>, <em>returnval</em>, <em>start_ts</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#AndroidApicall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.AndroidApicall" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.AndroidApicallEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">AndroidApicallEvent</tt><big>(</big><em>api</em>, <em>method</em>, <em>params</em>, <em>returnval</em>, <em>start_ts</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#AndroidApicallEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.AndroidApicallEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
 <p>Represents an API call of the App</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -80,18 +80,18 @@
 </tbody>
 </table>
 <dl class="method">
-<dt id="ambrosia_plugins.apimonitor.AndroidApicall.adjust_times">
-<tt class="descname">adjust_times</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#AndroidApicall.adjust_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.AndroidApicall.adjust_times" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.AndroidApicallEvent.adjust_times">
+<tt class="descname">adjust_times</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#AndroidApicallEvent.adjust_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.AndroidApicallEvent.adjust_times" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ambrosia_plugins.apimonitor.AndroidApicall.get_serializeable_properties">
-<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#AndroidApicall.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.AndroidApicall.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.AndroidApicallEvent.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#AndroidApicallEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.AndroidApicallEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ambrosia_plugins.apimonitor.AndroidApicall.indices">
-<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.AndroidApicall.indices" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.AndroidApicallEvent.indices">
+<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.AndroidApicallEvent.indices" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -134,52 +134,52 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="ambrosia_plugins.apimonitor.CallLogAccess">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">CallLogAccess</tt><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#CallLogAccess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.CallLogAccess" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.CallLogAccessEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">CallLogAccessEvent</tt><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#CallLogAccessEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.CallLogAccessEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
 <p>App accesses call logs</p>
 <dl class="method">
-<dt id="ambrosia_plugins.apimonitor.CallLogAccess.get_serializeable_properties">
-<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#CallLogAccess.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.CallLogAccess.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.CallLogAccessEvent.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#CallLogAccessEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.CallLogAccessEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ambrosia_plugins.apimonitor.CallLogAccess.indices">
-<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.CallLogAccess.indices" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.CallLogAccessEvent.indices">
+<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.CallLogAccessEvent.indices" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="ambrosia_plugins.apimonitor.ContactsAccess">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">ContactsAccess</tt><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#ContactsAccess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.ContactsAccess" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.ContactAccessEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">ContactAccessEvent</tt><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#ContactAccessEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.ContactAccessEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
 <p>App accesses contacts</p>
 <dl class="method">
-<dt id="ambrosia_plugins.apimonitor.ContactsAccess.get_serializeable_properties">
-<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#ContactsAccess.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.ContactsAccess.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.ContactAccessEvent.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#ContactAccessEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.ContactAccessEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ambrosia_plugins.apimonitor.ContactsAccess.indices">
-<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.ContactsAccess.indices" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.ContactAccessEvent.indices">
+<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.ContactAccessEvent.indices" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="ambrosia_plugins.apimonitor.PhoneCall">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">PhoneCall</tt><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#PhoneCall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.PhoneCall" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.PhoneCallEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">PhoneCallEvent</tt><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#PhoneCallEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.PhoneCallEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
 <p>App calls someone</p>
 <dl class="method">
-<dt id="ambrosia_plugins.apimonitor.PhoneCall.get_serializeable_properties">
-<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#PhoneCall.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.PhoneCall.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.PhoneCallEvent.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#PhoneCallEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.PhoneCallEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ambrosia_plugins.apimonitor.PhoneCall.indices">
-<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.PhoneCall.indices" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.PhoneCallEvent.indices">
+<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.PhoneCallEvent.indices" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -201,18 +201,18 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="ambrosia_plugins.apimonitor.SMSAccess">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">SMSAccess</tt><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#SMSAccess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.SMSAccess" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.SMSAccessEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.apimonitor.</tt><tt class="descname">SMSAccessEvent</tt><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#SMSAccessEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.SMSAccessEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
 <p>App accesses SMS</p>
 <dl class="method">
-<dt id="ambrosia_plugins.apimonitor.SMSAccess.get_serializeable_properties">
-<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#SMSAccess.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.SMSAccess.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.SMSAccessEvent.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/apimonitor.html#SMSAccessEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.apimonitor.SMSAccessEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ambrosia_plugins.apimonitor.SMSAccess.indices">
-<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.SMSAccess.indices" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.apimonitor.SMSAccessEvent.indices">
+<tt class="descname">indices</tt><em class="property"> = {}</em><a class="headerlink" href="#ambrosia_plugins.apimonitor.SMSAccessEvent.indices" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>

@@ -46,37 +46,6 @@ Methods
    class-methods
 
 
-addFilter
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-.. js:function:: ambrosia_web.event.addFilter(cls, filter)
-
-
-    
-    :param class cls: 
-        the event class 
-    
-    :param ambrosia_web.filter.Filter filter: 
-        the filter to add 
-    
-
-
-
-
-Add a filter to an event class. If null is passed, the filter is added to the general filters.
-
-
-
-
-
-
-
-
-
-    
-
-
-
 clearSelect
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -132,100 +101,6 @@ Receives an object containing the deserialized data from the server and returns 
 
 
 
-getEffectiveFilters
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-.. js:function:: ambrosia_web.event.getEffectiveFilters(cls)
-
-
-    
-    :param class cls: 
-        the event class 
-    
-
-
-
-    
-    :returns Array:
-        the filters 
-    
-
-
-Returns the filters that are effective for a specific event class.
-
-
-
-
-
-
-
-
-
-    
-
-
-
-getFilters
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-.. js:function:: ambrosia_web.event.getFilters(cls)
-
-
-    
-    :param class cls: 
-        the event class 
-    
-
-
-
-    
-    :returns Array:
-        the filter 
-    
-
-
-Returns all filter for a class. If null is passed, returns the general filters.
-
-
-
-
-
-
-
-
-
-    
-
-
-
-removeFilter
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-.. js:function:: ambrosia_web.event.removeFilter(filter)
-
-
-    
-    :param ambrosia_web.filter.Filter filter: 
-        the filter to remove 
-    
-
-
-
-
-Removes a filter
-
-
-
-
-
-
-
-
-
-    
-
-
-
 reset
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -257,26 +132,6 @@ Attributes
 
 ..
    class-attributes
-
-
-addFilterHandler
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-.. js:attribute:: addFilterHandler (static)  
-
-
-contains all handlers for adding filters to an  event class. Any part of the application may listen to those
-events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.
-
-
-
-
-
-
-
-
-    
-
 
 
 BLOCK_MARGIN_X
@@ -423,26 +278,6 @@ onUnSelectHandler
 contains all handlers for unselecting events. Any part of the application may listen to those events (i.e. add a
 function to this array). If the user unselect an entity the interface can adapt to this (e.g. the
 :js:class:`ambrosia_web.view.detailsview.DetailsView` shows details about this event).
-
-
-
-
-
-
-
-
-    
-
-
-
-removeFilterHandler
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-.. js:attribute:: removeFilterHandler (static)  
-
-
-contains all handlers for removing filters from an  event class. Any part of the application may listen to those
-events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.
 
 
 

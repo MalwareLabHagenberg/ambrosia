@@ -104,40 +104,6 @@ be used to find all events related to a certain entity (e.g. &#8220;someidofanen
 
 <p>Evaluate if an an event matches this filter</p>
 </div>
-<div class="section" id="getinput">
-<h3>getInput<a class="headerlink" href="#getinput" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
-<dt id="ambrosia_web.filter.Filter.getInput">
-<tt class="descclassname">ambrosia_web.filter.Filter.</tt><tt class="descname">getInput</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.filter.Filter.getInput" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns jQuery:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<p>Get a jQuery Element that can be used as an graphical representation of the filter (a textbox)</p>
-</div>
-<div class="section" id="getsubclasselements">
-<h3>getSubClassElements<a class="headerlink" href="#getsubclasselements" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
-<dt id="ambrosia_web.filter.Filter.getSubClassElements">
-<tt class="descclassname">ambrosia_web.filter.Filter.</tt><tt class="descname">getSubClassElements</tt><big>(</big><big>)</big><a class="headerlink" href="#ambrosia_web.filter.Filter.getSubClassElements" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns Array:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<p>A subclass may return custom jQuery elements</p>
-</div>
 <div class="section" id="isenabled">
 <h3>isEnabled<a class="headerlink" href="#isenabled" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
@@ -199,14 +165,13 @@ be used to find all events related to a certain entity (e.g. &#8220;someidofanen
 <h3>setRule<a class="headerlink" href="#setrule" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="ambrosia_web.filter.Filter.setRule">
-<tt class="descclassname">ambrosia_web.filter.Filter.</tt><tt class="descname">setRule</tt><big>(</big><em>r</em>, <em>no_input_update</em><big>)</big><a class="headerlink" href="#ambrosia_web.filter.Filter.setRule" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">ambrosia_web.filter.Filter.</tt><tt class="descname">setRule</tt><big>(</big><em>r</em><big>)</big><a class="headerlink" href="#ambrosia_web.filter.Filter.setRule" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
 <li><strong>r</strong> (<em>String</em>) &#8211; the new rule in filter syntax</li>
-<li><strong>no_input_update</strong> (<em>bool</em>) &#8211; used internally, disables update of the text field</li>
 </ul>
 </td>
 </tr>
@@ -232,8 +197,6 @@ be used to find all events related to a certain entity (e.g. &#8220;someidofanen
 <li><a class="reference internal" href="#constructor">Constructor</a></li>
 <li><a class="reference internal" href="#methods">Methods</a><ul>
 <li><a class="reference internal" href="#evaluate">evaluate</a></li>
-<li><a class="reference internal" href="#getinput">getInput</a></li>
-<li><a class="reference internal" href="#getsubclasselements">getSubClassElements</a></li>
 <li><a class="reference internal" href="#isenabled">isEnabled</a></li>
 <li><a class="reference internal" href="#setdescription">setDescription</a></li>
 <li><a class="reference internal" href="#setenabled">setEnabled</a></li>

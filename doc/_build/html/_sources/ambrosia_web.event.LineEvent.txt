@@ -32,6 +32,8 @@ Constructor
 .. js:class:: ambrosia_web.event.LineEvent()
 
 
+    Bases: :js:class:`ambrosia_web.event.Event` 
+
 
 
 

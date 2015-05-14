@@ -29,9 +29,14 @@ Implements a simple view that shows details about the last event that has been s
 Constructor
 -----------
 
-.. js:class:: ambrosia_web.view.detailsview.DetailsView()
+.. js:class:: ambrosia_web.view.detailsview.DetailsView(element)
 
 
+
+    
+    :param jQuery element: 
+        the jQuery element the view should be located 
+    
 
 
 

@@ -39,6 +39,37 @@ Constructor
 
 
 
+Methods
+-------
+
+..
+   class-methods
+
+
+hideAllPanels
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.view.hideAllPanels()
+
+
+
+
+
+hide all panels
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
     
 
 

@@ -135,7 +135,7 @@
             <span class="n">sc</span> <span class="o">=</span> <span class="n">c</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span>
             <span class="n">sc</span><span class="o">.</span><span class="n">correlate</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="Ambrosia.serialize"><a class="viewcode-back" href="../ambrosia.html#ambrosia.Ambrosia.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Ambrosia.serialize"><a class="viewcode-back" href="../ambrosia.html#ambrosia.Ambrosia.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Serialize Events into a compact text format (see :func:`ambrosia_web.util.serialize_obj`).</span>
 
 <span class="sd">        Should be called after :func:`Ambrosia.correlate`.</span>
@@ -144,7 +144,7 @@
 <span class="sd">            the serialized string</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;serializing&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">serialize_obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">to_serializeable</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">serialize_obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">to_serializeable</span><span class="p">(),</span> <span class="n">fp</span><span class="p">)</span>
 
 </div></div>
 <div class="viewcode-block" id="Correlator"><a class="viewcode-back" href="../ambrosia.html#ambrosia.Correlator">[docs]</a><span class="k">class</span> <span class="nc">Correlator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>

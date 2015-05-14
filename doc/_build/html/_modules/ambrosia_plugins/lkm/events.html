@@ -59,11 +59,11 @@
 <div class="viewcode-block" id="SyscallEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SyscallEvent">[docs]</a><span class="k">class</span> <span class="nc">SyscallEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents a system call from lkm</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">}</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;index&#39;</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">monotonic_ts</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">spawned_child</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">monotonic_ts</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">spawned_child</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process_entity</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SyscallEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">end_ts</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">props</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
@@ -71,8 +71,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;pid&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">props</span><span class="p">[</span><span class="s">&#39;params&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">returnval</span> <span class="o">=</span> <span class="n">props</span><span class="p">[</span><span class="s">&#39;returnval&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process_entity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spawned_child</span> <span class="o">=</span> <span class="n">spawned_child</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">idx</span>
 
         <span class="n">add_info</span> <span class="o">=</span> <span class="n">props</span><span class="p">[</span><span class="s">&#39;add_info&#39;</span><span class="p">]</span>
 
@@ -92,7 +93,8 @@
             <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
             <span class="s">&#39;spawned_child&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">,</span>
-            <span class="s">&#39;monotonic_ts&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monotonic_ts</span>
+            <span class="s">&#39;monotonic_ts&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monotonic_ts</span><span class="p">,</span>
+            <span class="s">&#39;syscall_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">argv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -109,10 +111,9 @@
         <span class="k">return</span> <span class="n">props</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;[Syscall: {} {} by {} result:{}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="k">return</span> <span class="s">&#39;[Syscall: {} {} result:{}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="p">(</span><span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">returnval</span><span class="p">)</span>
 
 </div>
@@ -121,22 +122,42 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="nb">execfile</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">execfile</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CommandExecuteEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="n">command</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">execfile</span> <span class="o">=</span> <span class="nb">execfile</span>
 
 <div class="viewcode-block" id="CommandExecuteEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.CommandExecuteEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
             <span class="s">&#39;command&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">,</span>
-            <span class="s">&#39;path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+            <span class="s">&#39;path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="s">&#39;execfile&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">execfile</span>
         <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&#39;[Execute: {}, {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">join_command</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="ZygoteForkEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ZygoteForkEvent">[docs]</a><span class="k">class</span> <span class="nc">ZygoteForkEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ZygoteForkEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
+
+<div class="viewcode-block" id="ZygoteForkEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ZygoteForkEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span>
+        <span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[Zygote Fork, UID: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
 
 </div>
 <div class="viewcode-block" id="FileDescriptorEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.FileDescriptorEvent">[docs]</a><span class="k">class</span> <span class="nc">FileDescriptorEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
@@ -163,8 +184,8 @@
 <div class="viewcode-block" id="UnknownFdEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.UnknownFdEvent">[docs]</a><span class="k">class</span> <span class="nc">UnknownFdEvent</span><span class="p">(</span><span class="n">FileDescriptorEvent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents a fd event where no syscall opening the fd has been found.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">fd_number</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">UnknownFdEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">fd_number</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UnknownFdEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fd_number</span> <span class="o">=</span> <span class="n">fd_number</span>
 
 <div class="viewcode-block" id="UnknownFdEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.UnknownFdEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -185,21 +206,49 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">FileDescriptorEvent</span><span class="o">.</span><span class="n">indices</span> <span class="o">|</span> <span class="p">{</span><span class="s">&#39;abspath&#39;</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_entity</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_entity</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
+    <span class="n">mode_flags</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;O_WRONLY&#39;</span><span class="p">:</span> <span class="mo">00000001</span><span class="p">,</span>
+        <span class="s">&#39;O_RDWR&#39;</span><span class="p">:</span> <span class="mo">00000002</span><span class="p">,</span>
+        <span class="s">&#39;O_CREAT&#39;</span><span class="p">:</span> <span class="mo">00000100</span><span class="p">,</span>
+        <span class="s">&#39;O_EXCL&#39;</span><span class="p">:</span> <span class="mo">00000200</span><span class="p">,</span>
+        <span class="s">&#39;O_NOCTTY&#39;</span><span class="p">:</span> <span class="mo">00000400</span><span class="p">,</span>
+        <span class="s">&#39;O_TRUNC&#39;</span><span class="p">:</span> <span class="mo">00001000</span><span class="p">,</span>
+        <span class="s">&#39;O_APPEND&#39;</span><span class="p">:</span> <span class="mo">00002000</span><span class="p">,</span>
+        <span class="s">&#39;O_NONBLOCK&#39;</span><span class="p">:</span> <span class="mo">00004000</span><span class="p">,</span>
+        <span class="s">&#39;O_DSYNC&#39;</span><span class="p">:</span> <span class="mo">00010000</span><span class="p">,</span>
+        <span class="s">&#39;O_DIRECT&#39;</span><span class="p">:</span> <span class="mo">00040000</span><span class="p">,</span>
+        <span class="s">&#39;O_LARGEFILE&#39;</span><span class="p">:</span> <span class="mo">00100000</span><span class="p">,</span>
+        <span class="s">&#39;O_DIRECTORY&#39;</span><span class="p">:</span> <span class="mo">00200000</span><span class="p">,</span>
+        <span class="s">&#39;O_NOFOLLOW&#39;</span><span class="p">:</span> <span class="mo">00400000</span><span class="p">,</span>
+        <span class="s">&#39;O_NOATIME&#39;</span><span class="p">:</span> <span class="mo">01000000</span><span class="p">,</span>
+        <span class="s">&#39;O_CLOEXEC&#39;</span><span class="p">:</span> <span class="mo">02000000</span><span class="p">,</span>
+        <span class="s">&#39;O_PATH&#39;</span><span class="p">:</span> <span class="mo">010000000</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">FileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">abspath</span> <span class="o">=</span> <span class="n">file_entity</span><span class="o">.</span><span class="n">abspath</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">file_entity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abspath</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">abspath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags_val</span> <span class="o">=</span> <span class="n">flags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">flags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">FileEvent</span><span class="o">.</span><span class="n">mode_flags</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FileEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.FileEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
 
         <span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
             <span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
-            <span class="s">&#39;abspath&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">abspath</span><span class="p">,</span>
-            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span>
+            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
+            <span class="s">&#39;flags&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags_val</span>
         <span class="p">})</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">FileEvent</span><span class="o">.</span><span class="n">mode_flags</span><span class="p">:</span>
+            <span class="n">props</span><span class="p">[</span><span class="s">&#39;flg_&#39;</span><span class="o">+</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span>
 
         <span class="k">return</span> <span class="n">props</span>
 </div>
@@ -214,9 +263,14 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">successful</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">AnonymousFileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">unknown</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AnonymousFileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">unknown</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
 
+<div class="viewcode-block" id="AnonymousFileEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.AnonymousFileEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">AnonymousFileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
+        <span class="n">props</span><span class="p">[</span><span class="s">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
+        <span class="k">return</span> <span class="n">props</span>
+</div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&#39;[Anonymous File &quot;{}&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
 
@@ -226,11 +280,81 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">FileDescriptorEvent</span><span class="o">.</span><span class="n">indices</span> <span class="o">|</span> <span class="nb">set</span><span class="p">()</span>
 
+    <span class="n">address_families</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="s">&#39;AF_UNSPEC&#39;</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s">&#39;AF_UNIX&#39;</span><span class="p">,</span>  <span class="c"># Unix domain sockets</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="s">&#39;AF_INET&#39;</span><span class="p">,</span>  <span class="c"># Internet IP Protocol</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="s">&#39;AF_AX25&#39;</span><span class="p">,</span>  <span class="c"># Amateur Radio AX.25</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="s">&#39;AF_IPX&#39;</span><span class="p">,</span>  <span class="c"># Novell IPX</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="s">&#39;AF_APPLETALK&#39;</span><span class="p">,</span>  <span class="c"># AppleTalk DDP</span>
+        <span class="mi">6</span><span class="p">:</span> <span class="s">&#39;AF_NETROM&#39;</span><span class="p">,</span>  <span class="c"># Amateur Radio NET/ROM</span>
+        <span class="mi">7</span><span class="p">:</span> <span class="s">&#39;AF_BRIDGE&#39;</span><span class="p">,</span>  <span class="c"># Multiprotocol bridge</span>
+        <span class="mi">8</span><span class="p">:</span> <span class="s">&#39;AF_ATMPVC&#39;</span><span class="p">,</span>  <span class="c"># ATM PVCs</span>
+        <span class="mi">9</span><span class="p">:</span> <span class="s">&#39;AF_X25&#39;</span><span class="p">,</span>  <span class="c"># Reserved for X.25,         project</span>
+        <span class="mi">10</span><span class="p">:</span> <span class="s">&#39;AF_INET6&#39;</span><span class="p">,</span>  <span class="c"># IP version:6</span>
+        <span class="mi">11</span><span class="p">:</span> <span class="s">&#39;AF_ROSE&#39;</span><span class="p">,</span>  <span class="c"># Amateur Radio X.25,         PLP</span>
+        <span class="mi">12</span><span class="p">:</span> <span class="s">&#39;AF_DECnet&#39;</span><span class="p">,</span>  <span class="c"># Reserved for DECnet project</span>
+        <span class="mi">13</span><span class="p">:</span> <span class="s">&#39;AF_NETBEUI&#39;</span><span class="p">,</span>  <span class="c"># Reserved for:802.2LLC projec</span>
+        <span class="mi">14</span><span class="p">:</span> <span class="s">&#39;AF_SECURITY&#39;</span><span class="p">,</span>  <span class="c"># Security callback pseudo AF</span>
+        <span class="mi">15</span><span class="p">:</span> <span class="s">&#39;AF_KEY&#39;</span><span class="p">,</span>  <span class="c"># PF_KEY key management API</span>
+        <span class="mi">16</span><span class="p">:</span> <span class="s">&#39;AF_NETLINK&#39;</span><span class="p">,</span>
+        <span class="mi">17</span><span class="p">:</span> <span class="s">&#39;AF_PACKET&#39;</span><span class="p">,</span>  <span class="c"># Packet family</span>
+        <span class="mi">18</span><span class="p">:</span> <span class="s">&#39;AF_ASH&#39;</span><span class="p">,</span>  <span class="c"># Ash</span>
+        <span class="mi">19</span><span class="p">:</span> <span class="s">&#39;AF_ECONET&#39;</span><span class="p">,</span>  <span class="c"># Acorn Econet</span>
+        <span class="mi">20</span><span class="p">:</span> <span class="s">&#39;AF_ATMSVC&#39;</span><span class="p">,</span>  <span class="c"># ATM SVCs</span>
+        <span class="mi">21</span><span class="p">:</span> <span class="s">&#39;AF_RDS&#39;</span><span class="p">,</span>  <span class="c"># RDS sockets</span>
+        <span class="mi">22</span><span class="p">:</span> <span class="s">&#39;AF_SNA&#39;</span><span class="p">,</span>  <span class="c"># Linux SNA Project (nutters!)</span>
+        <span class="mi">23</span><span class="p">:</span> <span class="s">&#39;AF_IRDA&#39;</span><span class="p">,</span>  <span class="c"># IRDA sockets</span>
+        <span class="mi">24</span><span class="p">:</span> <span class="s">&#39;AF_PPPOX&#39;</span><span class="p">,</span>  <span class="c"># PPPoX sockets</span>
+        <span class="mi">25</span><span class="p">:</span> <span class="s">&#39;AF_WANPIPE&#39;</span><span class="p">,</span>  <span class="c"># Wanpipe API Sockets</span>
+        <span class="mi">26</span><span class="p">:</span> <span class="s">&#39;AF_LLC&#39;</span><span class="p">,</span>  <span class="c"># Linux LLC</span>
+        <span class="mi">27</span><span class="p">:</span> <span class="s">&#39;AF_IB&#39;</span><span class="p">,</span>  <span class="c"># Native InfiniBand address</span>
+        <span class="mi">29</span><span class="p">:</span> <span class="s">&#39;AF_CAN&#39;</span><span class="p">,</span>  <span class="c"># Controller Area Network</span>
+        <span class="mi">30</span><span class="p">:</span> <span class="s">&#39;AF_TIPC&#39;</span><span class="p">,</span>  <span class="c"># TIPC sockets</span>
+        <span class="mi">31</span><span class="p">:</span> <span class="s">&#39;AF_BLUETOOTH&#39;</span><span class="p">,</span>  <span class="c"># Bluetooth sockets</span>
+        <span class="mi">32</span><span class="p">:</span> <span class="s">&#39;AF_IUCV&#39;</span><span class="p">,</span>  <span class="c"># IUCV sockets</span>
+        <span class="mi">33</span><span class="p">:</span> <span class="s">&#39;AF_RXRPC&#39;</span><span class="p">,</span>  <span class="c"># RxRPC sockets</span>
+        <span class="mi">34</span><span class="p">:</span> <span class="s">&#39;AF_ISDN&#39;</span><span class="p">,</span>  <span class="c"># mISDN sockets</span>
+        <span class="mi">35</span><span class="p">:</span> <span class="s">&#39;AF_PHONET&#39;</span><span class="p">,</span>  <span class="c"># Phonet sockets</span>
+        <span class="mi">36</span><span class="p">:</span> <span class="s">&#39;AF_IEEE802154&#39;</span><span class="p">,</span>  <span class="c"># IEEE80,2154 sockets</span>
+        <span class="mi">37</span><span class="p">:</span> <span class="s">&#39;AF_CAIF&#39;</span><span class="p">,</span>  <span class="c"># CAIF sockets</span>
+        <span class="mi">38</span><span class="p">:</span> <span class="s">&#39;AF_ALG&#39;</span><span class="p">,</span>  <span class="c"># Algorithm sockets</span>
+        <span class="mi">39</span><span class="p">:</span> <span class="s">&#39;AF_NFC&#39;</span><span class="p">,</span>  <span class="c"># NFC sockets</span>
+        <span class="mi">40</span><span class="p">:</span> <span class="s">&#39;AF_VSOCK&#39;</span><span class="p">,</span>  <span class="c"># vSockets</span>
+    <span class="p">}</span>
+
+    <span class="n">sock_types</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="s">&#39;SOCK_STREAM&#39;</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="s">&#39;SOCK_DGRAM&#39;</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="s">&#39;SOCK_RAW&#39;</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="s">&#39;SOCK_RDM&#39;</span><span class="p">,</span>
+        <span class="mi">5</span><span class="p">:</span> <span class="s">&#39;SOCK_SEQPACKET&#39;</span><span class="p">,</span>
+        <span class="mi">6</span><span class="p">:</span> <span class="s">&#39;SOCK_DCCP&#39;</span><span class="p">,</span>
+        <span class="mi">10</span><span class="p">:</span> <span class="s">&#39;SOCK_PACKET&#39;</span>
+    <span class="p">}</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SocketEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client_socket</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_socket</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address_family</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">socket_type</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected_to</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bound_to</span> <span class="o">=</span> <span class="bp">None</span>
 
 <div class="viewcode-block" id="SocketEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SocketEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SocketEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
+        <span class="n">props</span><span class="p">[</span><span class="s">&#39;client_socket&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_socket</span>
+        <span class="n">props</span><span class="p">[</span><span class="s">&#39;server_socket&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_socket</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">address_family</span> <span class="ow">in</span> <span class="n">SocketEvent</span><span class="o">.</span><span class="n">address_families</span><span class="p">:</span>
+            <span class="n">props</span><span class="p">[</span><span class="s">&#39;address_family&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SocketEvent</span><span class="o">.</span><span class="n">address_families</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">address_family</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket_type</span> <span class="ow">in</span> <span class="n">SocketEvent</span><span class="o">.</span><span class="n">sock_types</span><span class="p">:</span>
+            <span class="n">props</span><span class="p">[</span><span class="s">&#39;socket_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SocketEvent</span><span class="o">.</span><span class="n">sock_types</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">socket_type</span><span class="p">]</span>
+
+        <span class="n">props</span><span class="p">[</span><span class="s">&#39;connected_to&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected_to</span>
+        <span class="n">props</span><span class="p">[</span><span class="s">&#39;bound_to&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bound_to</span>
 
         <span class="k">return</span> <span class="n">props</span>
 </div>
@@ -238,7 +362,7 @@
         <span class="k">return</span> <span class="s">&#39;[Socket Event]&#39;</span>
 
 </div>
-<div class="viewcode-block" id="SocketAccept"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SocketAccept">[docs]</a><span class="k">class</span> <span class="nc">SocketAccept</span><span class="p">(</span><span class="n">FileDescriptorEvent</span><span class="p">):</span>
+<div class="viewcode-block" id="SocketAcceptEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SocketAcceptEvent">[docs]</a><span class="k">class</span> <span class="nc">SocketAcceptEvent</span><span class="p">(</span><span class="n">FileDescriptorEvent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents a successful accept() on a socket</span>
 
 <span class="sd">    This event&#39;s parent normally is a :class:`ambrosia_plugins.lkm.events.SocketEvent` and it is a</span>
@@ -247,10 +371,10 @@
     <span class="n">indices</span> <span class="o">=</span> <span class="n">FileDescriptorEvent</span><span class="o">.</span><span class="n">indices</span> <span class="o">|</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SocketAccept</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SocketAcceptEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SocketAccept.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SocketAccept.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SocketAccept</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
+<div class="viewcode-block" id="SocketAcceptEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SocketAcceptEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SocketAcceptEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="n">props</span>
 </div>
@@ -261,7 +385,7 @@
 <div class="viewcode-block" id="MemoryMapEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.MemoryMapEvent">[docs]</a><span class="k">class</span> <span class="nc">MemoryMapEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents a call to mmap(). It&#39;s parent normally is a :class:`ambrosia_plugins.lkm.events.FileDescriptorEvent`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process_entity&#39;</span><span class="p">}</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
 
     <span class="n">mmap_flags</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;MAP_SHARED&#39;</span><span class="p">:</span> <span class="mh">0x1</span><span class="p">,</span>
                   <span class="s">&#39;MAP_PRIVATE&#39;</span><span class="p">:</span> <span class="mh">0x2</span><span class="p">,</span>
@@ -279,11 +403,11 @@
                   <span class="s">&#39;MAP_UNINITIALIZED&#39;</span><span class="p">:</span> <span class="mh">0x4000000</span><span class="p">,</span>
                   <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process_entity</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MemoryMapEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span> <span class="o">=</span> <span class="n">process_entity</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flags_val</span> <span class="o">=</span> <span class="n">flags</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -295,8 +419,8 @@
 
 <div class="viewcode-block" id="MemoryMapEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.MemoryMapEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span><span class="p">,</span>
-            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span><span class="p">,</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
+            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
             <span class="s">&#39;address&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
             <span class="s">&#39;flags_value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags_val</span><span class="p">,</span>
             <span class="s">&#39;sucessful&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">successful</span><span class="p">,</span>
@@ -313,10 +437,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">successful</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">+=</span> <span class="s">&#39;FAILED: &#39;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">+=</span> <span class="s">&#39;Memory&#39;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">res</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
 
         <span class="n">res</span> <span class="o">+=</span> <span class="s">&#39; mapped to &#39;</span><span class="o">+</span><span class="nb">hex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">)</span>
 
@@ -328,19 +452,19 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">child_pid</span><span class="p">,</span> <span class="n">spawned_child</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process_entity</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">child_pid</span><span class="p">,</span> <span class="n">spawned_child</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spawned_child</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">StartTaskEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">child_pid</span> <span class="o">=</span> <span class="n">child_pid</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span> <span class="o">=</span> <span class="n">process_entity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spawned_child</span> <span class="o">=</span> <span class="n">spawned_child</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_process</span> <span class="o">=</span> <span class="n">spawned_child</span><span class="o">.</span><span class="n">is_process</span>
 
 <div class="viewcode-block" id="StartTaskEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.StartTaskEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s">&#39;child_pid&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_pid</span><span class="p">,</span>
-            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span><span class="p">,</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
             <span class="s">&#39;spawned_child&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">,</span>
             <span class="s">&#39;is_process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_process</span>
         <span class="p">}</span>
@@ -349,103 +473,106 @@
         <span class="k">return</span> <span class="s">&#39;[Start {}: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s">&#39;process&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_process</span> <span class="k">else</span> <span class="s">&#39;thread&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_pid</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="SuperUserRequest"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SuperUserRequest">[docs]</a><span class="k">class</span> <span class="nc">SuperUserRequest</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+<div class="viewcode-block" id="SuperUserRequestEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SuperUserRequestEvent">[docs]</a><span class="k">class</span> <span class="nc">SuperUserRequestEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Indicates that the process tried to run &quot;su&quot;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process_entity</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SuperUserRequest</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span> <span class="o">=</span> <span class="n">process_entity</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SuperUserRequestEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
 
-<div class="viewcode-block" id="SuperUserRequest.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SuperUserRequest.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SuperUserRequestEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SuperUserRequestEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span>
         <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;[SU-Request by PID {}, UID {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&#39;[SU-Request by PID {}, UID {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="CreateDir"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.CreateDir">[docs]</a><span class="k">class</span> <span class="nc">CreateDir</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+<div class="viewcode-block" id="CreateDirEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.CreateDirEvent">[docs]</a><span class="k">class</span> <span class="nc">CreateDirEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents an mkdir() syscall</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">file_entity</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process_entity</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_entity</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">CreateDir</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span> <span class="o">=</span> <span class="n">process_entity</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span> <span class="o">=</span> <span class="n">file_entity</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">,</span> <span class="nb">file</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CreateDirEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successful</span> <span class="o">=</span> <span class="n">successful</span>
 
-<div class="viewcode-block" id="CreateDir.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.CreateDir.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CreateDirEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.CreateDirEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span><span class="p">,</span>
-            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span>
+            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
+            <span class="s">&#39;successful&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">successful</span>
         <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;[Mkdir: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s">&#39;[Mkdir: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">))</span>
 
 </div>
-<div class="viewcode-block" id="SendSignal"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SendSignal">[docs]</a><span class="k">class</span> <span class="nc">SendSignal</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+<div class="viewcode-block" id="SendSignalEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SendSignalEvent">[docs]</a><span class="k">class</span> <span class="nc">SendSignalEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents a kill() syscall</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">,</span> <span class="n">target_process</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process_entity</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">target_process</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SendSignal</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span> <span class="o">=</span> <span class="n">process_entity</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SendSignalEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_process</span> <span class="o">=</span> <span class="n">target_process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="n">number</span>
 
-<div class="viewcode-block" id="SendSignal.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SendSignal.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SendSignalEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.SendSignalEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span><span class="p">,</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
             <span class="s">&#39;target_process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_process</span><span class="p">,</span>
             <span class="s">&#39;number&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">number</span>
         <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;[Signal {} to {} (by {})]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_process</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&#39;[Signal {} to {} (by {})]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_process</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="DeleteFileEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.DeleteFileEvent">[docs]</a><span class="k">class</span> <span class="nc">DeleteFileEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+<div class="viewcode-block" id="DeletePathEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.DeletePathEvent">[docs]</a><span class="k">class</span> <span class="nc">DeletePathEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents an unlink() syscall</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">successful</span><span class="p">,</span> <span class="n">file_entity</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_entity</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">successful</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">DeleteFileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span> <span class="o">=</span> <span class="n">file_entity</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DeletePathEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">successful</span> <span class="o">=</span> <span class="n">successful</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
 
-<div class="viewcode-block" id="DeleteFileEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.DeleteFileEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DeletePathEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.DeletePathEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span><span class="p">,</span>
-            <span class="s">&#39;successful&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">successful</span>
+            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
+            <span class="s">&#39;successful&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">successful</span><span class="p">,</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span>
         <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;[Delete File: {}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_entity</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s">&quot;[Delete File: {}]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">))</span>
 
 </div>
 <div class="viewcode-block" id="ExecEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ExecEvent">[docs]</a><span class="k">class</span> <span class="nc">ExecEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents an execve() syscall</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process_entity&#39;</span><span class="p">}</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">process_entity</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process_entity</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ExecEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">start_ts</span><span class="o">=</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="n">end_ts</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">process_entity</span> <span class="o">=</span> <span class="n">process_entity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">argv</span> <span class="o">=</span> <span class="n">argv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
@@ -454,29 +581,34 @@
         <span class="k">return</span> <span class="p">{</span>
             <span class="s">&#39;argv&#39;</span><span class="p">:</span> <span class="n">join_command</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argv</span><span class="p">),</span>
             <span class="s">&#39;env&#39;</span><span class="p">:</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="p">),</span>
-            <span class="s">&#39;path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+            <span class="s">&#39;path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span>
         <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&#39;[Exec: {}, {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">join_command</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">argv</span><span class="p">))</span>
 
 </div>
-<div class="viewcode-block" id="ANANASAdbShellExec"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ANANASAdbShellExec">[docs]</a><span class="k">class</span> <span class="nc">ANANASAdbShellExec</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+<div class="viewcode-block" id="ANANASAdbShellExecEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ANANASAdbShellExecEvent">[docs]</a><span class="k">class</span> <span class="nc">ANANASAdbShellExecEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents a command that has been executed by ANANAS</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ANANASAdbShellExec</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ANANASAdbShellExecEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
 
-<div class="viewcode-block" id="ANANASAdbShellExec.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ANANASAdbShellExec.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{}</span>
+<div class="viewcode-block" id="ANANASAdbShellExecEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ANANASAdbShellExecEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span>
+        <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s">&#39;[ANANAS Shell Command]&#39;</span>
 
 </div>
-<div class="viewcode-block" id="LibraryLoad"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.LibraryLoad">[docs]</a><span class="k">class</span> <span class="nc">LibraryLoad</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+<div class="viewcode-block" id="LibraryLoadEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.LibraryLoadEvent">[docs]</a><span class="k">class</span> <span class="nc">LibraryLoadEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents mmap() operations on a library file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
@@ -484,19 +616,64 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">LibraryLoad</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LibraryLoadEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">successful</span> <span class="o">=</span> <span class="n">successful</span>
 
-<div class="viewcode-block" id="LibraryLoad.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.LibraryLoad.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LibraryLoadEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.LibraryLoadEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
             <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span>
         <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;[Library load: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s">&#39;[Library load: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="JavaLibraryLoadEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.JavaLibraryLoadEvent">[docs]</a><span class="k">class</span> <span class="nc">JavaLibraryLoadEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents dalvik library load operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">,</span> <span class="n">system_library_load</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">JavaLibraryLoadEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successful</span> <span class="o">=</span> <span class="n">successful</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">system_library</span> <span class="o">=</span> <span class="n">system_library_load</span>
+
+<div class="viewcode-block" id="JavaLibraryLoadEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.JavaLibraryLoadEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
+            <span class="s">&#39;system_library&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_library</span>
+        <span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[Java Library load: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="APKInstallEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.APKInstallEvent">[docs]</a><span class="k">class</span> <span class="nc">APKInstallEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">APKInstallEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
+
+<div class="viewcode-block" id="APKInstallEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.APKInstallEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;file&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span>
+        <span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[APK install: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

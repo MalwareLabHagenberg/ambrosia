@@ -26,7 +26,7 @@ Methods
 Class
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: Class(name, p1, p2)
+.. js:function:: Class(name, p1, [p2])
 
 
     

@@ -32,6 +32,8 @@ Constructor
 .. js:class:: ambrosia_web.event.BlockEvent()
 
 
+    Bases: :js:class:`ambrosia_web.event.Event` 
+
 
 
 

@@ -56,7 +56,7 @@
 <span class="kn">from</span> <span class="nn">persistent.mapping</span> <span class="kn">import</span> <span class="n">PersistentMapping</span>
 
 <span class="kn">import</span> <span class="nn">ambrosia.context</span>
-<span class="kn">from</span> <span class="nn">ambrosia.util</span> <span class="kn">import</span> <span class="n">js_date</span><span class="p">,</span> <span class="n">obj_classname</span><span class="p">,</span> <span class="n">classname</span><span class="p">,</span> <span class="n">unique_id</span>
+<span class="kn">from</span> <span class="nn">ambrosia.util</span> <span class="kn">import</span> <span class="n">js_date</span><span class="p">,</span> <span class="n">obj_classname</span><span class="p">,</span> <span class="n">classname</span><span class="p">,</span> <span class="n">unique_id</span><span class="p">,</span> <span class="n">get_class</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Wolfgang Ettlinger&#39;</span>
 
@@ -100,7 +100,7 @@
 <span class="sd">        {</span>
 <span class="sd">            class_name: {</span>
 <span class="sd">                key: Binary Tree {</span>
-<span class="sd">                        attribute_value: [event, ...]</span>
+<span class="sd">                        attribute_value: set(event, ...)</span>
 <span class="sd">                    }</span>
 <span class="sd">            }</span>
 <span class="sd">        }</span>
@@ -173,6 +173,18 @@
 
         <span class="k">return</span> <span class="n">res</span>
 </div>
+<div class="viewcode-block" id="Analysis.iter_all_events"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.iter_all_events">[docs]</a>    <span class="k">def</span> <span class="nf">iter_all_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">cls</span> <span class="o">=</span> <span class="n">get_class</span><span class="p">(</span><span class="n">class_name</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">indices</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">min_value</span><span class="p">,</span> <span class="n">max_value</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">evt</span>
+
+    <span class="c"># TODO cls is None</span></div>
 <div class="viewcode-block" id="Analysis.iter_events"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.iter_events">[docs]</a>    <span class="k">def</span> <span class="nf">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Iterates over all events matching specific conditions in an efficient manner.</span>
 
@@ -224,7 +236,7 @@
                     <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
                         <span class="k">yield</span> <span class="n">el</span>
 </div>
-    <span class="k">def</span> <span class="nf">_event_index_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_event_index_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Locates the index for a specific event and key (and creates it if it does not exist)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
@@ -248,7 +260,7 @@
 
         <span class="n">ret</span> <span class="o">=</span> <span class="n">key_index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key_val</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">PersistentList</span><span class="p">()</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">OOBTree</span><span class="o">.</span><span class="n">OOTreeSet</span><span class="p">()</span>
             <span class="n">key_index</span><span class="p">[</span><span class="n">key_val</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret</span>
 
         <span class="k">return</span> <span class="n">ret</span>
@@ -268,9 +280,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="s">&#39;indices&#39;</span><span class="p">):</span>
-            <span class="n">idxlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index_list</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">idxlist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">idxlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+            <span class="n">idxset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index_set</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idxset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">idxset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="Analysis.del_event"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.del_event">[docs]</a>    <span class="k">def</span> <span class="nf">del_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Delete event and update indices</span>
@@ -287,15 +299,17 @@
             <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">evt</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="s">&#39;indices&#39;</span><span class="p">):</span>
-            <span class="n">idxlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index_list</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">idxlist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">idxlist</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+            <span class="n">idxset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index_set</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idxset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">idxset</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="Analysis.to_serializeable"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.to_serializeable">[docs]</a>    <span class="k">def</span> <span class="nf">to_serializeable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns all results in a serializable form</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span>
+            <span class="k">assert</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">start_ts</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span><span class="p">)</span>
             <span class="n">el</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
         <span class="n">events</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_events</span><span class="p">)</span>
@@ -340,7 +354,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_ts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">end_ts</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span> <span class="ow">or</span> <span class="n">start_ts</span> <span class="ow">is</span> <span class="bp">None</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end_ts</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span> <span class="ow">or</span> <span class="n">end_ts</span> <span class="ow">is</span> <span class="bp">None</span>
 
@@ -355,6 +368,20 @@
 
         <span class="k">if</span> <span class="n">end_ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">end_ts</span> <span class="o">=</span> <span class="n">end_ts</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unique_identifier</span> <span class="o">=</span> <span class="n">unique_id</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Event</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique_identifier</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_unique_identifier</span>
+
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Event</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">cmp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_unique_identifier</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">_unique_identifier</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">start_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -540,21 +567,28 @@
 <div class="viewcode-block" id="Entity.to_serializeable"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Entity.to_serializeable">[docs]</a>    <span class="k">def</span> <span class="nf">to_serializeable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns a dict containing all relevant information about the entity.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">properties</span><span class="p">,</span> <span class="n">references</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">{}</span>
+        <span class="n">properties</span><span class="p">,</span> <span class="n">references</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
 
-        <span class="n">props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
+        <span class="n">refs</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">props</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Entity</span><span class="p">):</span>
-                <span class="n">references</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">primary_key</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">references</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+                <span class="n">lst</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                    <span class="n">lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">primary_key</span><span class="p">)</span>
+
+                <span class="n">refs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">lst</span>
+            <span class="k">elif</span> <span class="n">v</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">refs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">properties</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+                <span class="n">refs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">primary_key</span>
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary_key</span><span class="p">,</span>
             <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="n">classname</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span>
             <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="n">properties</span><span class="p">,</span>
-            <span class="s">&#39;references&#39;</span><span class="p">:</span> <span class="n">references</span><span class="p">,</span>
+            <span class="s">&#39;references&#39;</span><span class="p">:</span> <span class="n">refs</span><span class="p">,</span>
             <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="p">}</span>
 </div>

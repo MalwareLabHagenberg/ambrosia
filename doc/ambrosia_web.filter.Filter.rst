@@ -101,62 +101,6 @@ Evaluate if an an event matches this filter
 
 
 
-getInput
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-.. js:function:: ambrosia_web.filter.Filter.getInput()
-
-
-
-
-    
-    :returns jQuery:
-         
-    
-
-
-Get a jQuery Element that can be used as an graphical representation of the filter (a textbox)
-
-
-
-
-
-
-
-
-
-    
-
-
-
-getSubClassElements
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
-.. js:function:: ambrosia_web.filter.Filter.getSubClassElements()
-
-
-
-
-    
-    :returns Array:
-         
-    
-
-
-A subclass may return custom jQuery elements
-
-
-
-
-
-
-
-
-
-    
-
-
-
 isEnabled
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -244,15 +188,12 @@ enable or disable the filter
 setRule
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-.. js:function:: ambrosia_web.filter.Filter.setRule(r, no_input_update)
+.. js:function:: ambrosia_web.filter.Filter.setRule(r)
 
 
     
     :param String r: 
         the new rule in filter syntax 
-    
-    :param bool no_input_update: 
-        used internally, disables update of the text field 
     
 
 

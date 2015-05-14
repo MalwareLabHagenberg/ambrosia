@@ -26,7 +26,7 @@
     <link rel="top" title="Ambrosia 0.9.0 documentation" href="index.html" />
     <link rel="up" title="Ambrosia Client Documentation" href="client.html" />
     <link rel="next" title="Class ambrosia_web.filter.BlacklistFilter" href="ambrosia_web.filter.BlacklistFilter.html" />
-    <link rel="prev" title="Class ambrosia_web.event.events-UnknownFdEvent" href="ambrosia_web.event.events-UnknownFdEvent.html" /> 
+    <link rel="prev" title="Class ambrosia_web.event.events-ZygoteForkEvent" href="ambrosia_web.event.events-ZygoteForkEvent.html" /> 
   </head>
   <body>
     <div class="related">
@@ -42,7 +42,7 @@
           <a href="ambrosia_web.filter.BlacklistFilter.html" title="Class ambrosia_web.filter.BlacklistFilter"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="ambrosia_web.event.events-UnknownFdEvent.html" title="Class ambrosia_web.event.events-UnknownFdEvent"
+          <a href="ambrosia_web.event.events-ZygoteForkEvent.html" title="Class ambrosia_web.event.events-ZygoteForkEvent"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
           <li><a href="client.html" accesskey="U">Ambrosia Client Documentation</a> &raquo;</li> 
@@ -90,6 +90,29 @@
 <p>Helper function for the parser.</p>
 </div>
 </div>
+<div class="section" id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="addfilterhandler">
+<h3>addFilterHandler<a class="headerlink" href="#addfilterhandler" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="addFilterHandler">
+<tt class="descname">addFilterHandler</tt><a class="headerlink" href="#addFilterHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>contains all handlers for adding filters to an  event class. Any part of the application may listen to those
+events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.</p>
+</div>
+<div class="section" id="removefilterhandler">
+<h3>removeFilterHandler<a class="headerlink" href="#removefilterhandler" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="removeFilterHandler">
+<tt class="descname">removeFilterHandler</tt><a class="headerlink" href="#removeFilterHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>contains all handlers for removing filters from an  event class. Any part of the application may listen to those
+events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.</p>
+</div>
+</div>
 </div>
 
 
@@ -106,13 +129,18 @@
 <li><a class="reference internal" href="#handlelogicaloperation">handleLogicalOperation</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#attributes">Attributes</a><ul>
+<li><a class="reference internal" href="#addfilterhandler">addFilterHandler</a></li>
+<li><a class="reference internal" href="#removefilterhandler">removeFilterHandler</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="ambrosia_web.event.events-UnknownFdEvent.html"
-                        title="previous chapter">Class ambrosia_web.event.events-UnknownFdEvent</a></p>
+  <p class="topless"><a href="ambrosia_web.event.events-ZygoteForkEvent.html"
+                        title="previous chapter">Class ambrosia_web.event.events-ZygoteForkEvent</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="ambrosia_web.filter.BlacklistFilter.html"
                         title="next chapter">Class ambrosia_web.filter.BlacklistFilter</a></p>
@@ -151,7 +179,7 @@
           <a href="ambrosia_web.filter.BlacklistFilter.html" title="Class ambrosia_web.filter.BlacklistFilter"
              >next</a> |</li>
         <li class="right" >
-          <a href="ambrosia_web.event.events-UnknownFdEvent.html" title="Class ambrosia_web.event.events-UnknownFdEvent"
+          <a href="ambrosia_web.event.events-ZygoteForkEvent.html" title="Class ambrosia_web.event.events-ZygoteForkEvent"
              >previous</a> |</li>
         <li><a href="index.html">Ambrosia 0.9.0 documentation</a> &raquo;</li>
           <li><a href="client.html" >Ambrosia Client Documentation</a> &raquo;</li> 

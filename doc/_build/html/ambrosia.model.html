@@ -64,6 +64,22 @@
 <div class="section" id="module-ambrosia.model.entities">
 <span id="ambrosia-model-entities-module"></span><h2>ambrosia.model.entities module<a class="headerlink" href="#module-ambrosia.model.entities" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
+<dt id="ambrosia.model.entities.App">
+<em class="property">class </em><tt class="descclassname">ambrosia.model.entities.</tt><tt class="descname">App</tt><big>(</big><em>context</em>, <em>package</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#App"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.App" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a></p>
+<dl class="staticmethod">
+<dt id="ambrosia.model.entities.App.find">
+<em class="property">static </em><tt class="descname">find</tt><big>(</big><em>context</em>, <em>entities</em>, <em>identifier_btree</em>, <em>package</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#App.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.App.find" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.entities.App.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#App.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.App.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ambrosia.model.entities.File">
 <em class="property">class </em><tt class="descclassname">ambrosia.model.entities.</tt><tt class="descname">File</tt><big>(</big><em>context</em>, <em>abspath</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#File"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.File" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a></p>
@@ -128,9 +144,9 @@
 </tr>
 </tbody>
 </table>
-<dl class="method">
+<dl class="staticmethod">
 <dt id="ambrosia.model.entities.ServerEndpoint.find">
-<tt class="descname">find</tt><big>(</big><em>context</em>, <em>entities</em>, <em>identifier_btree</em>, <em>protocol</em>, <em>address</em>, <em>port</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#ServerEndpoint.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.ServerEndpoint.find" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><tt class="descname">find</tt><big>(</big><em>context</em>, <em>entities</em>, <em>identifier_btree</em>, <em>protocol</em>, <em>address</em>, <em>port</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#ServerEndpoint.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.ServerEndpoint.find" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -259,6 +275,11 @@ representing it is returned. If no such server entity exist a new one is created
 <p>This behaviour makes sure that multiple event referencing the same entity all have references to the exact same
 entity in memory.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="ambrosia.model.Analysis.iter_all_events">
+<tt class="descname">iter_all_events</tt><big>(</big><em>context</em>, <em>key=None</em>, <em>min_value=None</em>, <em>max_value=None</em>, <em>value=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.iter_all_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.iter_all_events" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ambrosia.model.Analysis.iter_entities">
