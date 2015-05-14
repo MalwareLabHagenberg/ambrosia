@@ -173,7 +173,7 @@ ambrosia_web.filter = {
                     return [(res == true)?(false):(null), false];
                     break;
                 case A.filter.TYPE_FORCE_SHOW_PARENT:
-                    return [res, res];
+                    return [(res == true)?(true):(null), res];
                     break;
                 default:
                     throw "Invalid type";
@@ -455,13 +455,16 @@ ambrosia_web.filter = {
         }
     },
 
-    addFilter: function(filter){
+    addFilter: function(filter, no_redraw){
         A.filter.filters.push(filter);
         for(var i in A.filter.addFilterHandler){
             A.filter.addFilterHandler[i](filter);
         }
 
-        A.redraw();
+        if(filter.isEnabled() && !no_redraw) {
+            /* redraw only if the new filter is enabled */
+            A.redraw();
+        }
     },
 
     removeFilter: function(filter){

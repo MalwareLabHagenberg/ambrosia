@@ -16,7 +16,7 @@ var ambrosia_web = {
      * Redraws all views of the application
      */
     redraw: function() {
-        var drawing = busy('Drawing');
+        var drawing = busy('Redrawing');
 
         /* avoid browser freeze before "Drawing" is shown */
         window.setTimeout(function(){
@@ -72,7 +72,7 @@ var ambrosia_web = {
 
                 $.ajax('filters/default.filter', {
                     success: function (r) {
-                        A.filter.addFilter(new A.filter.Filter(r, 'default filter'));
+                        A.filter.addFilter(new A.filter.Filter(r, 'default filter'), true);
                         loading_filters.finish();
 
                         A.mainView.setup();
@@ -91,8 +91,8 @@ var A = ambrosia_web;
 
 $(document).ready(A.init);
 
-window.onerror = function(msg, file, line){
-    A.log.E(file+':'+line+': '+msg);
+window.onerror = function(msg, file, line, col, errobj){
+    A.log.E([file, line, msg, col, errobj]);
 };
 
 $(window).bind('hashchange', function(e) {

@@ -22,6 +22,9 @@ ambrosia_web.util = {
                 window.alert("ERROR: "+str);
             }
             console.log(level+": "+str);
+            if(typeof(str) != "string"){
+                console.log(str);
+            }
         },
 
         /**

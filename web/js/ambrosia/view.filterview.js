@@ -141,7 +141,9 @@ ambrosia_web.view.filterview = {
 
                 this._apply_button.click(function(){
                     ths.filter.setRule(ths._editor.getValue());
-                    A.redraw();
+                    if(ths.filter.isEnabled()) {
+                        A.redraw();
+                    }
                 });
 
                 this._delete_button.click(function(){

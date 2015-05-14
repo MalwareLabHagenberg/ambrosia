@@ -27,7 +27,7 @@ ambrosia_web.view.entityview = {
 
                     var add = A.util.addToPropertyTable;
 
-                    var fths = $('<button type="button"/>').text('this');
+                    var fths = $('<button type="button"/>').text('whitelist this');
                     fths.click(function(){
                         A.filter.addFilter(new A.filter.Filter(
                             '"'+entity.id+'" : r.*.id',
@@ -36,7 +36,7 @@ ambrosia_web.view.entityview = {
                             A.filter.TYPE_FORCE_SHOW_PARENT));
                     });
 
-                    var fnths = $('<button type="button"/>').text('not this');
+                    var fnths = $('<button type="button"/>').text('blacklist this');
                     fnths.click(function(){
                         A.filter.addFilter(new A.filter.Filter(
                             '"'+entity.id+'" : r.*.id',
@@ -45,7 +45,16 @@ ambrosia_web.view.entityview = {
                             A.filter.TYPE_BLACKLIST));
                     });
 
-                    add('filter', $('<span/>').append(fths).append(fnths), table);
+                    var fnnths = $('<button type="button"/>').text('blacklist others');
+                    fnnths.click(function(){
+                        A.filter.addFilter(new A.filter.Filter(
+                            '"'+entity.id+'" !: r.*.id',
+                            'blacklist others: '+entity,
+                            true,
+                            A.filter.TYPE_BLACKLIST));
+                    });
+
+                    add('filter', $('<span/>').append(fths).append(fnths).append(fnnths), table);
 
                     for(var i in entity){
                         if($.inArray(i, ['id', 'type', 'description']) != -1) {

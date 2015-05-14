@@ -36,6 +36,7 @@ ambrosia_web.view.mainview = {
          * @name setup
          */
         setup: function () {
+            var drawing = busy('Drawing');
             this._setupEventHandler();
             var ths = this;
 
@@ -45,6 +46,7 @@ ambrosia_web.view.mainview = {
                         ths.svg = svg;
 
                         ths.redraw();
+                        drawing.finish();
                     }, 1); // JQUERY SVG catches all exceptions, we do not want this!
                 }, settings: {height: $('#mainview').height() - 20}
             });
@@ -67,6 +69,12 @@ ambrosia_web.view.mainview = {
             var lastTS = 0;
 
             A.event.reset();
+
+            /*
+            hide the element while drawing, this may improve performance on some browsers since
+            the rendering happens "off-screen"
+             */
+            this._main_view_element.hide();
 
             this.svg.clear();
             this.g_zoomed = this.svg.group();
@@ -98,6 +106,8 @@ ambrosia_web.view.mainview = {
             for (var i in A.result.events) {
                 A.result.events[i].draw();
             }
+
+            this._main_view_element.show();
 
             // TODO counter
 
