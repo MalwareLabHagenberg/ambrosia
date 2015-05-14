@@ -21,7 +21,7 @@ stype == "StartTaskEvent" {
     p.is_process == false;
 }
 
-stype == "AnonymousFileEvent" {
+stype == "AnonymousFileAccessEvent" {
     # hide file operations on fds created by pipe()
     p.description == "pipe";
     # hide file operations on fds created by epoll()
@@ -75,7 +75,7 @@ stype == "ZygoteForkEvent";
 stype == "SendSignalEvent";
 
 
-stype == "FileEvent" {
+stype == "FileAccessEvent" {
     # read only
     p.flg_O_RDWR==false && p.flg_O_WRONLY==false {
         # hide getting random numbers
@@ -118,7 +118,7 @@ stype == "DeletePathEvent" {
     r.file.p.abspath == "/data/ananaslkm.ko";
 }
 
-stype == "FileEvent" {
+stype == "FileAccessEvent" {
     r.process.p.type == "ADBD_CHILD" && r.file.p.abspath == "/data/system/packages.xml";
 }
 
@@ -304,7 +304,7 @@ r.process.p.type=="HEALTHD" {
 # Filter app processes                                                         #
 ################################################################################
 (r.process.p.type=="ZYGOTE_CHILD" || r.process.p.type=="TARGET_APP") {
-    stype == "FileEvent" {
+    stype == "FileAccessEvent" {
         # several zygote childs access /proc/*/oom_adj
         (r.file.p.abspath~"^/proc/\d+/oom_adj$" && p.flags==131073);
 
@@ -338,11 +338,11 @@ r.file.p.abspath~"^/data/(data|user)/.+\.db(-journal|-shm|-wal|-mj[0-9A-F]{9})?$
 # normal behaviour of commands                                                 #
 ################################################################################
 "/system/bin/date": r.process.p.path {
-    stype == "FileEvent" && r.file.p.abspath == "/dev/alarm";
+    stype == "FileAccessEvent" && r.file.p.abspath == "/dev/alarm";
 }
 
 "/system/bin/dexopt" : r.process.p.path {
-    stype == "FileEvent" && r.file.p.abspath == "/sys/qemu_trace/process_name";
+    stype == "FileAccessEvent" && r.file.p.abspath == "/sys/qemu_trace/process_name";
 }
 
 "/system/bin/app_process" : r.process.r.tg_leader.p.path {

@@ -228,11 +228,11 @@ rect.mainview_selected {
 }
 
 /* file events: green */
-.event_FileEvent {
+.event_FileAccessEvent {
     fill: #54cc52;
 }
 
-.event_AnonymousFileEvent {
+.event_AnonymousFileAccessEvent {
     fill: #99cc52;
 }
 

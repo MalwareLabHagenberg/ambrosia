@@ -75,7 +75,7 @@ class Ambrosia(object):
         This method finds all Correlaters (see :class:`ambrosia_web.plugins.PluginManager`) and starts them.
 
         A :class:`Correlator` searches for specific events (at top level) and wraps them into other events. E.g. a
-        open(), read() and close() SyscallEvents are wrapped into a FileEvent. The :class:`Correlator` can also do
+        open(), read() and close() SyscallEvents are wrapped into a FileAccessEvent. The :class:`Correlator` can also do
         several passes (e.g. wrap 3 events of type A into a event B, then wrap several B events and wrap them into a C
         event).
 

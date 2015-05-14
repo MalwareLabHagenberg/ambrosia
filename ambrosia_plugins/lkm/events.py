@@ -153,7 +153,7 @@ class UnknownFdEvent(FileDescriptorEvent):
         return '[Unknown FD-Event (#{})]'.format(self.fd_number)
 
 
-class FileEvent(FileDescriptorEvent):
+class FileAccessEvent(FileDescriptorEvent):
     """Represents a normal file operation on a file, directory or pipe
     """
     indices = FileDescriptorEvent.indices | {'abspath'}
@@ -179,19 +179,19 @@ class FileEvent(FileDescriptorEvent):
 
     def __init__(self, file, flags, mode, process, successful):
         assert isinstance(file, File)
-        super(FileEvent, self).__init__(process, successful)
+        super(FileAccessEvent, self).__init__(process, successful)
         self.abspath = file.abspath
         self.file = file
         self.mode = mode
         self.flags_val = flags
         self.flags = set()
         if flags is not None:
-            for f, v in FileEvent.mode_flags.iteritems():
+            for f, v in FileAccessEvent.mode_flags.iteritems():
                 if (v & flags) != 0:
                     self.flags.add(f)
 
     def get_serializeable_properties(self):
-        props = super(FileEvent, self).get_serializeable_properties()
+        props = super(FileAccessEvent, self).get_serializeable_properties()
 
         props.update({
             'mode': self.mode,
@@ -199,27 +199,27 @@ class FileEvent(FileDescriptorEvent):
             'flags': self.flags_val
         })
 
-        for f in FileEvent.mode_flags:
+        for f in FileAccessEvent.mode_flags:
             props['flg_'+f] = f in self.flags
 
         return props
 
     def __str__(self):
-        return '[FileEvent: "{}"]'.format(self.abspath)
+        return '[FileAccessEvent: "{}"]'.format(self.abspath)
 
 
-class AnonymousFileEvent(FileEvent):
+class AnonymousFileAccessEvent(FileAccessEvent):
     """Represents an operation that happens on a file without a name (e.g. an unnamed pipe)
     """
     indices = FileDescriptorEvent.indices
 
     def __init__(self, description, process, context, successful=True):
         assert isinstance(context, AmbrosiaContext)
-        super(AnonymousFileEvent, self).__init__(File.unknown(context), None, None, process, successful)
+        super(AnonymousFileAccessEvent, self).__init__(File.unknown(context), None, None, process, successful)
         self.description = description
 
     def get_serializeable_properties(self):
-        props = super(AnonymousFileEvent, self).get_serializeable_properties()
+        props = super(AnonymousFileAccessEvent, self).get_serializeable_properties()
         props['description'] = self.description
         return props
 

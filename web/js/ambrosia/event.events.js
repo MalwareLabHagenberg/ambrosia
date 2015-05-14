@@ -61,10 +61,10 @@ ambrosia_web.event.events = function(){
 
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.FileEvent`
+     * Represents :class:`ambrosia_plugins.lkm.events.FileAccessEvent`
      * @constructor
      */
-    var FileEvent = Class('ambrosia_web.event.events.FileEvent',
+    var FileAccessEvent = Class('ambrosia_web.event.events.FileAccessEvent',
         A.event.BlockEvent, {
             /*
             new A.filter.Filter(
@@ -84,10 +84,10 @@ ambrosia_web.event.events = function(){
 
 
     /**
-     * Represents :class:`ambrosia_plugins.lkm.events.AnonymousFileEvent`
+     * Represents :class:`ambrosia_plugins.lkm.events.AnonymousFileAccessEvent`
      * @constructor
      */
-    var AnonymousFileEvent = Class('ambrosia_web.event.events.AnonymousFileEvent',
+    var AnonymousFileAccessEvent = Class('ambrosia_web.event.events.AnonymousFileAccessEvent',
         A.event.BlockEvent, { });
 
 
@@ -237,7 +237,7 @@ ambrosia_web.event.events = function(){
         'ambrosia_plugins.lkm.events.SyscallEvent':             SyscallEvent,
         'ambrosia_plugins.apimonitor.AndroidApicallEvent':      AndroidApicallEvent,
         'ambrosia_plugins.apimonitor.SendSMSEvent':             SendSMSEvent,
-        'ambrosia_plugins.lkm.events.FileEvent':                FileEvent,
+        'ambrosia_plugins.lkm.events.FileAccessEvent':          FileAccessEvent,
         'ambrosia_plugins.lkm.events.StartTaskEvent':           StartTaskEvent,
         'ambrosia_plugins.lkm.events.UnknownFdEvent':           UnknownFdEvent,
         'ambrosia_plugins.lkm.events.MemoryMapEvent':           MemoryMapEvent,
@@ -254,7 +254,7 @@ ambrosia_web.event.events = function(){
         'ambrosia_plugins.apimonitor.ContactAccessEvent':       ContactAccessEvent,
         'ambrosia_plugins.apimonitor.PhoneCallEvent':           PhoneCallEvent,
         'ambrosia_plugins.apimonitor.SMSAccessEvent':           SMSAccessEvent,
-        'ambrosia_plugins.lkm.events.AnonymousFileEvent':       AnonymousFileEvent,
+        'ambrosia_plugins.lkm.events.AnonymousFileAccessEvent': AnonymousFileAccessEvent,
         'ambrosia_plugins.lkm.events.LibraryLoadEvent':         LibraryLoadEvent,
         'ambrosia_plugins.lkm.events.JavaLibraryLoadEvent':     JavaLibraryLoadEvent,
         'ambrosia_plugins.lkm.events.ZygoteForkEvent':          ZygoteForkEvent,

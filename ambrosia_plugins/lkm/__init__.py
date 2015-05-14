@@ -14,9 +14,9 @@ from ambrosia import model, Correlator
 from ambrosia.context import AmbrosiaContext
 from ambrosia.model.entities import Task, File, App, ServerEndpoint
 from ambrosia_plugins.events import ANANASEvent
-from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileEvent, \
+from ambrosia_plugins.lkm.events import SyscallEvent, CommandExecuteEvent, FileDescriptorEvent, FileAccessEvent, \
     SocketEvent, SocketAcceptEvent, MemoryMapEvent, StartTaskEvent, SuperUserRequestEvent, CreateDirEvent, SendSignalEvent, \
-    DeletePathEvent, ExecEvent, ANANASAdbShellExecEvent, AnonymousFileEvent, UnknownFdEvent, LibraryLoadEvent, JavaLibraryLoadEvent, \
+    DeletePathEvent, ExecEvent, ANANASAdbShellExecEvent, AnonymousFileAccessEvent, UnknownFdEvent, LibraryLoadEvent, JavaLibraryLoadEvent, \
     ZygoteForkEvent, APKInstallEvent, MountEvent
 
 __author__ = 'Wolfgang Ettlinger'
@@ -27,7 +27,7 @@ class PluginInfo(PluginInfoTop):
     def correlators():
         return [
             (SyscallCorrelator, 10),  # basic correlation
-            (FileEventCorrelator, 20),  # classifies file events
+            (FileAccessEventCorrelator, 20),  # classifies file events
             (CommandExecuteCorrelator, 30),  # finds command executions
             (AdbCommandCorrelator, 40),  # correlates command executions with adb commands
             (InstallCorelator, 50)  # find APK installations
@@ -314,13 +314,13 @@ class SyscallCorrelator(ambrosia.Correlator):
                 if path.startswith('socket:'):
                     new_event = SocketEvent(proc, True)
                 elif path.startswith('anon_inode:') or path.startswith('pipe:'):
-                    new_event = AnonymousFileEvent(path, proc, self.context)
+                    new_event = AnonymousFileAccessEvent(path, proc, self.context)
                 elif path.startswith('/'):
                     if path.endswith(' (deleted)'):
                         # kernel appends ' (deleted)' for deleted files
                         path = path[0:-10]
 
-                    new_event = FileEvent(
+                    new_event = FileAccessEvent(
                         self.context.analysis.get_entity(
                             self.context,
                             File,
@@ -555,7 +555,7 @@ class SyscallCorrelator(ambrosia.Correlator):
                 flags = int(evt.params[1])
                 mode = int(evt.params[2])
 
-            parent_evt = FileEvent(
+            parent_evt = FileAccessEvent(
                 self.context.analysis.get_entity(
                     self.context,
                     File,
@@ -570,7 +570,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
             self.to_add.add(parent_evt)
         elif evt.name == "epoll_create" or evt.name == "epoll_create1":
-            parent_evt = AnonymousFileEvent("epoll", proc, self.context, self._is_success(evt.returnval))
+            parent_evt = AnonymousFileAccessEvent("epoll", proc, self.context, self._is_success(evt.returnval))
 
             if parent_evt.successful:
                 proc_fds[evt.returnval] = parent_evt
@@ -592,7 +592,7 @@ class SyscallCorrelator(ambrosia.Correlator):
             fd1 = int(evt.params[0])
             fd2 = int(evt.params[1])
 
-            parent_evt = AnonymousFileEvent('pipe', proc, self.context,
+            parent_evt = AnonymousFileAccessEvent('pipe', proc, self.context,
                                             self._is_success(evt.returnval) and fd1 >= 0 and fd2 >= 0)
 
             if parent_evt.successful:
@@ -736,12 +736,12 @@ class SyscallCorrelator(ambrosia.Correlator):
             self.to_remove.add(evt)
 
 
-class FileEventCorrelator(Correlator):
+class FileAccessEventCorrelator(Correlator):
     """
     Finds library load events (mmap to \*.so files)
     """
     def correlate(self):
-        for fe in self.context.analysis.iter_events(self.context, FileEvent):
+        for fe in self.context.analysis.iter_events(self.context, FileAccessEvent):
             if re.match('^/vendor/lib/.+\.so', fe.abspath) or re.match('^/system/lib/.+\.so', fe.abspath):
 
                 lle = LibraryLoadEvent(fe.file, fe.process, False)
@@ -777,7 +777,7 @@ class CommandExecuteCorrelator(Correlator):
     * :class:`ambrosia_plugins.lkm.events.ExecEvent`: commands are started using a fork-and-exec
     * :class:`ambrosia_plugins.lkm.events.LibraryLoad`: shortly after a fork indicates that a library is loaded that
         is essential to run the command.
-    * :class:`ambrosia_plugins.lkm.events.FileEvent`: several file events happen at the begin of a command execution
+    * :class:`ambrosia_plugins.lkm.events.FileAccessEvent`: several file events happen at the begin of a command execution
 
     """
     def correlate(self):
@@ -877,8 +877,8 @@ class CommandExecuteCorrelator(Correlator):
         self.update_tree()
 
     def _find_file_events(self, process, evt, start_ts, matches):
-        for fe in self.context.analysis.iter_events(self.context, FileEvent, 'process', value=process):
-            assert isinstance(fe, FileEvent)
+        for fe in self.context.analysis.iter_events(self.context, FileAccessEvent, 'process', value=process):
+            assert isinstance(fe, FileAccessEvent)
 
             if (fe.start_ts - start_ts) > datetime.timedelta(0, 2):
                 # we consider everything within 2 seconds as startup
