@@ -68,35 +68,37 @@ A.filter.handleStatement = function(op, block, stmt2){
     var stmt = A.filter.optimizeLogical(op, 'AND', block);
     return new A.filter.optimizeLogical(stmt, 'OR', stmt2);
 }
-}
-*/
+}*/
 
 start
-  = op:operation block:block ";"? ws stmt:start
+  = statement
+
+statement
+  = ws op:selector block:block ";"? ws stmt:statement
     { return new A.filter.handleStatement(op, block, stmt); }
   / ws
     { return new A.filter.Static(false); }
 
-block
-  = "{" stmt:start "}"
-    { return stmt; }
-  / ws
-    { return new A.filter.Static(true); }
-
-operation
-  = ws ex1:expression ws rest:(logical_operator operation)?
+selector
+  = ex1:expression rest:(logical_operator selector)?
     { return A.filter.handleLogicalOperation(arguments[0], arguments[1])}
 
+block
+  = "{" stmt:statement "}"
+    { return stmt; }
+  / ""
+    { return new A.filter.Static(true); }
+
 expression
-  = "(" exp:operation ws ")"
+  = "(" ws exp:selector ")" ws
     { return exp; }
   / cmp:comparison 
     { return cmp; }
-  / uo:unary_operator ex:operation
+  / uo:unary_operator ex:expression
     { return new A.filter.UnaryOperator(uo, ex); }
 
 comparison
-  = p1:value ws op:operand ws p2:value
+  = p1:value op:operator p2:value
     { return new A.filter.Comparison(p1, op, p2) }
   / "true"
     { return new A.filter.Static(true); }
@@ -108,34 +110,35 @@ value
   / string
   / number
 
-operand
-  = '==' { return 'EQ'}
-  / '!=' { return 'NEQ' }
-  / '>=' { return 'GE' }
-  / '>' { return 'G' }
-  / '<=' { return 'LE' }
-  / '<' { return 'L' }
-  / '~' { return 'REGEX' }
-  / ':' { return 'IN' }
-  / '!:' { return 'NIN' }
+operator
+  = '==' ws { return 'EQ'}
+  / '!=' ws { return 'NEQ' }
+  / '>=' ws { return 'GE' }
+  / '>' ws { return 'G' }
+  / '<=' ws { return 'LE' }
+  / '<' ws { return 'L' }
+  / '~' ws { return 'REGEX' }
+  / ':' ws { return 'IN' }
+  / '!:' ws { return 'NIN' }
 
 unary_operator
-  = '!' { return 'NOT' }
+  = '!' ws { return 'NOT' }
 
 logical_operator
-  = '&&' { return 'AND'}
-  / '||' { return 'OR' }
+  = '&&' ws { return 'AND'}
+  / '||' ws { return 'OR' }
 
 property
-  = p:[a-zA-Z_\*\.]+
+  = p:[a-zA-Z_\*\.]+  ws
     { return new A.filter.Property(p.join("")) }
 
 string
-  = '"' str:[^\"]* '"' 
+  = '"' str:[^\"]* '"'  ws
     { return str.join("") }
 
 number
-  = num:[0-9\.]+ { return parseFloat(num.join("")) }
+  = num:$([-+]? [0-9]* "."? [0-9]*)  ws
+    { return parseFloat(num) }
 
 ws
   = [ \t\n]* "#" [^\n]* "\n"? ws?
