@@ -360,7 +360,7 @@ ambrosia_web.event = {
                 xOffset + this.dimensions.getX(), this.dimensions.getY(),
                 this.dimensions.getWidth(), this.dimensions.getHeight());
 
-            $(this.svgElement).addClass('mainview_block').addClass(this.cssClass);
+            $(this.svgElement).attr('class', 'mainview_block ' + this.cssClass);
 
             for(var i in this.children){
                 this.children[i].draw(A.event.BLOCK_PADDING + xOffset + this.dimensions.getX());
