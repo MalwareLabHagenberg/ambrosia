@@ -324,13 +324,13 @@ rect.mainview_selected {
     fill: #426f1d;
 }
 
-/* irrelevant events: grey */
+/* caused by ANANAS: red */
 .event_ANANASAdbShellExecEvent {
-    fill: #818181;
+    fill: #79000f;
 }
 
 .event_ANANASEvent {
-    stroke: #666261;
+    stroke: #793d00;
 }
 
 
