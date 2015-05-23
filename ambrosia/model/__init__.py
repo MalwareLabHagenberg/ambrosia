@@ -124,6 +124,18 @@ class Analysis(Persistent):
         return res
 
     def iter_all_events(self, context, key=None, min_value=None, max_value=None, value=None):
+        """Iterates over all event classes.
+
+        Args:
+            context (ambrosia_web.context.AmbrosiaContext): the current context
+            key: the key we are searching for
+            min_value: the minimum value
+            max_value: the maximum value
+            value: the specific value (to search for exactly one value)
+
+        This method works just like :func:`Analysis.iter_events` but is not limited to a certain entity Type. Instead,
+        it searches entitiy of all types.
+        """
         for class_name, idx in self._event_index.iteritems():
             cls = get_class(class_name)
             assert issubclass(cls, Event)
@@ -134,7 +146,6 @@ class Analysis(Persistent):
             for evt in self.iter_events(context, cls, key, min_value, max_value, value):
                 yield evt
 
-    # TODO cls is None
     def iter_events(self, context, cls=None, key=None, min_value=None, max_value=None, value=None):
         """Iterates over all events matching specific conditions in an efficient manner.
 
@@ -146,7 +157,7 @@ class Analysis(Persistent):
             max_value: the maximum value
             value: the specific value (to search for exactly one value)
 
-        This method uses an internal indizes to efficiently select specific events. Each event class defines attributes
+        This method uses a internal indices to efficiently select specific events. Each event class defines attributes
         that should be indexed (:class:`Event`.indices). This class makes sure that those attributes can be searched for
         very fast.
 

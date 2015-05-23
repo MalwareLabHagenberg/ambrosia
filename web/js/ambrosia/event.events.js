@@ -65,22 +65,7 @@ ambrosia_web.event.events = function(){
      * @constructor
      */
     var FileAccessEvent = Class('ambrosia_web.event.events.FileAccessEvent',
-        A.event.BlockEvent, {
-            /*
-            new A.filter.Filter(
-                '!(p.abspath=="/proc/net/xt_qtaguid/iface_stat_fmt" && p.flags==131072 &&  "m.android.phone" !: p.process.comm)',
-                'android phone accesses /proc/net/xt_qtaguid/iface_stat_fmt'),
-
-
-
-
-            new A.filter.Filter('!(p.abspath=="/dev/binder" && p.mode==131074)', ''),
-
-            new A.filter.Filter(
-                '!(p.abspath ~ "/system/framework/.*\\.jar" && p.mode==131072 && r.process.p.type=="ADBD_CHILD")',
-                '')*/
-
-    });
+        A.event.BlockEvent, { });
 
 
     /**

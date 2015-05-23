@@ -61,7 +61,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;index&#39;</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">monotonic_ts</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">spawned_child</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">monotonic_ts</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">spawned_child</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">target_task</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SyscallEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">end_ts</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
@@ -73,6 +73,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">returnval</span> <span class="o">=</span> <span class="n">props</span><span class="p">[</span><span class="s">&#39;returnval&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spawned_child</span> <span class="o">=</span> <span class="n">spawned_child</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_task</span> <span class="o">=</span> <span class="n">target_task</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">idx</span>
 
         <span class="n">add_info</span> <span class="o">=</span> <span class="n">props</span><span class="p">[</span><span class="s">&#39;add_info&#39;</span><span class="p">]</span>
@@ -93,6 +94,7 @@
             <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
             <span class="s">&#39;spawned_child&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spawned_child</span><span class="p">,</span>
+            <span class="s">&#39;target_task&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_task</span><span class="p">,</span>
             <span class="s">&#39;monotonic_ts&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">monotonic_ts</span><span class="p">,</span>
             <span class="s">&#39;syscall_index&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
         <span class="p">}</span>
@@ -144,6 +146,8 @@
 
 </div>
 <div class="viewcode-block" id="ZygoteForkEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.ZygoteForkEvent">[docs]</a><span class="k">class</span> <span class="nc">ZygoteForkEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Represents that *zygote* forked to start an app</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;process&#39;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
@@ -201,7 +205,7 @@
         <span class="k">return</span> <span class="s">&#39;[Unknown FD-Event (#{})]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fd_number</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="FileEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.FileEvent">[docs]</a><span class="k">class</span> <span class="nc">FileEvent</span><span class="p">(</span><span class="n">FileDescriptorEvent</span><span class="p">):</span>
+<div class="viewcode-block" id="FileAccessEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.FileAccessEvent">[docs]</a><span class="k">class</span> <span class="nc">FileAccessEvent</span><span class="p">(</span><span class="n">FileDescriptorEvent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents a normal file operation on a file, directory or pipe</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">FileDescriptorEvent</span><span class="o">.</span><span class="n">indices</span> <span class="o">|</span> <span class="p">{</span><span class="s">&#39;abspath&#39;</span><span class="p">}</span>
@@ -227,19 +231,19 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">FileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FileAccessEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">abspath</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">abspath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="nb">file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flags_val</span> <span class="o">=</span> <span class="n">flags</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">flags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">FileEvent</span><span class="o">.</span><span class="n">mode_flags</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">FileAccessEvent</span><span class="o">.</span><span class="n">mode_flags</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">&amp;</span> <span class="n">flags</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-<div class="viewcode-block" id="FileEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.FileEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
+<div class="viewcode-block" id="FileAccessEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.FileAccessEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FileAccessEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
 
         <span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
             <span class="s">&#39;mode&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
@@ -247,27 +251,27 @@
             <span class="s">&#39;flags&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags_val</span>
         <span class="p">})</span>
 
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">FileEvent</span><span class="o">.</span><span class="n">mode_flags</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">FileAccessEvent</span><span class="o">.</span><span class="n">mode_flags</span><span class="p">:</span>
             <span class="n">props</span><span class="p">[</span><span class="s">&#39;flg_&#39;</span><span class="o">+</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span>
 
         <span class="k">return</span> <span class="n">props</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;[FileEvent: &quot;{}&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&#39;[FileAccessEvent: &quot;{}&quot;]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span>
 
 </div>
-<div class="viewcode-block" id="AnonymousFileEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.AnonymousFileEvent">[docs]</a><span class="k">class</span> <span class="nc">AnonymousFileEvent</span><span class="p">(</span><span class="n">FileEvent</span><span class="p">):</span>
+<div class="viewcode-block" id="AnonymousFileAccessEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.AnonymousFileAccessEvent">[docs]</a><span class="k">class</span> <span class="nc">AnonymousFileAccessEvent</span><span class="p">(</span><span class="n">FileAccessEvent</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Represents an operation that happens on a file without a name (e.g. an unnamed pipe)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="n">FileDescriptorEvent</span><span class="o">.</span><span class="n">indices</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">successful</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">AmbrosiaContext</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">AnonymousFileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">unknown</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AnonymousFileAccessEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">File</span><span class="o">.</span><span class="n">unknown</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
 
-<div class="viewcode-block" id="AnonymousFileEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.AnonymousFileEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">AnonymousFileEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
+<div class="viewcode-block" id="AnonymousFileAccessEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.AnonymousFileAccessEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">AnonymousFileAccessEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_serializeable_properties</span><span class="p">()</span>
         <span class="n">props</span><span class="p">[</span><span class="s">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
         <span class="k">return</span> <span class="n">props</span>
 </div>
@@ -657,6 +661,8 @@
 
 </div>
 <div class="viewcode-block" id="APKInstallEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.APKInstallEvent">[docs]</a><span class="k">class</span> <span class="nc">APKInstallEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Represents an app installation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">file</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
@@ -673,8 +679,40 @@
         <span class="p">}</span>
 </div>
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&#39;[APK install: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span></div>
-</pre></div>
+        <span class="k">return</span> <span class="s">&#39;[APK install: {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="MountEvent"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.MountEvent">[docs]</a><span class="k">class</span> <span class="nc">MountEvent</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Represents a mount syscall</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dev</span><span class="p">,</span> <span class="n">mountpoint</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">successful</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dev</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mountpoint</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MountEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dev</span> <span class="o">=</span> <span class="n">dev</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mountpoint</span> <span class="o">=</span> <span class="n">mountpoint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flags</span> <span class="o">=</span> <span class="n">flags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">successful</span> <span class="o">=</span> <span class="n">successful</span>
+
+<div class="viewcode-block" id="MountEvent.get_serializeable_properties"><a class="viewcode-back" href="../../../ambrosia_plugins.lkm.html#ambrosia_plugins.lkm.events.MountEvent.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&#39;dev&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="p">,</span>
+            <span class="s">&#39;mountpoint&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mountpoint</span><span class="p">,</span>
+            <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s">&#39;flags&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">,</span>
+            <span class="s">&#39;data&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="s">&#39;process&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">,</span>
+            <span class="s">&#39;successful&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">successful</span>
+        <span class="p">}</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;[Mount: {} to {}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dev</span><span class="o">.</span><span class="n">abspath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mountpoint</span><span class="o">.</span><span class="n">abspath</span><span class="p">)</span>
+</pre></div></div>
 
           </div>
         </div>

@@ -133,7 +133,7 @@ adjusted (to the clock of the analysis machine). See <tt class="xref py py-class
 <dd><p>Correlates the events</p>
 <p>This method finds all Correlaters (see <tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.plugins.PluginManager</span></tt>) and starts them.</p>
 <p>A <a class="reference internal" href="#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">Correlator</span></tt></a> searches for specific events (at top level) and wraps them into other events. E.g. a
-open(), read() and close() SyscallEvents are wrapped into a FileEvent. The <a class="reference internal" href="#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">Correlator</span></tt></a> can also do
+open(), read() and close() SyscallEvents are wrapped into a FileAccessEvent. The <a class="reference internal" href="#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">Correlator</span></tt></a> can also do
 several passes (e.g. wrap 3 events of type A into a event B, then wrap several B events and wrap them into a C
 event).</p>
 <p>Should be called after <a class="reference internal" href="#ambrosia.Ambrosia.adjust_times" title="ambrosia.Ambrosia.adjust_times"><tt class="xref py py-func docutils literal"><span class="pre">Ambrosia.adjust_times()</span></tt></a>.</p>

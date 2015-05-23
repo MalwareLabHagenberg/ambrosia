@@ -93,6 +93,10 @@ ambrosia_web.view.filterview = {
             }
         }),
 
+    /**
+     * Represents a single filter in the filter view
+     * @constructor
+     */
     FilterViewElement: Class(
             'ambrosia_web.view.filterview.FilterViewElement',
         {

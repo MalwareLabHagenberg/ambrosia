@@ -174,6 +174,18 @@
         <span class="k">return</span> <span class="n">res</span>
 </div>
 <div class="viewcode-block" id="Analysis.iter_all_events"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.iter_all_events">[docs]</a>    <span class="k">def</span> <span class="nf">iter_all_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterates over all event classes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (ambrosia_web.context.AmbrosiaContext): the current context</span>
+<span class="sd">            key: the key we are searching for</span>
+<span class="sd">            min_value: the minimum value</span>
+<span class="sd">            max_value: the maximum value</span>
+<span class="sd">            value: the specific value (to search for exactly one value)</span>
+
+<span class="sd">        This method works just like :func:`Analysis.iter_events` but is not limited to a certain entity Type. Instead,</span>
+<span class="sd">        it searches entitiy of all types.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_event_index</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
             <span class="n">cls</span> <span class="o">=</span> <span class="n">get_class</span><span class="p">(</span><span class="n">class_name</span><span class="p">)</span>
             <span class="k">assert</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">Event</span><span class="p">)</span>
@@ -183,8 +195,7 @@
 
             <span class="k">for</span> <span class="n">evt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_events</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">min_value</span><span class="p">,</span> <span class="n">max_value</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
                 <span class="k">yield</span> <span class="n">evt</span>
-
-    <span class="c"># TODO cls is None</span></div>
+</div>
 <div class="viewcode-block" id="Analysis.iter_events"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Analysis.iter_events">[docs]</a>    <span class="k">def</span> <span class="nf">iter_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">min_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Iterates over all events matching specific conditions in an efficient manner.</span>
 
@@ -196,7 +207,7 @@
 <span class="sd">            max_value: the maximum value</span>
 <span class="sd">            value: the specific value (to search for exactly one value)</span>
 
-<span class="sd">        This method uses an internal indizes to efficiently select specific events. Each event class defines attributes</span>
+<span class="sd">        This method uses a internal indices to efficiently select specific events. Each event class defines attributes</span>
 <span class="sd">        that should be indexed (:class:`Event`.indices). This class makes sure that those attributes can be searched for</span>
 <span class="sd">        very fast.</span>
 
@@ -500,7 +511,7 @@
                 <span class="s">&#39;children&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">to_serializeable</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">],</span>
                 <span class="s">&#39;startTS&#39;</span><span class="p">:</span> <span class="n">js_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_ts</span><span class="p">),</span>
                 <span class="s">&#39;endTS&#39;</span><span class="p">:</span> <span class="n">js_date</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_ts</span><span class="p">),</span>
-                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
                 <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="n">props</span><span class="p">,</span>
                 <span class="s">&#39;references&#39;</span><span class="p">:</span> <span class="n">refs</span><span class="p">}</span>
 </div>
@@ -589,7 +600,7 @@
             <span class="s">&#39;type&#39;</span><span class="p">:</span> <span class="n">classname</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span>
             <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="n">properties</span><span class="p">,</span>
             <span class="s">&#39;references&#39;</span><span class="p">:</span> <span class="n">refs</span><span class="p">,</span>
-            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="nb">unicode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="p">}</span>
 </div>
 <div class="viewcode-block" id="Entity.get_serializeable_properties"><a class="viewcode-back" href="../../ambrosia.model.html#ambrosia.model.Entity.get_serializeable_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_serializeable_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

@@ -35,7 +35,7 @@ ambrosia_web.view = {
 
             /**
              * show this panel
-             * @methodOf ambrosia_web.view.View
+             * @methodOf ambrosia_web.view.Panel
              * @name show
              */
             show: function(){
@@ -45,7 +45,7 @@ ambrosia_web.view = {
 
             /**
              * check whether this panel is shown
-             * @methodOf ambrosia_web.view.View
+             * @methodOf ambrosia_web.view.Panel
              * @name isShown
              */
             isShown: function(){

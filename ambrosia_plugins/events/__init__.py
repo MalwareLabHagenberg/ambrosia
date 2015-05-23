@@ -44,6 +44,8 @@ class ANANASEvent(model.Event):
 
 
 class EventParser(ambrosia.ResultParser):
+    """ Parses the *events* xml tag
+    """
     def parse(self, name, el, context):
         assert isinstance(context, AmbrosiaContext)
         if name == 'events':

@@ -96,6 +96,8 @@ class CommandExecuteEvent(model.Event):
 
 
 class ZygoteForkEvent(model.Event):
+    """ Represents that *zygote* forked to start an app
+    """
     indices = {'process'}
 
     def __init__(self, process):
@@ -609,6 +611,8 @@ class JavaLibraryLoadEvent(model.Event):
 
 
 class APKInstallEvent(model.Event):
+    """ Represents an app installation
+    """
     indices = set()
 
     def __init__(self, file, process):
@@ -629,6 +633,8 @@ class APKInstallEvent(model.Event):
 
 
 class MountEvent(model.Event):
+    """ Represents a mount syscall
+    """
     indices = set()
 
     def __init__(self, dev, mountpoint, type, flags, data, process, successful):

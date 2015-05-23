@@ -39,7 +39,7 @@ class PluginInfo(PluginInfoTop):
 
 
 class LkmPluginParser(ambrosia.ResultParser):
-    """Parses the *process* and *syscalltrace* elements of the result set.
+    """Parses the *process*, *syscalltrace* and *appinfo* elements of the result set.
     """
     def __init__(self):
         super(LkmPluginParser, self).__init__()
@@ -77,11 +77,11 @@ class LkmPluginParser(ambrosia.ResultParser):
            * adjtime: the adjusted time (the captured *normal* time - error).
            * lasterror: the error of the last syscall. If the error of two consecutive syscall changes, we know that
              the system clock has been altered (and we need to make an entry in
-             :class:`ambrosia_web.clocks.ClockSyncer`.translate_table). The comparison sees two errors that are at a maximum
-             of 1 second apart as a clock change. This is because the error is not absolutely precise (the *monotonic*
-             and *normal* timestamps are not captured at exactly the same time, even a context switch may happen in
-             between).
-
+             :class:`ambrosia_web.clocks.ClockSyncer`.translate_table). The comparison sees two errors that are at a
+             maximum of 1 second apart as a clock change. This is because the error is not absolutely precise (the
+             *monotonic* and *normal* timestamps are not captured at exactly the same time, even a context switch may
+             happen in between).
+        * *appinfo* element: A :class:`ambrosia_web.model.entities.App` entity is created for each app in the report.
         """
         assert isinstance(context, AmbrosiaContext)
         analysis = context.analysis
@@ -454,6 +454,15 @@ class SyscallCorrelator(ambrosia.Correlator):
         self.update_tree()
 
     def _parse_addr_str(self, addrstr, socket_evt):
+        """Parse the struct sockaddr structure passed to bind and connect syscalls.
+
+        Args:
+            addrstr (str): the hexascii representation of the struct sockaddr
+            oldfd (ambrosia_plugins.lkm.events.SocketEvent): the socket event the struct should be parsed for
+
+        Returns:
+            an :class:`ambrosia.model.Entity` that represents the address
+        """
         assert isinstance(socket_evt, SocketEvent)
         raw = binascii.unhexlify(addrstr)
 
@@ -738,7 +747,7 @@ class SyscallCorrelator(ambrosia.Correlator):
 
 class FileAccessEventCorrelator(Correlator):
     """
-    Finds library load events (mmap to \*.so files)
+    Finds library load events (mmap to \*.so files) and Java library loads
     """
     def correlate(self):
         for fe in self.context.analysis.iter_events(self.context, FileAccessEvent):
@@ -981,6 +990,8 @@ class AdbCommandCorrelator(Correlator):
 
 
 class InstallCorelator(Correlator):
+    """ Finds app installations
+    """
     def correlate(self):
         self.log.info('Correlating App installations')
 

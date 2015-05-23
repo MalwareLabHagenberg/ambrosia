@@ -111,6 +111,12 @@ class Task(Entity):
 
 
 class App(Entity):
+    """Represents an app that has been installed on the system.
+
+    Args:
+        context (ambrosia_web.context.AmbrosiaContext): the current context
+        package (str): the app's package name
+    """
     def __init__(self, context, package):
         assert isinstance(context, ambrosia.context.AmbrosiaContext)
         super(App, self).__init__(package)
@@ -141,7 +147,7 @@ class App(Entity):
 
 
 class File(Entity):
-    """Represents file (existing or not) on the emulator.
+    """Represents a file or directory (existing or not) on the emulator.
 
     Args:
         context (ambrosia_web.context.AmbrosiaContext): the current context

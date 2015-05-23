@@ -18,7 +18,14 @@ ambrosia_web.filter = {
      */
     removeFilterHandler: [],
 
+    /**
+     * the filter type for whitelist filters
+     */
     TYPE_FORCE_SHOW_PARENT: 'whitelist_force_show_parent',
+
+    /**
+     * the filter type for blacklist filters
+     */
     TYPE_BLACKLIST: 'blacklist',
 
     /***
@@ -27,23 +34,19 @@ ambrosia_web.filter = {
      * The following shows example for the filter syntax:
      *
      * @example
-     * !(test == 1.2 || (test > 2 && p.bar != "foobar") || true ) && !false
+     * stype == "FileAccessEvent" {
+     *      # read only
+     *      p.flg_O_RDWR==false && p.flg_O_WRONLY==false {
+     *          # hide getting random numbers
+     *          r.file.p.abspath == "/dev/urandom";
+     *      }
+     *  }
      *
-     * The logical operations "&&" and '!!' as well as the unary logical operation "!" are allowed. Parentheses may be
-     * used to change the default precedence of the operations.
+     *  # hide Android shared memory operations
+     *  (r.file.p.abspath=="/dev/ashmem" && p.flags==131074);
      *
-     * These logical operations manage "comparisons". A "comparison" may compare two values using the operators "==",
-     * "!=", ">=", "<=", "<", "~" (the first value matches a regex defined by the second value), ":" (the second value
-     * is an array and the first element is contained in the second one) and "!:" (the first value is not contained
-     * in the second value).
-     *
-     * A value may be a string in the form of "string", a number in the form of 1.0 or 1, true or false or a property.
-     * A property is a string describing an attribute of an event (e.g. abspath, successful). Moreover a property may
-     * also match a specific reference (e.g. r.process.pid, r.file.abspath). The reference defined in a property may be
-     * a specific reference (like r.file or r.process). Moreover the string "*" may be used to get all values
-     * (e.g. r.*.id). Since multiple values are returned, the value  must be treated as an array (Array operations ":"
-     * and "!:" must be used). A general filter (that is applied to all events regardless of their type) can therefore
-     * be used to find all events related to a certain entity (e.g. "someidofanentity" : r.*.id).
+     * Please see the thesis *Ambrosia: A Framework for Visualizing Malicious Behaviour in Android Applications* for
+     * a detailed explaination of the filter language.
      *
      * @constructor
      */
@@ -74,13 +77,6 @@ ambrosia_web.filter = {
             },
 
             /**
-             * TODO
-             */
-            redraw: function(){
-                this._counter.text(this.counter + ' events filtered');
-            },
-
-            /**
              * replaces the current rule with a new one
              * @function
              * @param {String} r the new rule in filter syntax
@@ -99,14 +95,32 @@ ambrosia_web.filter = {
                 this._call_change_listener();
             },
 
+            /**
+             * get the current rule string
+             * @function
+             * @methodOf ambrosia_web.filter.Filter
+             * @name getRule
+             */
             getRule: function () {
                 return this._rule;
             },
 
+            /**
+             * get the error descriptin string
+             * @function
+             * @methodOf ambrosia_web.filter.Filter
+             * @name getError
+             */
             getError: function () {
                 return this._error;
             },
 
+            /**
+             * get the filter type
+             * @function
+             * @methodOf ambrosia_web.filter.Filter
+             * @name getType
+             */
             getType: function () {
                 return this._type;
             },
@@ -122,13 +136,22 @@ ambrosia_web.filter = {
                 this._call_change_listener();
             },
 
+            /**
+             * set the filter type
+             * @param {String} t fitler type
+             * @methodOf ambrosia_web.filter.Filter
+             * @name setType
+             */
             setType: function(t){
                 this._type = t;
                 this._call_change_listener();
             },
 
             /**
-             * TODO
+             * get the description string
+             * @function
+             * @methodOf ambrosia_web.filter.Filter
+             * @name getDescription
              */
             getDescription: function(){
                 return this._description;
@@ -247,7 +270,10 @@ ambrosia_web.filter = {
         }
     },
 
-
+    /**
+     * A static value in a filter. Used by the parser.
+     * @constructor
+     */
     Static: Class('ambrosia_web.filter.Static',
         {
         __init__: function(val) {
@@ -265,6 +291,9 @@ ambrosia_web.filter = {
         }
     }),
 
+    /**
+     * optimize a comparison. Used by the parser.
+     */
     optimizeLogical: function(p1, op, p2){
         var p1_static = p1 instanceof A.filter.Static;
         var p2_static = p2 instanceof A.filter.Static;
@@ -444,17 +473,24 @@ ambrosia_web.filter = {
         }
     },
 
+    /**
+     * Helper function for the parser.
+     * @param op the selector of a statement
+     * @param block the block of a statement
+     * @param stmt2 the next statement
+     * @returns {*}
+     */
     handleStatement: function(op, block, stmt2){
         var stmt = A.filter.optimizeLogical(op, 'AND', block);
         return A.filter.optimizeLogical(stmt, 'OR', stmt2);
     },
 
-    resetFilterCounters: function(){
-        for(var i in A.filter.filters){
-            A.filter.filters[i].counter = 0;
-        }
-    },
-
+    /**
+     * Add a filter.
+     * @param filter the filter object
+     * @param no_redraw true if the visualisation should not be redrawn
+     * @returns {*}
+     */
     addFilter: function(filter, no_redraw){
         A.filter.filters.push(filter);
         for(var i in A.filter.addFilterHandler){
@@ -467,6 +503,11 @@ ambrosia_web.filter = {
         }
     },
 
+    /**
+     * Remove a filter
+     * @param filter the filter object to remove
+     * @returns {*}
+     */
     removeFilter: function(filter){
         var idx = A.filter.filters.indexOf(filter);
 

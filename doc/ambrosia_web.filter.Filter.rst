@@ -33,23 +33,19 @@ Examples
 
 .. code-block:: javascript
 
-    !(test == 1.2 || (test > 2 && p.bar != "foobar") || true ) && !false
+    stype == "FileAccessEvent" {
+     # read only
+     p.flg_O_RDWR==false && p.flg_O_WRONLY==false {
+         # hide getting random numbers
+         r.file.p.abspath == "/dev/urandom";
+     }
+ }
 
-The logical operations "&&" and '!!' as well as the unary logical operation "!" are allowed. Parentheses may be
-used to change the default precedence of the operations.
+ # hide Android shared memory operations
+ (r.file.p.abspath=="/dev/ashmem" && p.flags==131074);
 
-These logical operations manage "comparisons". A "comparison" may compare two values using the operators "==",
-"!=", ">=", "<=", "<", "~" (the first value matches a regex defined by the second value), ":" (the second value
-is an array and the first element is contained in the second one) and "!:" (the first value is not contained
-in the second value).
-
-A value may be a string in the form of "string", a number in the form of 1.0 or 1, true or false or a property.
-A property is a string describing an attribute of an event (e.g. abspath, successful). Moreover a property may
-also match a specific reference (e.g. r.process.pid, r.file.abspath). The reference defined in a property may be
-a specific reference (like r.file or r.process). Moreover the string "*" may be used to get all values
-(e.g. r.*.id). Since multiple values are returned, the value  must be treated as an array (Array operations ":"
-and "!:" must be used). A general filter (that is applied to all events regardless of their type) can therefore
-be used to find all events related to a certain entity (e.g. "someidofanentity" : r.*.id).
+Please see the thesis *Ambrosia: A Framework for Visualizing Malicious Behaviour in Android Applications* for
+a detailed explaination of the filter language.
 
 
 
@@ -88,6 +84,98 @@ evaluate
 
 
 Evaluate if an an event matches this filter
+
+
+
+
+
+
+
+
+
+    
+
+
+
+getDescription
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.filter.Filter.getDescription()
+
+
+
+
+
+get the description string
+
+
+
+
+
+
+
+
+
+    
+
+
+
+getError
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.filter.Filter.getError()
+
+
+
+
+
+get the error descriptin string
+
+
+
+
+
+
+
+
+
+    
+
+
+
+getRule
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.filter.Filter.getRule()
+
+
+
+
+
+get the current rule string
+
+
+
+
+
+
+
+
+
+    
+
+
+
+getType
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.filter.Filter.getType()
+
+
+
+
+
+get the filter type
 
 
 
@@ -200,6 +288,34 @@ setRule
 
 
 replaces the current rule with a new one
+
+
+
+
+
+
+
+
+
+    
+
+
+
+setType
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.filter.Filter.setType(t)
+
+
+    
+    :param String t: 
+        fitler type 
+    
+
+
+
+
+set the filter type
 
 
 

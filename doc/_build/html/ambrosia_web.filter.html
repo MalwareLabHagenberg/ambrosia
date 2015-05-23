@@ -66,6 +66,29 @@
 </div>
 <div class="section" id="methods">
 <h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="addfilter">
+<h3>addFilter<a class="headerlink" href="#addfilter" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.filter.addFilter">
+<tt class="descclassname">ambrosia_web.filter.</tt><tt class="descname">addFilter</tt><big>(</big><em>filter</em>, <em>no_redraw</em><big>)</big><a class="headerlink" href="#ambrosia_web.filter.addFilter" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>filter</strong> &#8211; the filter object</li>
+<li><strong>no_redraw</strong> &#8211; true if the visualisation should not be redrawn</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns *:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Add a filter.</p>
+</div>
 <div class="section" id="handlelogicaloperation">
 <h3>handleLogicalOperation<a class="headerlink" href="#handlelogicaloperation" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
@@ -88,6 +111,74 @@
 </dd></dl>
 
 <p>Helper function for the parser.</p>
+</div>
+<div class="section" id="handlestatement">
+<h3>handleStatement<a class="headerlink" href="#handlestatement" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.filter.handleStatement">
+<tt class="descclassname">ambrosia_web.filter.</tt><tt class="descname">handleStatement</tt><big>(</big><em>op</em>, <em>block</em>, <em>stmt2</em><big>)</big><a class="headerlink" href="#ambrosia_web.filter.handleStatement" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>op</strong> &#8211; the selector of a statement</li>
+<li><strong>block</strong> &#8211; the block of a statement</li>
+<li><strong>stmt2</strong> &#8211; the next statement</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns *:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Helper function for the parser.</p>
+</div>
+<div class="section" id="optimizelogical">
+<h3>optimizeLogical<a class="headerlink" href="#optimizelogical" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.filter.optimizeLogical">
+<tt class="descclassname">ambrosia_web.filter.</tt><tt class="descname">optimizeLogical</tt><big>(</big><em>p1</em>, <em>op</em>, <em>p2</em><big>)</big><a class="headerlink" href="#ambrosia_web.filter.optimizeLogical" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>p1</strong> &#8211; </li>
+<li><strong>op</strong> &#8211; </li>
+<li><strong>p2</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>optimize a comparison. Used by the parser.</p>
+</div>
+<div class="section" id="removefilter">
+<h3>removeFilter<a class="headerlink" href="#removefilter" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="ambrosia_web.filter.removeFilter">
+<tt class="descclassname">ambrosia_web.filter.</tt><tt class="descname">removeFilter</tt><big>(</big><em>filter</em><big>)</big><a class="headerlink" href="#ambrosia_web.filter.removeFilter" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>filter</strong> &#8211; the filter object to remove</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns *:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Remove a filter</p>
 </div>
 </div>
 <div class="section" id="attributes">
@@ -112,6 +203,24 @@ events (i.e. add a function to this array). If the user select an entity the int
 <p>contains all handlers for removing filters from an  event class. Any part of the application may listen to those
 events (i.e. add a function to this array). If the user select an entity the interface can adapt to this.</p>
 </div>
+<div class="section" id="type-blacklist">
+<h3>TYPE_BLACKLIST<a class="headerlink" href="#type-blacklist" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="TYPE_BLACKLIST">
+<tt class="descname">TYPE_BLACKLIST</tt><a class="headerlink" href="#TYPE_BLACKLIST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>the filter type for blacklist filters</p>
+</div>
+<div class="section" id="type-force-show-parent">
+<h3>TYPE_FORCE_SHOW_PARENT<a class="headerlink" href="#type-force-show-parent" title="Permalink to this headline">¶</a></h3>
+<dl class="attribute">
+<dt id="TYPE_FORCE_SHOW_PARENT">
+<tt class="descname">TYPE_FORCE_SHOW_PARENT</tt><a class="headerlink" href="#TYPE_FORCE_SHOW_PARENT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>the filter type for whitelist filters</p>
+</div>
 </div>
 </div>
 
@@ -126,12 +235,18 @@ events (i.e. add a function to this array). If the user select an entity the int
 <li><a class="reference internal" href="#">Namespace ambrosia_web.filter</a><ul>
 <li><a class="reference internal" href="#constructor">Constructor</a></li>
 <li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#addfilter">addFilter</a></li>
 <li><a class="reference internal" href="#handlelogicaloperation">handleLogicalOperation</a></li>
+<li><a class="reference internal" href="#handlestatement">handleStatement</a></li>
+<li><a class="reference internal" href="#optimizelogical">optimizeLogical</a></li>
+<li><a class="reference internal" href="#removefilter">removeFilter</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#attributes">Attributes</a><ul>
 <li><a class="reference internal" href="#addfilterhandler">addFilterHandler</a></li>
 <li><a class="reference internal" href="#removefilterhandler">removeFilterHandler</a></li>
+<li><a class="reference internal" href="#type-blacklist">TYPE_BLACKLIST</a></li>
+<li><a class="reference internal" href="#type-force-show-parent">TYPE_FORCE_SHOW_PARENT</a></li>
 </ul>
 </li>
 </ul>

@@ -67,6 +67,19 @@
 <dt id="ambrosia.model.entities.App">
 <em class="property">class </em><tt class="descclassname">ambrosia.model.entities.</tt><tt class="descname">App</tt><big>(</big><em>context</em>, <em>package</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#App"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.App" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a></p>
+<p>Represents an app that has been installed on the system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</li>
+<li><strong>package</strong> (<em>str</em>) &#8211; the app&#8217;s package name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="staticmethod">
 <dt id="ambrosia.model.entities.App.find">
 <em class="property">static </em><tt class="descname">find</tt><big>(</big><em>context</em>, <em>entities</em>, <em>identifier_btree</em>, <em>package</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#App.find"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.App.find" title="Permalink to this definition">¶</a></dt>
@@ -83,7 +96,7 @@
 <dt id="ambrosia.model.entities.File">
 <em class="property">class </em><tt class="descclassname">ambrosia.model.entities.</tt><tt class="descname">File</tt><big>(</big><em>context</em>, <em>abspath</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model/entities.html#File"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.entities.File" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a></p>
-<p>Represents file (existing or not) on the emulator.</p>
+<p>Represents a file or directory (existing or not) on the emulator.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -279,7 +292,25 @@ entity in memory.</p>
 <dl class="method">
 <dt id="ambrosia.model.Analysis.iter_all_events">
 <tt class="descname">iter_all_events</tt><big>(</big><em>context</em>, <em>key=None</em>, <em>min_value=None</em>, <em>max_value=None</em>, <em>value=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia/model.html#Analysis.iter_all_events"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia.model.Analysis.iter_all_events" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Iterates over all event classes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>context</strong> (<em>ambrosia_web.context.AmbrosiaContext</em>) &#8211; the current context</li>
+<li><strong>key</strong> &#8211; the key we are searching for</li>
+<li><strong>min_value</strong> &#8211; the minimum value</li>
+<li><strong>max_value</strong> &#8211; the maximum value</li>
+<li><strong>value</strong> &#8211; the specific value (to search for exactly one value)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>This method works just like <a class="reference internal" href="#ambrosia.model.Analysis.iter_events" title="ambrosia.model.Analysis.iter_events"><tt class="xref py py-func docutils literal"><span class="pre">Analysis.iter_events()</span></tt></a> but is not limited to a certain entity Type. Instead,
+it searches entitiy of all types.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ambrosia.model.Analysis.iter_entities">
@@ -319,7 +350,7 @@ entity in memory.</p>
 </tr>
 </tbody>
 </table>
-<p>This method uses an internal indizes to efficiently select specific events. Each event class defines attributes
+<p>This method uses a internal indices to efficiently select specific events. Each event class defines attributes
 that should be indexed (<a class="reference internal" href="#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">Event</span></tt></a>.indices). This class makes sure that those attributes can be searched for
 very fast.</p>
 <p>The method accepts the following combinations of argument:

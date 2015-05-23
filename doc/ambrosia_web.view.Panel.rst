@@ -47,6 +47,60 @@ Constructor
 
 
 
+Methods
+-------
+
+..
+   class-methods
+
+
+isShown
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.view.Panel.isShown()
+
+
+
+
+
+check whether this panel is shown
+
+
+
+
+
+
+
+
+
+    
+
+
+
+show
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+.. js:function:: ambrosia_web.view.Panel.show()
+
+
+
+
+
+show this panel
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
     
 
 

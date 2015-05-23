@@ -1,5 +1,9 @@
 "use strict";
 
+/**
+ * This is the syntax rule for the ACE editor
+ */
+
 ace.define("ace/mode/ambrosia_highlight_rules",
     ["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules"],
     function(require, exports, module) {

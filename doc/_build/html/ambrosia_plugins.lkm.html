@@ -84,6 +84,7 @@
 <dt id="ambrosia_plugins.lkm.events.APKInstallEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">APKInstallEvent</tt><big>(</big><em>file</em>, <em>process</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#APKInstallEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.APKInstallEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents an app installation</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.APKInstallEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#APKInstallEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.APKInstallEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -97,18 +98,18 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="ambrosia_plugins.lkm.events.AnonymousFileEvent">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">AnonymousFileEvent</tt><big>(</big><em>description</em>, <em>process</em>, <em>context</em>, <em>successful=True</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#AnonymousFileEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.AnonymousFileEvent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileEvent" title="ambrosia_plugins.lkm.events.FileEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileEvent</span></tt></a></p>
+<dt id="ambrosia_plugins.lkm.events.AnonymousFileAccessEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">AnonymousFileAccessEvent</tt><big>(</big><em>description</em>, <em>process</em>, <em>context</em>, <em>successful=True</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#AnonymousFileAccessEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.AnonymousFileAccessEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileAccessEvent" title="ambrosia_plugins.lkm.events.FileAccessEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileAccessEvent</span></tt></a></p>
 <p>Represents an operation that happens on a file without a name (e.g. an unnamed pipe)</p>
 <dl class="method">
-<dt id="ambrosia_plugins.lkm.events.AnonymousFileEvent.get_serializeable_properties">
-<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#AnonymousFileEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.AnonymousFileEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.lkm.events.AnonymousFileAccessEvent.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#AnonymousFileAccessEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.AnonymousFileAccessEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ambrosia_plugins.lkm.events.AnonymousFileEvent.indices">
-<tt class="descname">indices</tt><em class="property"> = set(['process'])</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.AnonymousFileEvent.indices" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.lkm.events.AnonymousFileAccessEvent.indices">
+<tt class="descname">indices</tt><em class="property"> = set(['process'])</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.AnonymousFileAccessEvent.indices" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -182,6 +183,28 @@
 </dd></dl>
 
 <dl class="class">
+<dt id="ambrosia_plugins.lkm.events.FileAccessEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">FileAccessEvent</tt><big>(</big><em>file</em>, <em>flags</em>, <em>mode</em>, <em>process</em>, <em>successful</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#FileAccessEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileAccessEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="ambrosia_plugins.lkm.events.FileDescriptorEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileDescriptorEvent</span></tt></a></p>
+<p>Represents a normal file operation on a file, directory or pipe</p>
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.events.FileAccessEvent.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#FileAccessEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileAccessEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia_plugins.lkm.events.FileAccessEvent.indices">
+<tt class="descname">indices</tt><em class="property"> = set(['process', 'abspath'])</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileAccessEvent.indices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia_plugins.lkm.events.FileAccessEvent.mode_flags">
+<tt class="descname">mode_flags</tt><em class="property"> = {'O_DSYNC': 4096, 'O_DIRECTORY': 65536, 'O_LARGEFILE': 32768, 'O_CREAT': 64, 'O_PATH': 2097152, 'O_EXCL': 128, 'O_CLOEXEC': 524288, 'O_DIRECT': 16384, 'O_APPEND': 1024, 'O_NOCTTY': 256, 'O_NOATIME': 262144, 'O_WRONLY': 1, 'O_NONBLOCK': 2048, 'O_RDWR': 2, 'O_TRUNC': 512, 'O_NOFOLLOW': 131072}</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileAccessEvent.mode_flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="ambrosia_plugins.lkm.events.FileDescriptorEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">FileDescriptorEvent</tt><big>(</big><em>process</em>, <em>successful</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#FileDescriptorEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
@@ -194,28 +217,6 @@
 <dl class="attribute">
 <dt id="ambrosia_plugins.lkm.events.FileDescriptorEvent.indices">
 <tt class="descname">indices</tt><em class="property"> = set(['process'])</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent.indices" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ambrosia_plugins.lkm.events.FileEvent">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">FileEvent</tt><big>(</big><em>file</em>, <em>flags</em>, <em>mode</em>, <em>process</em>, <em>successful</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#FileEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileEvent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ambrosia_plugins.lkm.events.FileDescriptorEvent" title="ambrosia_plugins.lkm.events.FileDescriptorEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileDescriptorEvent</span></tt></a></p>
-<p>Represents a normal file operation on a file, directory or pipe</p>
-<dl class="method">
-<dt id="ambrosia_plugins.lkm.events.FileEvent.get_serializeable_properties">
-<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#FileEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ambrosia_plugins.lkm.events.FileEvent.indices">
-<tt class="descname">indices</tt><em class="property"> = set(['process', 'abspath'])</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileEvent.indices" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ambrosia_plugins.lkm.events.FileEvent.mode_flags">
-<tt class="descname">mode_flags</tt><em class="property"> = {'O_DSYNC': 4096, 'O_DIRECTORY': 65536, 'O_LARGEFILE': 32768, 'O_CREAT': 64, 'O_PATH': 2097152, 'O_EXCL': 128, 'O_CLOEXEC': 524288, 'O_DIRECT': 16384, 'O_APPEND': 1024, 'O_NOCTTY': 256, 'O_NOATIME': 262144, 'O_WRONLY': 1, 'O_NONBLOCK': 2048, 'O_RDWR': 2, 'O_TRUNC': 512, 'O_NOFOLLOW': 131072}</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.FileEvent.mode_flags" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -272,6 +273,23 @@
 <dl class="attribute">
 <dt id="ambrosia_plugins.lkm.events.MemoryMapEvent.mmap_flags">
 <tt class="descname">mmap_flags</tt><em class="property"> = {'MAP_NONBLOCK': 65536, 'MAP_EXECUTABLE': 4096, 'MAP_SHARED': 1, 'MAP_GROWSDOWN': 256, 'MAP_HUGETLB': 262144, 'MAP_STACK': 131072, 'MAP_PRIVATE': 2, 'MAP_DENYWRITE': 2048, 'MAP_LOCKED': 8192, 'MAP_FIXED': 16, 'MAP_NORESERVE': 16384, 'MAP_UNINITIALIZED': 67108864, 'MAP_ANONYMOUS': 32, 'MAP_POPULATE': 32768}</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.MemoryMapEvent.mmap_flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ambrosia_plugins.lkm.events.MountEvent">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">MountEvent</tt><big>(</big><em>dev</em>, <em>mountpoint</em>, <em>type</em>, <em>flags</em>, <em>data</em>, <em>process</em>, <em>successful</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#MountEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.MountEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents a mount syscall</p>
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.events.MountEvent.get_serializeable_properties">
+<tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#MountEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.MountEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ambrosia_plugins.lkm.events.MountEvent.indices">
+<tt class="descname">indices</tt><em class="property"> = set([])</em><a class="headerlink" href="#ambrosia_plugins.lkm.events.MountEvent.indices" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -375,7 +393,7 @@
 
 <dl class="class">
 <dt id="ambrosia_plugins.lkm.events.SyscallEvent">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">SyscallEvent</tt><big>(</big><em>context</em>, <em>props</em>, <em>time</em>, <em>monotonic_ts</em>, <em>process</em>, <em>idx</em>, <em>spawned_child=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SyscallEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SyscallEvent" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">SyscallEvent</tt><big>(</big><em>context</em>, <em>props</em>, <em>time</em>, <em>monotonic_ts</em>, <em>process</em>, <em>idx</em>, <em>spawned_child=None</em>, <em>target_task=None</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#SyscallEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.SyscallEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
 <p>Represents a system call from lkm</p>
 <dl class="method">
@@ -406,6 +424,7 @@
 <dt id="ambrosia_plugins.lkm.events.ZygoteForkEvent">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.events.</tt><tt class="descname">ZygoteForkEvent</tt><big>(</big><em>process</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#ZygoteForkEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.ZygoteForkEvent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Event" title="ambrosia.model.Event"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Event</span></tt></a></p>
+<p>Represents that <em>zygote</em> forked to start an app</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.events.ZygoteForkEvent.get_serializeable_properties">
 <tt class="descname">get_serializeable_properties</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm/events.html#ZygoteForkEvent.get_serializeable_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.events.ZygoteForkEvent.get_serializeable_properties" title="Permalink to this definition">¶</a></dt>
@@ -449,7 +468,7 @@
 </dd>
 </dl>
 </li>
-<li><p class="first"><a class="reference internal" href="#ambrosia_plugins.lkm.events.FileEvent" title="ambrosia_plugins.lkm.events.FileEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileEvent</span></tt></a>: several file events happen at the begin of a command execution</p>
+<li><p class="first"><a class="reference internal" href="#ambrosia_plugins.lkm.events.FileAccessEvent" title="ambrosia_plugins.lkm.events.FileAccessEvent"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia_plugins.lkm.events.FileAccessEvent</span></tt></a>: several file events happen at the begin of a command execution</p>
 </li>
 </ul>
 <dl class="method">
@@ -480,13 +499,13 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="ambrosia_plugins.lkm.FileEventCorrelator">
-<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">FileEventCorrelator</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#FileEventCorrelator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.FileEventCorrelator" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.lkm.FileAccessEventCorrelator">
+<em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">FileAccessEventCorrelator</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#FileAccessEventCorrelator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.FileAccessEventCorrelator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.html#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Correlator</span></tt></a></p>
-<p>Finds library load events (mmap to *.so files)</p>
+<p>Finds library load events (mmap to *.so files) and Java library loads</p>
 <dl class="method">
-<dt id="ambrosia_plugins.lkm.FileEventCorrelator.correlate">
-<tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#FileEventCorrelator.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.FileEventCorrelator.correlate" title="Permalink to this definition">¶</a></dt>
+<dt id="ambrosia_plugins.lkm.FileAccessEventCorrelator.correlate">
+<tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#FileAccessEventCorrelator.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.FileAccessEventCorrelator.correlate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -495,6 +514,7 @@
 <dt id="ambrosia_plugins.lkm.InstallCorelator">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">InstallCorelator</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#InstallCorelator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.InstallCorelator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.html#ambrosia.Correlator" title="ambrosia.Correlator"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.Correlator</span></tt></a></p>
+<p>Finds app installations</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.InstallCorelator.correlate">
 <tt class="descname">correlate</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#InstallCorelator.correlate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.InstallCorelator.correlate" title="Permalink to this definition">¶</a></dt>
@@ -506,7 +526,7 @@
 <dt id="ambrosia_plugins.lkm.LkmPluginParser">
 <em class="property">class </em><tt class="descclassname">ambrosia_plugins.lkm.</tt><tt class="descname">LkmPluginParser</tt><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#LkmPluginParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.LkmPluginParser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="ambrosia.html#ambrosia.ResultParser" title="ambrosia.ResultParser"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.ResultParser</span></tt></a></p>
-<p>Parses the <em>process</em> and <em>syscalltrace</em> elements of the result set.</p>
+<p>Parses the <em>process</em>, <em>syscalltrace</em> and <em>appinfo</em> elements of the result set.</p>
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.LkmPluginParser.finish">
 <tt class="descname">finish</tt><big>(</big><em>context</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#LkmPluginParser.finish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.LkmPluginParser.finish" title="Permalink to this definition">¶</a></dt>
@@ -552,13 +572,15 @@ This is also the error of the emulator clock (compared to the host clock)</li>
 <li>adjtime: the adjusted time (the captured <em>normal</em> time - error).</li>
 <li>lasterror: the error of the last syscall. If the error of two consecutive syscall changes, we know that
 the system clock has been altered (and we need to make an entry in
-<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.clocks.ClockSyncer</span></tt>.translate_table). The comparison sees two errors that are at a maximum
-of 1 second apart as a clock change. This is because the error is not absolutely precise (the <em>monotonic</em>
-and <em>normal</em> timestamps are not captured at exactly the same time, even a context switch may happen in
-between).</li>
+<tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.clocks.ClockSyncer</span></tt>.translate_table). The comparison sees two errors that are at a
+maximum of 1 second apart as a clock change. This is because the error is not absolutely precise (the
+<em>monotonic</em> and <em>normal</em> timestamps are not captured at exactly the same time, even a context switch may
+happen in between).</li>
 </ul>
 </dd>
 </dl>
+</li>
+<li><p class="first"><em>appinfo</em> element: A <tt class="xref py py-class docutils literal"><span class="pre">ambrosia_web.model.entities.App</span></tt> entity is created for each app in the report.</p>
 </li>
 </ul>
 </dd></dl>
@@ -599,6 +621,11 @@ between).</li>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="method">
+<dt id="ambrosia_plugins.lkm.SyscallCorrelator._create_fd_dir_entry">
+<tt class="descname">_create_fd_dir_entry</tt><big>(</big><em>proc</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator._create_fd_dir_entry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator._create_fd_dir_entry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.SyscallCorrelator._generate_start_fd_directory">
@@ -688,9 +715,30 @@ may share file descriptors.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ambrosia_plugins.lkm.SyscallCorrelator._is_success">
+<tt class="descname">_is_success</tt><big>(</big><em>val</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator._is_success"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator._is_success" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ambrosia_plugins.lkm.SyscallCorrelator._parse_addr_str">
 <tt class="descname">_parse_addr_str</tt><big>(</big><em>addrstr</em>, <em>socket_evt</em><big>)</big><a class="reference internal" href="_modules/ambrosia_plugins/lkm.html#SyscallCorrelator._parse_addr_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ambrosia_plugins.lkm.SyscallCorrelator._parse_addr_str" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Parse the struct sockaddr structure passed to bind and connect syscalls.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>addrstr</strong> (<em>str</em>) &#8211; the hexascii representation of the struct sockaddr</li>
+<li><strong>oldfd</strong> (<a class="reference internal" href="#ambrosia_plugins.lkm.events.SocketEvent" title="ambrosia_plugins.lkm.events.SocketEvent"><em>ambrosia_plugins.lkm.events.SocketEvent</em></a>) &#8211; the socket event the struct should be parsed for</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">an <a class="reference internal" href="ambrosia.model.html#ambrosia.model.Entity" title="ambrosia.model.Entity"><tt class="xref py py-class docutils literal"><span class="pre">ambrosia.model.Entity</span></tt></a> that represents the address</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="ambrosia_plugins.lkm.SyscallCorrelator.correlate">
