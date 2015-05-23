@@ -18,7 +18,7 @@ ambrosia_web.filter = {
      */
     removeFilterHandler: [],
 
-    TYPE_FORCE_SHOW_PARENT: 'force_show_parent',
+    TYPE_FORCE_SHOW_PARENT: 'whitelist_force_show_parent',
     TYPE_BLACKLIST: 'blacklist',
 
     /***

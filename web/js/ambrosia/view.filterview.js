@@ -19,7 +19,8 @@ ambrosia_web.view.filterview = {
                 this._type_select = $('<select/>');
                 this._type_select
                     .append($('<option value="'+ A.filter.TYPE_BLACKLIST+'">blacklist</option>'))
-                    .append($('<option value="'+ A.filter.TYPE_FORCE_SHOW_PARENT+'">force show parent</option>'));
+                    .append($('<option value="'+ A.filter.TYPE_FORCE_SHOW_PARENT+'">whitelist (force show parent)'+
+                                '</option>'));
                 this._add_button = $('<button>add filter</button>')
                     .click(function(){
                         A.filter.addFilter(new A.filter.Filter(
