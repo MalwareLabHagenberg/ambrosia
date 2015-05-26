@@ -293,15 +293,15 @@ rect.mainview_selected {
 
 /* low-level events: dark */
 .event_ExecEvent {
-    fill: #743234;
+    fill: #483273;
 }
 
 .event_AndroidApicallEvent {
-    fill: #663a60;
+    fill: #3a5766;
 }
 
 .event_SendSignalEvent {
-    fill: #373265;
+    fill: #323a63;
 }
 
 .event_MemoryMapEvent {
