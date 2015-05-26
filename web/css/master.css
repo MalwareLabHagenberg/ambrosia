@@ -301,7 +301,7 @@ rect.mainview_selected {
 }
 
 .event_SendSignalEvent {
-    fill: #323a63;
+    fill: #316149;
 }
 
 .event_MemoryMapEvent {
@@ -317,7 +317,7 @@ rect.mainview_selected {
 }
 
 .event_LibraryLoadEvent {
-    fill: #634d17;
+    fill: #486117;
 }
 
 .event_JavaLibraryLoadEvent {
