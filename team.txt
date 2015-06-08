@@ -1,0 +1,20 @@
+this software has initially been created by Wolfgang Ettlinger  in the course of the master's thesis "Ambrosia: A
+ Framework for Visualizing Malicious Behaviour in Android Applications". It has since been maintained by the ANANAS
+ Team:
+
+current members
+ Dieter Vymazal (dieter.vymazal@fh-hagenberg.at)
+ Markus Zeilinger (markus.zeilinger@fh-hagenberg.at)
+ Wolfgang Ettlinger (wolfgang.ettlinger@students.fh-hagenberg.at)
+ Tobias Dussmann (tobias.dussmann@students.fh-hagenberg.at)
+ Martin Grubhofer (martin.grubhofer@students.fh-hagenberg.at)
+ Peter Kastner (peter.kastner@students.fh-hagenberg.at)
+ Stefan Lengauer (stefan.lengauer@students.fh-hagenberg.at)
+ Alexander Scheipner (alexander.scheipner@students.fh-hagenberg.at)
+ Jürgen Schwinghammer (juergen.schwinghammer@students.fh-hagenberg.at)
+
+former members
+ Thomas Eder (thomas.eder@students.fh-hagenberg.at)
+ Michael Rodler (michael.rodler@students.fh-hagenberg.at)
+ Christian Nösterer (christian.noesterer@students.fh-hagenberg.at)
+ Thomas Traunmüller (thomas.traunmueller@students.fh-hagenberg.at)
