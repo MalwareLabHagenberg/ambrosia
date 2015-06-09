@@ -1,3 +1,6 @@
 [submodule "web/js/ace-builds"]
 	path = web/js/ace-builds
 	url = https://github.com/ajaxorg/ace-builds.git
+[submodule "web/js/jquery-mousewheel"]
+	path = web/js/jquery-mousewheel
+	url = https://github.com/jquery/jquery-mousewheel
